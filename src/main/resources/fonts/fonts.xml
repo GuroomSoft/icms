@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+ 	<!-- 나눔바른고딕 -->
+    <fontFamily name="나눔바른고딕">
+        <normal><![CDATA[fonts/NANUMBARUNGOTHIC.TTF]]></normal>
+        <bold><![CDATA[fonts/NANUMBARUNGOTHICBOLD.TTF]]></bold>
+        <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+        <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+    </fontFamily>
+    
+ 	<!-- 나눔고딕 -->    
+    <fontFamily name="나눔고딕">
+        <normal><![CDATA[fonts/NANUMGOTHIC.TTF]]></normal>
+        <bold><![CDATA[fonts/NANUMBARUNGOTHICBOLD.TTF]]></bold>        
+        <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+        <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+    </fontFamily>
+    
+ 	<!-- 나눔스퀘어 -->    
+    <fontFamily name="나눔스퀘어">
+        <normal><![CDATA[fonts/NANUMSQUARER.TTF]]></normal>
+        <bold><![CDATA[fonts/NANUMSQUAREB.TTF]]></bold>        
+        <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+        <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+    </fontFamily>
+</fontFamilies>

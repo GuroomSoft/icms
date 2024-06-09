@@ -1,0 +1,140 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.code.dao.CustomerDAO">
+
+    <!-- 고객사 병합 처리 -->
+    <insert id="mergeCustomer" parameterType="partner">
+        MERGE /* PartnerMapper.mergeCustomer */
+            INTO MT_CUSTOMER_RELATION a
+            USING (
+                SELECT
+                    #{corpCd} AS corp_cd,
+                    #{bpCd} AS bp_cd,
+                    #{useAt} AS use_at,
+                    #{ifSeq} AS if_seq,
+                    #{ifType} AS if_type,
+                    #{ifResult} AS if_result,
+                    #{ifMessage} AS if_message,
+                    GETDATE() AS reg_dt,
+                    #{regUid} AS reg_uid
+        ) b ON (a.corp_cd = b.corp_cd AND a.bp_cd = b.bp_cd)
+        WHEN MATCHED THEN
+        UPDATE SET
+            <if test="useAt != null">use_at = b.use_at,</if>
+            <if test="ifSeq != null">if_seq = b.if_seq,</if>
+            <if test="ifType != null">if_type = b.if_type,</if>
+            <if test="ifResult != null">if_result = b.if_result,</if>
+            <if test="ifMessage != null">if_message = b.if_message,</if>
+            mod_uid = b.reg_uid,
+            mod_dt = b.reg_dt
+        WHEN NOT MATCHED THEN
+        INSERT (
+            corp_cd, bp_cd,
+            <if test="useAt != null">use_at,</if>
+            <if test="ifSeq != null">if_seq,</if>
+            <if test="ifType != null">if_type,</if>
+            <if test="ifResult != null">if_result,</if>
+            <if test="ifMessage != null">if_message,</if>
+            reg_dt, reg_uid
+        ) VALUES (
+            b.corp_cd, b.bp_cd,
+            <if test="useAt != null">b.use_at,</if>
+            <if test="ifSeq != null">b.if_seq,</if>
+            <if test="ifType != null">b.if_type,</if>
+            <if test="ifResult != null">b.if_result,</if>
+            <if test="ifMessage != null">b.if_message,</if>
+            b.reg_dt, b.reg_uid
+        );
+    </insert>
+
+    <!-- 고객사 상태 업데이트 -->
+    <update id="updateCustomerStatus" parameterType="partner">
+        update /* CustomerMapper.updateCustomerStatus */
+                MT_CUSTOMER_RELATION
+           set use_at = #{useAt},
+               mod_uid = #{regUid},
+               mod_dt = GETDATE()
+         where bp_cd = #{bpCd}
+        <if test='corpCd != null and !corpCd.equals("")'>and corp_cd = #{corpCd}</if>
+    </update>
+
+    <!-- 고객사 삭제 처리 -->
+    <delete id="deleteCustomer" parameterType="java.lang.String">
+        DELETE /* CustomerMapper.deleteCustomer */
+        FROM MT_CUSTOMER_RELATION
+        WHERE bp_cd = #{bpCd}
+        <if test='corpCd != null and !corpCd.equals("")'>and corp_cd = #{corpCd}</if>
+    </delete>
+
+    <!-- 다른회사 참조 카운트 -->
+    <select id="selectOtherRefCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select /* CustomerMapper.selectRefCount */
+            isnull(count(*), 0)
+          from MT_CUSTOMER_RELATION WITH(NOLOCK)
+         where corp_cd != #{corpCd}
+           and bp_cd = #{bpCd}
+           and use_at = #{useAt}
+    </select>
+
+    <!-- 고객사 목록 조회 -->
+    <select id="selectCustomer" parameterType="partner" resultType="partner">
+        select /* CustomerMapper.selectCustomer */
+            a.corp_cd, a.corp_nm, a.bp_cd, a.bp_nm, a.bp_tax_nm, a.biz_reg_no, a.ceo_nm, a.post_no, a.bp_adrs,
+            a.bp_email, a.bp_tel_no, a.bp_remark, a.contact_nm, a.contact_email, a.contact_mobile,
+            a.use_at, a.use_at_nm,
+            a.display_at, dbo.FN_GET_CODE_NAME('C04', a.display_at) AS displayAtNm,
+            a.display_ord, a.if_seq, a.if_type, a.if_result, a.if_message,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120) as reg_dt,
+            a.reg_uid, c.account_id AS reg_account_id
+        from MV_CUSTOMER a
+            left outer join ST_USERS c WITH(NOLOCK) ON a.reg_uid = c.user_uid
+        <where>
+            <if test='corpCd != null and !corpCd.equals("")'>AND a.corp_cd = #{corpCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>AND a.bp_cd LIKE CONCAT('%', #{a.bpCd}, '%')</if>
+            <if test='bpNm != null and !bpNm.equals("")'>AND CONCAT(ISNULL(a.bp_cd, ''), ISNULL(a.bp_nm, ''), ISNULL(a.bp_tax_nm, '')) LIKE CONCAT('%', #{bpNm}, '%')</if>
+            <if test='bizRegNo != null and !bizRegNo.equals("")'>AND a.biz_reg_no LIKE ('%', #{bizRegNo},'%')</if>
+            <if test='ceoNm != null and !ceoNm.equals("")'>AND a.ceo_nm LIKE ('%', #{ceoNm},'%')</if>
+            <if test='bpEmail != null and !bpEmail.equals("")'>AND a.bp_email = #{bpEmail}</if>
+            <if test='contactNm != null and !contactNm.equals("")'>AND a.contact_nm LIKE CONCAT('%', #{contactNm}, '%')</if>
+            <if test='bpEmail != null and !bpEmail.equals("")'>AND CONCAT(ISNULL(a.bp_email), ISNULL(a.contact_email)) LIKE CONCAT('%', #{bpEmail}, '%')</if>
+            <if test='bpTelNo != null and !bpTelNo.equals("")'>AND CONCAT(ISNULL(a.bp_tel_no), ISNULL(a.contact_mobile)) LIKE CONCAT('%', #{bpTelNo}, '%')</if>
+            <if test='displayAt != null and !displayAt.equals("")'>AND a.display_at = #{displayAt}</if>
+            <if test='useAt != null and !useAt.equals("")'>AND a.use_at = #{useAt}</if>
+        </where>
+        order by a.corp_cd
+    </select>
+
+    <!-- 고객사 상세 조회 -->
+    <select id="selectCustomerByKey" parameterType="java.lang.String" resultType="partner">
+        select /* CustomerMapper.selectCustomerByKey */
+            a.corp_cd, a.corp_nm, a.bp_cd, a.bp_nm, a.bp_tax_nm, a.biz_reg_no, a.ceo_nm, a.post_no, a.bp_adrs,
+            a.bp_email, a.bp_tel_no, a.bp_remark, a.contact_nm, a.contact_email, a.contact_mobile,
+            a.use_at, a.use_at_nm,
+            a.display_at, dbo.FN_GET_CODE_NAME('C04', a.display_at) AS displayAtNm,
+            a.display_ord, a.if_seq, a.if_type, a.if_result, a.if_message
+        from MV_CUSTOMER a
+        where a.corp_cd = #{corpCd}
+            and a.bp_cd = #{bpCd}
+    </select>
+
+    <!-- 고객사 신규 추가 목록 조회 -->
+    <select id="selectCustomerHelperForNew" resultType="partner" parameterType="java.lang.String">
+        select /* SupplierMapper.selectCustomerHelperForNew */
+            a.bp_cd, a.bp_nm, a.bp_tax_nm, a.biz_reg_no, a.ceo_nm,
+            a.bp_email, a.bp_tel_no, a.contact_nm, a.contact_email, a.contact_mobile, a.use_at
+        from MT_BIZ_PARTNER a
+        where isnull(a.display_at, 'Y') = 'Y'
+        <if test='searchWord != null and !searchWord.equals("")'>CONCAT(ISNULL(a.bp_cd, ''), ISNULL(a.bp_nm, ''), ISNULL(a.bp_tax_nm, '')) LIKE CONCAT('%', #{searchWord}, '%')</if>
+            and a.bp_cd not in (
+                select b.bp_cd
+                from MT_CUSTOMER_RELATION b
+                where b.use_at = 'Y'
+        <if test='corpCd != null and !corpCd.equals("")'>and b.corp_cd = #{corpCd}</if>
+            )
+        <if test='useAt != null and !useAt.equals("")'>and a.use_at = #{useAt}</if>
+        order by a.display_ord
+    </select>
+
+
+</mapper>

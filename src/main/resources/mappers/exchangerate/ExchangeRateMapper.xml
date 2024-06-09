@@ -1,0 +1,82 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.common.dao.ExchangeRateDAO">
+
+    <!-- 환율 목록 조회 -->
+    <select id="selectExchangeRate" resultType="exchangeRate">
+        SELECT /* ExchangeRateMapper.selectExchangeRate */
+            std_date, cur_unit, cur_nm, ttb, tts, deal_bas_r, bkpr, yy_efee_r, ten_dd_efee_r, kftc_deal_bas_r, kftc_bkpr
+        FROM HT_EXCHANGE_RATE WITH(NOLOCK)
+        WHERE std_date = #{stdDate}
+    </select>
+    
+    <!-- 환율정보 등록 -->
+    <insert id="insertExchangeRate" parameterType="exchangeRate">
+        INSERT /* ExchangeRateMapper.insertExchangeRate */
+        INTO HT_EXCHANGE_RATE (
+            std_date, cur_unit, cur_nm, ttb, tts, deal_bas_r, bkpr, yy_efee_r, ten_dd_efee_r, kftc_deal_bas_r,
+            kftc_bkpr, reg_dt, reg_uid
+        ) VALUES (
+            #{stdDate}, #{curUnit}, #{curNm}, #{ttb}, #{tts}, #{dealBasR}, #{bkpr}, #{yyEfeeR}, #{tenDdEfeeR}, #{kftcDealBasR},
+            #{kftcBkpr}, GETDATE() , #{regUid}
+        )
+    </insert>
+
+    <!-- 환율정보 삭제 -->
+    <delete id="deleteExchangeRate" parameterType="java.lang.String">
+        DELETE /* ExchangeRateMapper.deleteExchangeRate */
+        FROM HT_EXCHANGE_RATE
+        WHERE std_date = #{stdDate}
+        <if test='curUnit != null and !curUnit.equals("")'>
+            AND cur_unit = #{curUnit}
+        </if>
+    </delete>
+
+    <insert id="saveExchangeRateDate">
+        MERGE /* ExchangeRateMapper.saveExchangeRateDate */
+            INTO HT_EXCHANGE_RATE_DATE a
+        USING (
+            SELECT
+                1 AS seq,
+                #{stdDate} AS std_date
+        ) b ON (a.seq = b.seq)
+        WHEN MATCHED THEN
+            UPDATE SET std_date = b.std_date
+        WHEN NOT MATCHED THEN
+            INSERT (seq, std_date) VALUES (b.seq, b.std_date);
+    </insert>
+
+    <select id="getLastExchangeRateDate" resultType="java.lang.String">
+        select /* ExchangeRateMapper.getLastExchangeRateDate */
+            ISNULL(std_date, '') AS stdDate
+          from HT_EXCHANGE_RATE_DATE WITH(NOLOCK)
+         where seq = 1
+    </select>
+
+    <!-- 통화목록 조회 -->
+    <select id="selectExchangeUnit" resultType="java.util.Map">
+        select  /* ExchangeRateMapper.selectExchangeUnit */
+            exchg_unit AS currencyUnit, exchg_nm AS currencyUnitNm
+        from MT_EXCHANGE_UNIT WITH(NOLOCK)
+        where 1=1
+        <if test='displayAt != null and !displayAt.equals("")'>AND display_at = #{displayAt}</if>
+    </select>
+
+    <select id="getExchangeUnitDefault" resultType="exchangeUnit">
+        select  /* ExchangeRateMapper.selectExchangeUnitDefault */
+            TOP 1 exchg_unit, exchg_nm
+        from MT_EXCHANGE_UNIT WITH(NOLOCK)
+        where default_at = 'Y'
+    </select>
+
+    <!-- 대시보드 용 매매 기준율 -->
+    <select id="selectBaseRateForLastMonth" parameterType="java.lang.String" resultType="java.util.Map">
+        select /* ExchangeRateMapper. */
+            TOP 30 RIGHT(std_date, 4) AS x, CAST(REPLACE(deal_bas_r, ',', '') as numeric(10, 2)) AS y
+        from HT_EXCHANGE_RATE with(nolock)
+        where cur_unit LIKE concat(#{curUnit}, '%')
+        order by cur_unit, std_date
+    </select>
+
+</mapper>

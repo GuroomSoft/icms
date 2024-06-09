@@ -1,0 +1,41 @@
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  error:
+    whitelabel:
+      enabled: true   # true - 브라우저 오류 페이지 표시
+
+spring:
+  profiles:
+    active: prod
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600      # 데이터 유지시간(sec)
+      cache-null-values: true # null 캐싱 여부
+  messages:
+    basename: i18n/messages,i18n/error
+    encoding: UTF-8
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML
+    cache: false
+
+# MyBatis Setting
+mybatis:
+  mapper-locations:
+    - classpath:mappers/**/*.xml
+  type-aliases-package: com.guroomsoft.icms.**.dto, com.guroomsoft.icms.**.**.dto
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 10000
+    default-statement-timeout: 120
+
+# 수출입은행 Open API 인증키
+exchange-rate:
+  auth-key: 4ncW2r0lYUnf9wbFVVMaheRoGrwTT9Jn

@@ -1,0 +1,217 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.bbs.dao.BbsDAO">
+
+    <!-- 공지사항 목록 조회 -->
+    <select id="selectNoticeForAdmin" resultType="notice" parameterType="noticeReq">
+        SELECT /* BbsMapper.selectNoticeForAdmin */
+            w.*
+        FROM (
+            SELECT ROW_NUMBER () OVER (ORDER BY a.NTT_UID DESC) AS rnum,
+                a.BBS_ID, a.NTT_UID, a.NTT_CATEGORY, dbo.FN_GET_CODE_NAME('C01', a.NTT_CATEGORY) AS NTT_CATEGORY_NM,
+                a.NTT_SUBJECT, a.NTT_CONTENT, a.READ_COUNT, a.TOP_LOCK_AT, a.ANSWER_AT,
+                a.PARENT_NTT_UID, a.ANSWER_LVL, a.SORT_ORDER, a.WRITE_DT, a.WRITER_ID, b.ACCOUNT_NAME AS WRITER,
+                a.PUB_BEGIN_DATE, a.PUB_END_DATE,
+                a.ATCH_FILE_ID, a.USE_AT
+            FROM CT_BBS a WITH(NOLOCK)
+                LEFT OUTER JOIN ST_USERS b WITH(NOLOCK) ON a.WRITER_ID = b.ACCOUNT_ID
+            WHERE a.BBS_ID = #{bbsId}
+                AND a.USE_AT = 'Y'
+            <if test='nttCategory != null'>AND a.NTT_CATEGORY = #{nttCategory}</if>
+            <if test='searchWord != null'>AND CONCAT(isnull(a.NTT_SUBJECT, ''), isnull(a.NTT_CONTENT, '')) LIKE
+                CONCAT('%', #{searchWord}, '%')</if>
+            <if test='fromDate != null'>
+                <![CDATA[AND a.WRITE_DT >= #{fromDate}]]>
+                </if>
+                <if test='toDate != null'>
+                    <![CDATA[ AND a.WRITE_DT <= #{toDate}]]>
+                </if>
+            <if test='parentNttUid != null and parentNttUid gt 0'>AND a.PARENT_NTT_UID = #{parentNttUid}</if>
+        ) w
+        WHERE <![CDATA[ w.rnum BETWEEN #{startOffset} AND (#{startOffset} + #{rowCountPerPage} - 1) ]]>
+    </select>
+
+    <!-- 공지사항 관리용 카운터 조회 -->
+    <select id="selectNoticeCountForAdmin" resultType="int" parameterType="noticeReq">
+        SELECT /* BbsMapper.selectNoticeCountForAdmin */
+            COUNT(*)
+        FROM CT_BBS a WITH(NOLOCK)
+            LEFT OUTER JOIN ST_USERS b WITH(NOLOCK) ON a.WRITER_ID = b.ACCOUNT_ID
+        WHERE a.BBS_ID = #{bbsId}
+        AND a.USE_AT = 'Y'
+        <if test='nttCategory != null'>AND a.NTT_CATEGORY = #{nttCategory}</if>
+        <if test='searchWord != null'>AND CONCAT(NTT_SUBJECT, NTT_CONTENT) LIKE CONCAT('%', #{searchWord}, '%')</if>
+        <if test='fromDate != null'>
+            <![CDATA[ AND a.WRITE_DT >= #{fromDate} ]]>
+        </if>
+        <if test='toDate != null'>
+            <![CDATA[ AND a.WRITE_DT <= #{toDate} ]]>
+        </if>
+        <if test='parentNttUid != null and parentNttUid gt 0'>AND a.PARENT_NTT_UID = #{parentNttUid}</if>
+    </select>
+
+    <!-- 공지사항 카운터 조회 -->
+    <select id="selectNoticeCount" resultType="int" parameterType="noticeReq">
+        SELECT /* BbsMapper.selectNoticeCount */
+                COUNT(*)
+        FROM CT_BBS a WITH(NOLOCK)
+            LEFT OUTER JOIN ST_USERS b WITH(NOLOCK) ON a.WRITER_ID = b.ACCOUNT_ID
+        WHERE a.BBS_ID = #{bbsId}
+          AND a.USE_AT = 'Y'
+            <if test='nttCategory != null'>AND a.NTT_CATEGORY = #{nttCategory}</if>
+            <if test='searchWord != null'>AND CONCAT(a.NTT_SUBJECT, a.NTT_CONTENT) LIKE CONCAT('%', #{searchWord}, '%')</if>
+            <if test='parentNttUid != null and parentNttUid gt 0'>AND PARENT_NTT_UID = #{parentNttUid}</if>
+        <![CDATA[
+          AND CASE WHEN ISNULL(a.PUB_BEGIN_DATE, '') = '' THEN '1900-01-01'
+                   ELSE a.PUB_BEGIN_DATE END <= CONVERT(NVARCHAR(10), GETDATE(), 23)
+          AND CASE WHEN ISNULL(a.PUB_END_DATE, '') = '' THEN '9999-12-31'
+                   ELSE a.PUB_END_DATE END >= CONVERT(NVARCHAR(10), GETDATE(), 23)
+        ]]>
+    </select>
+
+    <!-- 공지사항 목록 조회 -->
+    <select id="selectNotice" resultType="notice" parameterType="noticeReq">
+        SELECT /* BbsMapper.selectNotice */
+            w.*
+        FROM (
+            SELECT ROW_NUMBER () OVER (ORDER BY a.TOP_LOCK_AT DESC, a.NTT_UID DESC) AS rnum,
+                a.BBS_ID, a.NTT_UID, a.NTT_CATEGORY, dbo.FN_GET_CODE_NAME('C01', a.NTT_CATEGORY) AS nttCategoryNm,
+                a.NTT_SUBJECT, a.NTT_CONTENT, a.READ_COUNT, a.TOP_LOCK_AT,
+                a.PARENT_NTT_UID, a.WRITE_DT, a.WRITER_ID, b.ACCOUNT_NAME AS WRITER,
+                a.ATCH_FILE_ID
+            FROM CT_BBS a WITH(NOLOCK)
+                LEFT OUTER JOIN ST_USERS b WITH(NOLOCK) ON a.WRITER_ID = b.ACCOUNT_ID
+            WHERE a.BBS_ID = #{bbsId}
+              AND a.USE_AT = 'Y'
+            <if test='nttCategory != null'>AND a.NTT_CATEGORY = #{nttCategory}</if>
+            <if test='searchWord != null'>AND CONCAT(NTT_SUBJECT, NTT_CONTENT) LIKE CONCAT('%', #{searchWord}, '%')</if>
+            <if test='parentNttUid != null and parentNttUid gt 0'>AND PARENT_NTT_UID = #{parentNttUid}</if>
+            <![CDATA[
+              AND CASE WHEN ISNULL(a.PUB_BEGIN_DATE, '') = '' THEN '1900-01-01'
+                       ELSE a.PUB_BEGIN_DATE END <= CONVERT(NVARCHAR(10), GETDATE(), 23)
+              AND CASE WHEN ISNULL(a.PUB_END_DATE, '') = '' THEN '9999-12-31'
+                       ELSE a.PUB_END_DATE END >= CONVERT(NVARCHAR(10), GETDATE(), 23)
+            ]]>
+        ) w
+        WHERE <![CDATA[ w.rnum >= #{startOffset} AND w.rnum < (#{startOffset} + #{rowCountPerPage}) ]]>
+    </select>
+
+    <!-- 공지사항 목록 조회 -->
+    <select id="selectNoticeByKey" resultType="notice" parameterType="notice">
+        SELECT /* BbsMapper.selectBbsByKey */
+            BBS_ID, NTT_UID, NTT_CATEGORY, dbo.FN_GET_CODE_NAME('C01', NTT_CATEGORY) AS nttCategoryNm,
+            NTT_SUBJECT, NTT_CONTENT, READ_COUNT, TOP_LOCK_AT, ANSWER_AT,
+            PARENT_NTT_UID, ANSWER_LVL, NTT_PWD, SORT_ORDER, WRITE_DT, WRITER_ID, PUB_BEGIN_DATE, PUB_END_DATE,
+            ATCH_FILE_ID, USE_AT, REG_DT, REG_UID
+        FROM CT_BBS WITH(NOLOCK)
+        WHERE BBS_ID = #{bbsId}
+          AND NTT_UID = #{nttUid}
+    </select>
+
+    <!-- 공지사항 목록 조회 대시보드용 -->
+    <select id="selectNoticeForDashboard" resultType="notice" parameterType="noticeReq">
+        SELECT /* BbsMapper.selectNoticeForDashboard */
+            TOP 5 NTT_UID, CONCAT('[', dbo.FN_GET_CODE_NAME('C01', NTT_CATEGORY), '] ', NTT_SUBJECT) AS nttSubject,
+            WRITE_DT AS writeDt
+        FROM CT_BBS WITH(NOLOCK)
+        WHERE BBS_ID = #{bbsId}
+         AND use_at = 'Y'
+        ORDER BY WRITE_DT DESC
+    </select>
+<!--                 <![CDATA[AND a.WRITE_DT >= #{fromDate}]]> -->
+    <select id="getHeaderList" resultType="java.util.Map" parameterType="String">
+        <![CDATA[
+        select
+            TOP 5 bbs_id as bbiId, ntt_uid as nttUid,
+            CONCAT('[', dbo.FN_GET_CODE_NAME('C01', ntt_category), '] ', ntt_subject) as shortTitle,
+
+            CASE WHEN DATEDIFF(mi, reg_dt, GETDATE()) < 60 THEN CONCAT( DATEDIFF(mi, reg_dt, GETDATE()), '분전' )
+                WHEN DATEDIFF(mi, reg_dt, GETDATE()) BETWEEN 60 AND (60*24) THEN CONCAT( DATEDIFF(mi, reg_dt, GETDATE()) / 60 , '시간전' )
+                WHEN DATEDIFF(mi, reg_dt, GETDATE()) BETWEEN (60*24) AND (60*24*30) THEN CONCAT( DATEDIFF(mi, reg_dt, GETDATE()) / (60*24), '일전' )
+                WHEN DATEDIFF(mi, reg_dt, GETDATE()) > (60*24*30) THEN CONCAT( DATEDIFF(mm, reg_dt, GETDATE()) , '개월전' )
+                ELSE ''
+            END AS shortRegDt,
+            CASE WHEN DATEDIFF(mi, reg_dt, GETDATE()) < 60 THEN CONCAT( RIGHT(CONCAT('0', DATEPART(HOUR, reg_dt)), 2), ':',
+                    RIGHT( CONCAT('0', DATEPART(MINUTE, reg_dt)), 2 ) )
+                WHEN DATEDIFF(mi, reg_dt, GETDATE()) BETWEEN 60 AND (60*24) THEN CONCAT( RIGHT(CONCAT('0', DATEPART(HOUR, reg_dt)), 2), ':',
+                    RIGHT( CONCAT('0', DATEPART(MINUTE, reg_dt)), 2 ) )
+                WHEN DATEDIFF(mi, reg_dt, GETDATE()) BETWEEN (60*24) AND (60*24*30) THEN CONCAT( RIGHT(CONCAT('0', DATEPART(MONTH, reg_dt)), 2), '-',
+                    RIGHT(CONCAT('0', DATEPART(DAY, reg_dt)), 2) )
+                WHEN DATEDIFF(mi, reg_dt, GETDATE()) > (60*24*30) THEN CONCAT( RIGHT(CONCAT('0', DATEPART(MONTH, reg_dt)), 2), '-',
+                    RIGHT(CONCAT('0', DATEPART(DAY, reg_dt)), 2) )
+                ELSE ''
+            END AS regDt
+        from CT_BBS WITH (NOLOCK)
+        where bbs_id = #{bbsId}
+        ORDER BY reg_dt DESC
+        ]]>
+    </select>
+    <!-- 게시글 등록 -->
+    <insert id="insertNotice" parameterType="notice">
+        <selectKey keyProperty="nttUid" resultType="long" order="BEFORE">
+            <if test='bbsId != null and bbsId.equals("IA")'>
+                SELECT NEXT VALUE FOR BBS_IA_SEQ
+            </if>
+            <if test='bbsId != null and bbsId.equals("PA")'>
+                SELECT NEXT VALUE FOR BBS_PA_SEQ
+            </if>
+        </selectKey>
+        INSERT /* BbsMapper.insertBbs */
+        INTO CT_BBS(
+            BBS_ID, NTT_UID, NTT_CATEGORY, NTT_SUBJECT, NTT_CONTENT, TOP_LOCK_AT,
+            WRITE_DT, WRITER_ID,
+        <if test='pubBeginDate != null'>PUB_BEGIN_DATE, </if>
+        <if test='pubEndDate != null'>PUB_END_DATE, </if>
+        <if test='atchFileId != null'>ATCH_FILE_ID, </if>
+            USE_AT, REG_DT, REG_UID
+        ) VALUES (
+            #{bbsId}, #{nttUid}, #{nttCategory}, #{nttSubject}, #{nttContent}, #{topLockAt},
+            CONVERT(NVARCHAR(19), GETDATE(), 21), #{writerId},
+        <if test='pubBeginDate != null'>#{pubBeginDate}, </if>
+        <if test='pubEndDate != null'>#{pubEndDate}, </if>
+        <if test='atchFileId != null'>#{atchFileId}, </if>
+            'Y', GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 게시글 수정 -->
+    <update id="updateNotice" parameterType="notice">
+        UPDATE  /* BbsMapper.updateBbs */
+            CT_BBS
+        <set>
+            <if test='nttCategory != null'>NTT_CATEGORY=#{nttCategory},</if>
+            <if test='nttSubject != null'>NTT_SUBJECT=#{nttSubject},</if>
+            <if test='nttContent != null'>NTT_CONTENT=#{nttContent},</if>
+            <if test='topLockAt != null'>TOP_LOCK_AT=#{topLockAt},</if>
+            <if test='answerAt != null'>ANSWER_AT=#{answerAt},</if>
+            <if test='parentNttUid != null and parentNttUid gt 0'>PARENT_NTT_UID=#{parentNttUid},</if>
+            <if test='answerLvl != null and answerLvl gt 0'>ANSWER_LVL=#{answerLvl},</if>
+            <if test='nttPwd != null'>NTT_PWD=#{nttPwd},</if>
+            <if test='sortOrder != null and sortOrder gt 0'>SORT_ORDER=#{sortOrder},</if>
+            <if test='pubBeginDate != null'>PUB_BEGIN_DATE=#{pubBeginDate},</if>
+            <if test='pubEndDate != null'>PUB_END_DATE=#{pubEndDate},</if>
+            <if test='atchFileId != null'>ATCH_FILE_ID=#{atchFileId},</if>
+            <if test='useAt != null'>USE_AT=#{useAt},</if>
+            MOD_DT=GETDATE(),
+            MOD_UID=#{modUid}
+        </set>
+        WHERE BBS_ID = #{bbsId} AND NTT_UID = #{nttUid}
+    </update>
+
+    <!-- 조회 수 업데이트 -->
+    <update id="updateNoticeReadCount" parameterType="notice">
+        UPDATE  /* BbsMapper.updateBbs */
+            CT_BBS
+           SET read_count = read_count + 1
+        WHERE BBS_ID = #{bbsId} AND NTT_UID = #{nttUid}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <update id="deleteNotice" parameterType="notice">
+        DELETE  /* BbsMapper.deleteNotice */
+          FROM CT_BBS
+        WHERE BBS_ID = #{bbsId} AND NTT_UID = #{nttUid}
+    </update>
+
+</mapper>

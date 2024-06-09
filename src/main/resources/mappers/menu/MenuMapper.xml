@@ -1,0 +1,140 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.common.dao.MenuDAO">
+    <!-- 시스템 메뉴 -->
+    <select id="selectMenus" resultType="menu" parameterType="menu">
+        SELECT /* MenuMapper.selectMenus */
+            MENU_UID, MENU_NM, MENU_SHORT_NM, MENU_CD, PARENT_UID, MENU_ICON, MENU_LVL, MENU_TYPE, MENU_PATH,
+            REDIRECT_PATH, DISPLAY_AT, DISPLAY_ORD, MENU_REMARK, USE_AT
+        FROM ST_MENU
+        <where>
+            <if test="menuUid != null and menuUid gt 0"> AND MENU_UID = #{menuUid}</if>
+            <if test='menuNm != null and !menuNm.equals("")'> AND CONCAT(MENU_NM, MENU_SHORT_NM) LIKE CONCAT('%', #{menuNm}, '%')</if>
+            <if test='menuShortNm != null and !menuShortNm.equals("")'> AND CONCAT(MENU_NM, MENU_SHORT_NM) LIKE CONCAT('%', #{menuShortNm}, '%')</if>
+            <if test='menuCd != null and !menuCd.equals("")'> AND MENU_CD LIKE CONCAT(#{menuCd}, '%')</if>
+            <if test='parentUid != null'> AND PARENT_UID = #{parentUid}</if>
+            <if test='menuIcon != null and !menuIcon.equals("")'> AND MENU_ICON = #{menuIcon}</if>
+            <if test='menuType != null and !menuType.equals("")'> AND MENU_TYPE = #{menuType}</if>
+            <if test='displayAt != null and !displayAt.equals("")'> AND DISPLAY_AT = #{displayAt}</if>
+            <if test='useAt != null and !useAt.equals("")'> AND USE_AT = #{useAt}</if>
+        </where>
+        ORDER BY DISPLAY_ORD
+    </select>
+
+    <!-- 메뉴 단건 조회 -->
+    <select id="selectMenuByKey" resultType="menu">
+        SELECT /* MenuMapper.selectMenuByKey */
+            MENU_UID, MENU_NM, MENU_SHORT_NM, MENU_CD, PARENT_UID, MENU_ICON, MENU_LVL, MENU_TYPE, MENU_PATH,
+            REDIRECT_PATH, DISPLAY_AT, DISPLAY_ORD, MENU_REMARK, USE_AT
+        FROM ST_MENU
+        WHERE MENU_UID = #{menuUid}
+    </select>
+
+    <!-- 메뉴 등록 -->
+    <insert id="insertMenu" parameterType="menu">
+        <selectKey keyProperty="menuUid" resultType="long" order="BEFORE">
+            SELECT NEXT VALUE FOR MENU_SEQ
+        </selectKey>
+        INSERT /* MenuMapper.insertMenu */
+        INTO ST_MENU (
+            MENU_UID,
+            MENU_NM,
+            MENU_SHORT_NM,
+            <if test='menuCd != null and !menuCd.equals("")'> MENU_CD, </if>
+            <if test='parentUid != null'> PARENT_UID, </if>
+            <if test='menuIcon != null and !menuIcon.equals("")'> MENU_ICON, </if>
+            <if test='menuLvl != null'> MENU_LVL, </if>
+            <if test='menuType != null and !menuType.equals("")'> MENU_TYPE, </if>
+            <if test='menuPath != null and !menuPath.equals("")'> MENU_PATH, </if>
+            <if test='redirectPath != null and !redirectPath.equals("")'> REDIRECT_PATH, </if>
+            <if test='displayAt != null and !displayAt.equals("")'> DISPLAY_AT, </if>
+            <if test='displayOrd != null'> DISPLAY_ORD, </if>
+            <if test='menuRemark != null and !menuRemark.equals("")'> MENU_REMARK, </if>
+            USE_AT,
+            REG_DT,
+            REG_UID
+        ) VALUES (
+            #{menuUid},
+            #{menuNm},
+            #{menuShortNm},
+            <if test='menuCd != null and !menuCd.equals("")'> #{menuCd}, </if>
+            <if test='parentUid != null'> #{parentUid}, </if>
+            <if test='menuIcon != null and !menuIcon.equals("")'> #{menuIcon}, </if>
+            <if test='menuLvl != null'> #{menuLvl}, </if>
+            <if test='menuType != null and !menuType.equals("")'> #{menuType}, </if>
+            <if test='menuPath != null and !menuPath.equals("")'> #{menuPath}, </if>
+            <if test='redirectPath != null and !redirectPath.equals("")'> #{redirectPath}, </if>
+            <if test='displayAt != null and !displayAt.equals("")'> #{displayAt}, </if>
+            <if test='displayOrd != null'> #{displayOrd}, </if>
+            <if test='menuRemark != null and !menuRemark.equals("")'> #{menuRemark}, </if>
+            'Y', GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 메뉴 수정 -->
+    <update id="updateMenu" parameterType="menu">
+        UPDATE /* MenuMapper.updateMenu*/
+            ST_MENU
+        <set>
+            <if test='menuNm != null and !menuNm.equals("")'> MENU_NM = #{menuNm}, </if>
+            <if test='menuShortNm != null and !menuShortNm.equals("")'> MENU_SHORT_NM = #{menuShortNm}, </if>
+            <if test='menuCd != null and !menuCd.equals("")'> MENU_CD = #{menuCd}, </if>
+            <if test='parentUid != null'> PARENT_UID = #{parentUid}, </if>
+            <if test='menuIcon != null and !menuIcon.equals("")'> MENU_ICON = #{menuIcon}, </if>
+            <if test='menuLvl != null'> MENU_LVL = #{menuLvl}, </if>
+            <if test='menuType != null and !menuType.equals("")'> MENU_TYPE = #{menuType}, </if>
+            <if test='menuPath != null and !menuPath.equals("")'> MENU_PATH = #{menuPath}, </if>
+            <if test='redirectPath != null and !redirectPath.equals("")'> REDIRECT_PATH = #{redirectPath}, </if>
+            <if test='displayAt != null and !displayAt.equals("")'> DISPLAY_AT = #{displayAt}, </if>
+            <if test='displayOrd != null'> DISPLAY_ORD = #{displayOrd}, </if>
+            <if test='menuRemark != null and !menuRemark.equals("")'> MENU_REMARK = #{menuRemark}, </if>
+            <if test='useAt != null and !useAt.equals("")'> USE_AT = #{useAt}, </if>
+            <if test='modUid != null'> MOD_UID = #{modUid}, </if>
+            MOD_DT = GETDATE()
+        </set>
+        WHERE MENU_UID = #{menuUid}
+    </update>
+
+    <!-- 메뉴 삭제 -->
+    <delete id="deleteMenu" parameterType="java.lang.Long">
+        DELETE /* MenuMapper.deleteMenu*/
+        FROM ST_MENU
+        WHERE MENU_UID = #{menuUid};
+    </delete>
+
+
+    <!-- 인가된 권한(메뉴) -->
+    <select id="selectAuthAuthoritiesByUser" resultType="groupAuthority" parameterType="java.lang.Long">
+        SELECT /* MenuMapper.selectAuthAuthoritiesByUser */
+            a.grp_uid,
+            a.menu_uid,
+            b.menu_nm,
+            b.menu_cd,
+            b.menu_type,
+            b.menu_short_nm,
+            b.parent_uid,
+            b.menu_icon,
+            b.menu_lvl,
+            b.menu_type,
+            b.menu_path,
+            b.redirect_path,
+            b.display_at,
+            b.menu_remark,
+            ISNULL(a.view_perm_at, 'N') AS VIEW_PERM_AT,
+            ISNULL(a.reg_perm_at, 'N') AS REG_PERM_AT,
+            ISNULL(a.mod_perm_at, 'N') AS MOD_PERM_AT,
+            ISNULL(a.del_perm_at, 'N') AS DEL_PERM_AT,
+            ISNULL(a.exec_perm_at, 'N') AS EXEC_PERM_AT
+        FROM ST_GROUP_AUTHORITY a
+            JOIN ST_MENU b ON a.MENU_UID = b.MENU_UID
+        WHERE a.grp_uid IN (SELECT DISTINCT grp_uid
+                              FROM ST_AUTH_GROUP_MEMBER
+                             WHERE user_uid = #{userUid} )
+          AND b.display_at = 'Y'
+          AND b.use_at = 'Y'
+        <if test='parentMenuUid != null'> AND b.PARENT_UID = #{parentMenuUid}</if>
+        ORDER BY b.DISPLAY_ORD
+    </select>
+
+</mapper>

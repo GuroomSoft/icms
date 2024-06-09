@@ -1,0 +1,124 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.price.dao.PurchasePriceDAO">
+    <!-- PURCHASE_PRICE_SEQ 을 사용해서 등록 -->
+
+    <!-- 공급업체 사급단가 등록 -->
+    <insert id="insertPurchasePrice" parameterType="purchasePrice" >
+        insert /* PurchasePriceMapper.insertPurchasePrice */
+          into HT_PURCHASE_PRICE (
+            plant_cd, pur_org, bp_cd, mat_cd, pur_price, origin_pur_price,
+            cur_unit, price_unit, purchase_unit, price_status, bgn_valid_date, if_seq, if_type, if_result,
+            if_message, reg_dt, reg_uid
+        ) VALUES (
+            #{plantCd}, #{purOrg}, #{bpCd}, #{matCd}, #{purPrice}, #{purPrice} / (#{priceUnit} * 1.0),
+            #{curUnit}, #{priceUnit}, #{purchaseUnit}, #{priceStatus}, #{bgnValidDate}, #{ifSeq}, #{ifType}, #{ifResult},
+            #{ifMessage}, GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 공급업체 사급단가 삭제 -->
+    <delete id="deletePurchasePrice" parameterType="purchasePrice">
+        delete /* PurchasePriceMapper.deletePurchasePrice */
+          from HT_PURCHASE_PRICE
+        <where>
+            <if test='plantCd != null and !plantCd.equals("")'>and plant_cd = #{plantCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>and bp_cd = #{bpCd}</if>
+            <if test='matCd != null and !matCd.equals("")'>and mat_cd = #{matCd}</if>
+        </where>
+    </delete>
+
+    <!-- 공급업체 사급단가 병합 -->
+    <insert id="mergePurchasePrice" parameterType="purchasePrice">
+        MERGE /* PurchasePriceMapper.mergePurchasePrice */
+            INTO HT_PURCHASE_PRICE a
+        USING (
+            SELECT
+                #{plantCd} AS plant_cd,
+                #{purOrg} AS pur_org,
+                #{bpCd} AS bp_cd,
+                #{matCd} AS mat_cd,
+                #{purPrice} AS pur_price,
+                #{originPurPrice} AS origin_pur_price,
+                #{curUnit} AS cur_unit,
+                #{priceUnit} AS price_unit,
+                #{purchaseUnit} AS purchase_unit,
+                #{priceStatus} AS price_status,
+                <if test='ifSeq != null'>#{ifSeq} AS if_seq,</if>
+                <if test="ifType != null">#{ifType} AS if_type,</if>
+                <if test="ifResult != null">#{ifResult} AS if_result,</if>
+                <if test="ifMessage != null">#{ifMessage} AS if_message,</if>
+                GETDATE() AS reg_dt,
+                #{regUid} AS reg_uid
+            ) b ON (a.plant_cd = b.plant_cd and a.pur_org = b.pur_org and a.bp_cd = b.bp_cd and a.mat_cd = b.mat_cd)
+        WHEN MATCHED THEN
+        UPDATE SET
+            pur_price = b.pur_price,
+            origin_pur_price = (b.pur_price / (b.price_unit * 1.0)),
+            cur_unit = b.cur_unit,
+            price_unit = b.price_unit,
+            purchase_unit = b.purchase_unit,
+            price_status = b.price_status,
+            bgn_valid_date = b.bgn_valid_date,
+            <if test='ifSeq != null'>if_seq = b.if_seq,</if>
+            <if test="ifType != null">if_type = b.if_type,</if>
+            <if test="ifResult != null">if_result = b.if_result,</if>
+            <if test="ifMessage != null">if_message = b.if_message,</if>
+            mod_uid = b.reg_uid,
+            mod_dt = b.reg_dt
+            WHEN NOT MATCHED THEN
+        INSERT (
+            plant_cd, pur_org, bp_cd, mat_cd, pur_price, origin_pur_price,
+            cur_unit, price_unit, purchase_unit, price_status,bgn_valid_date,
+            <if test='ifSeq != null'>if_seq,</if>
+            <if test="ifType != null">if_type,</if>
+            <if test="ifResult != null">if_result,</if>
+            <if test="ifMessage != null">if_message,</if>
+            reg_dt, reg_uid
+        ) VALUES (
+                b.plant_cd, b.pur_org, b.bp_cd, b.mat_cd, b.pur_price, (b.pur_price / (b.price_unit * 1.0)),
+                b.cur_unit, b.price_unit, b.purchase_unit, b.price_status, b.bgn_valid_date,
+                <if test='ifSeq != null'>b.if_seq,</if>
+                <if test="ifType != null">b.if_type,</if>
+                <if test="ifResult != null">b.if_result,</if>
+                <if test="ifMessage != null">b.if_message,</if>
+                b.reg_dt, b.reg_uid
+        );
+    </insert>
+
+    <!-- 협력사 사급단가 목록 조회 -->
+    <select id="selectPurchasePrice" parameterType="purchasePriceReq" resultType="purchasePrice">
+        select /* PurchasePriceMapper.selectPurchasePrice */
+            *, c.plant_nm, m.bp_nm AS bpNm, b.item_nm AS mat_nm, d.account_id AS regAccountId
+          from HT_PURCHASE_PRICE a WITH(NOLOCK)
+               left outer join MT_BIZ_PARTNER m WITH(NOLOCK) ON a.bp_cd = m.bp_cd
+               left outer join MT_ITEM b WITH(NOLOCK) ON a.mat_cd = b.item_no
+               left outer join MT_PLANT c WITH(NOLOCK) ON a.plant_cd = c.plant_cd
+               left outer join ST_USERS d WITH(NOLOCK) ON a.reg_uid = d.user_uid
+        <where>
+            <if test='plantCd != null and !plantCd.equals("")'>and a.plant_cd = #{plantCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>and a.bp_cd = #{bpCd}</if>
+            <if test='searchWord != null and !searchWord.equals("")'>and CONCAT(a.mat_cd, b.item_nm) LIKE CONCAT('%', #{searchWord}, '%')</if>
+        </where>
+        order by a.plant_cd, a.bp_cd, a.mat_cd
+        <if test="rowCountPerPage gt 0">
+            offset #{startOffset} rows
+            fetch next #{rowCountPerPage} rows only
+        </if>
+    </select>
+
+    <!-- 협력사 사급단가 목록 카운트 조회 -->
+    <select id="selectPurchasePriceCount" parameterType="purchasePriceReq" resultType="int">
+        select /* PurchasePriceMapper.selectPurchasePriceCount */
+                count(*)
+          from HT_PURCHASE_PRICE a WITH(NOLOCK)
+               left outer join MT_ITEM b WITH(NOLOCK) ON a.mat_cd = b.item_no
+               left outer join MT_PLANT c WITH(NOLOCK) ON a.plant_cd = c.plant_cd
+        <where>
+            <if test='plantCd != null and !plantCd.equals("")'>and a.plant_cd = #{plantCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>and a.bp_cd = #{bpCd}</if>
+            <if test='searchWord != null and !searchWord.equals("")'>and CONCAT(a.mat_cd, b.item_nm) LIKE CONCAT('%', #{searchWord}, '%')</if>
+        </where>
+    </select>
+</mapper>

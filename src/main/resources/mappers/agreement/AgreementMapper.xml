@@ -1,0 +1,127 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.agreement.dao.AgreementDAO">
+
+    <!-- 문서 등록 -->
+    <insert id="insertAgreement" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            CALL SP_CREATE_ECONTRACT_AGREEMENT(
+                #{pSrcDocNo,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pReqUserUid,      mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{docNo,            mode=OUT, jdbcType=VARCHAR, javaType=String},
+                #{errCode,          mode=OUT, jdbcType=NUMERIC, javaType=int},
+                #{errMsg,           mode=OUT, jdbcType=VARCHAR, javaType=String})
+            }
+    </insert>
+
+    <!-- 조회 -->
+    <select id="selectAgreement" parameterType="java.util.Map" resultType="java.util.Map">
+        select /* AgreementMapper.selectAgreement */
+            doc_no,
+            plant_cd,
+            announced_date,
+            sender_team,
+            sender,
+            bp_cd,
+            bp_nm,
+            ceo_nm,
+            agr_desc,
+            agr_detail,
+            src_doc_no,
+            eform_doc_id,
+            eform_doc_name,
+            eform_status,
+            request_dt,
+            complete_dt,
+            last_chg_dt,
+            reg_dt,
+            reg_id
+        from HT_AGREEMENT WITH (NOLOCK)
+        where plant_cd = #{plantCd}
+          and announced_date = #{announcedDate}
+          and bp_cd in
+        <foreach collection="bpList" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- 조회 -->
+    <select id="selectAgreementDataOnly" parameterType="java.util.Map" resultType="java.util.Map">
+        select /* AgreementMapper.selectAgreementDataOnly */
+            sender_team as team_s,
+            sender as name_s,
+            bp_cd,
+            bp_nm as company_r,
+            ceo_nm as name_r,
+            agr_desc,
+            agr_detail,
+            agr_file
+         from HT_AGREEMENT WITH (NOLOCK)
+        where plant_cd = #{plantCd}
+          and announced_date = #{announcedDate}
+          and bp_cd in
+        <foreach collection="bpList" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <update id="updateAgreementDetailImage" parameterType="java.util.Map">
+        update HT_AGREEMENT
+        <set>
+            <if test='agrDetail != null and !agrDetail.equals("")'>agr_detail = #{agrDetail},</if>
+            <if test='agrFile != null and !agrFile.equals("")'>agr_file = #{agrFile},</if>
+            reg_dt = GETDATE()
+        </set>
+        <where>
+            <if test='docNo != null and !docNo.equals("")'>and doc_no = #{docNo}</if>
+            <if test='srcDocNo != null and !srcDocNo.equals("")'>and src_doc_no = #{srcDocNo}</if>
+            <if test='plantCd != null and !plantCd.equals("")'>and plant_cd = #{plantCd}</if>
+            <if test='announcedDate != null and !announcedDate.equals("")'>and announced_date = #{announcedDate}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>and bp_cd = #{bpCd}</if>
+        </where>
+    </update>
+
+    <!-- 웹훅 정보 등록 -->
+    <insert id="insertEformWebhook" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            CALL SP_CREATE_EFORM_WEBHOOK(
+                #{pWebhookId,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pWebhookName,     mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pCompanyId,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pEventType,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pDocId,           mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pDocTitle,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pTemplateId,      mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pTemplateName,    mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pTemplateVersion, mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pWorkflowSeq,     mode=IN,  jdbcType=NUMERIC, javaType=Integer},
+                #{pHistoryId,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pDocStatus,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pEditorId,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pUpdateDate,      mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{pUpdateDt,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pMassJobRequestId, mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pComment, mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{errCode,          mode=OUT, jdbcType=NUMERIC, javaType=int},
+                #{errMsg,           mode=OUT, jdbcType=VARCHAR, javaType=String})
+            }
+    </insert>
+
+    <select id="getHeaderNotification" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT /* AgreementMapper.getHeaderNotification */
+               TOP 10 concat('[', b.cd_nm, '] ',  a.doc_title) as docTitle, convert(nvarchar(19), c.reg_dt, 121) as regDt,
+               a.plant_cd AS plantCd, d.plant_nm AS plantNm, a.bp_cd as bpCd, e.bp_nm AS bpNm, a.doc_status AS docStatus
+          FROM HT_AGREEMENT_STATUS_LOG a WITH (NOLOCK)
+            JOIN (SELECT add_data1, cd_nm FROM ST_CODE WHERE cg_id = 'C10') b ON a.doc_status = b.add_data1
+            JOIN HT_AGREEMENT c WITH (NOLOCK) ON a.doc_id  = c.eform_doc_id
+            JOIN MT_PLANT d WITH (NOLOCK) ON a.plant_cd = d.plant_cd
+            JOIN MT_BIZ_PARTNER e WITH (NOLOCK) ON a.bp_cd = e.bp_cd
+        WHERE a.doc_status IN ('doc_accept_participant', 'doc_complete', 'doc_reject_participant', 'doc_request_participant')
+        <if test='accountId != null and !accountId.equals("")'>and c.reg_id  = #{accountId}</if>
+        <if test='bpCd != null and !bpCd.equals("")'>and a.bp_cd = #{bpCd}</if>
+        ORDER BY a.reg_dt DESC
+    </select>
+
+</mapper>

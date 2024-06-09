@@ -1,0 +1,212 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.code.dao.CodeDAO">
+    <resultMap id="codeGroupResult" type="com.guroomsoft.icms.biz.code.dto.CodeGroup">
+        <result column="CG_ID" property="cgId" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="CG_NM" property="cgNm" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="CG_REMARK" property="cgRemark" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="DISPLAY_AT" property="displayAt" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="USE_AT" property="useAt" jdbcType="NVARCHAR" javaType="String"/>
+    </resultMap>
+
+    <resultMap id="codeResult" type="com.guroomsoft.icms.biz.code.dto.Code">
+        <result column="CG_ID" property="cgId" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="CD" property="cd" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="CD_NM" property="cdNm" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="UPPER_CD" property="upperCd" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="CD_REMARK" property="cdRemark" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="ADD_DATA1" property="addData1" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="ADD_DATA2" property="addData2" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="ADD_DATA3" property="addData3" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="DEFAULT_AT" property="defaultAt" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="DISPLAY_AT" property="displayAt" jdbcType="NVARCHAR" javaType="String"/>
+        <result column="USE_AT" property="useAt" jdbcType="NVARCHAR" javaType="String" />
+    </resultMap>
+
+    <!-- 공통 코드 그룹 목록 조회 -->
+    <select id="selectCodeGroups" resultMap="codeGroupResult" parameterType="codeGroup">
+        SELECT /* CodeMapper.selectCodeGroups */
+            CG_ID,
+            CG_NM,
+            CG_REMARK,
+            DISPLAY_AT,
+            USE_AT
+        FROM ST_CODE_GROUP
+        <where>
+            <if test='cgId != null and !cgId.equals("")'>AND CG_ID LIKE CONCAT('%', #{cgId}, '%')</if>
+            <if test='cgNm != null and !cgNm.equals("")'>AND CONCAT(CG_ID, CG_NM) LIKE CONCAT('%', #{cgNm}, '%')</if>
+            <if test='cgRemark != null and !cgRemark.equals("")'>AND CG_REMARK LIKE CONCAT('%', #{cgRemark}, '%')</if>
+            <if test='displayAt != null'>AND DISPLAY_AT = #{displayAt}</if>
+            <if test='useAt != null'>AND USE_AT = #{useAt}</if>
+        </where>
+        ORDER BY CG_ID
+    </select>
+
+    <!-- 공통 코드 그룹 조회(단건) -->
+    <select id="selectCodeGroupByKey" resultMap="codeGroupResult">
+        SELECT /* CodeMapper.selectCodeGroupByKey */
+            CG_ID,
+            CG_NM,
+            CG_REMARK,
+            DISPLAY_AT,
+            USE_AT
+        FROM ST_CODE_GROUP
+        WHERE CG_ID = #{cgId}
+    </select>
+
+    <!-- 공통 코드 그룹 등록 -->
+    <insert id="insertCodeGroup" parameterType="codeGroup" >
+        INSERT /* CodeMapper.insertCodeGroup */
+        INTO ST_CODE_GROUP(
+            CG_ID, CG_NM,
+            <if test="cgRemark != null"> CG_REMARK, </if>
+            <if test='displayAt != null'> DISPLAY_AT, </if>
+            USE_AT, REG_DT, REG_UID
+        ) VALUES (
+            #{cgId}, #{cgNm},
+            <if test="cgRemark != null"> #{cgRemark}, </if>
+            <if test='displayAt != null'> #{displayAt}, </if>
+            'Y', GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 공통 코드 그룹 수정 -->
+    <update id="updateCodeGroup"  parameterType="codeGroup" >
+        UPDATE /* CodeMapper.updateCodeGroup */
+            ST_CODE_GROUP
+        <set>
+            <if test='cgNm != null and !cgNm.equals("")'>CG_NM = #{cgNm},</if>
+            <if test='cgRemark != null'>CG_REMARK = #{cgRemark}, </if>
+            <if test='displayAt != null'>DISPLAY_AT = #{displayAt},</if>
+            <if test='useAt != null'>USE_AT = #{useAt},</if>
+        </set>
+        WHERE CG_ID = #{cgId}
+    </update>
+
+    <!-- 공통 코드 그룹 삭제 -->
+    <delete id="deleteCodeGroup" parameterType="java.lang.String" >
+        DELETE /* CodeMapper.deleteCodeGroup */
+        FROM ST_CODE_GROUP
+        WHERE CG_ID = #{cgId}
+    </delete>
+
+    <!-- 공통 코드 목록 조회 -->
+    <select id="selectCodes" resultMap="codeResult" parameterType="code">
+        SELECT /* CodeMapper.selectCodes */
+            CG_ID,
+            CD,
+            CD_NM,
+            UPPER_CD,
+            CD_REMARK,
+            ADD_DATA1,
+            ADD_DATA2,
+            ADD_DATA3,
+            DEFAULT_AT,
+            DISPLAY_AT,
+            DISPLAY_ORD,
+            USE_AT
+        FROM ST_CODE
+        <where>
+            <if test='cgId != null and !cgId.equals("")'>AND CG_ID=#{cgId}</if>
+            <if test='cd != null and !cd.equals("")'>AND CD=#{cd}</if>
+            <if test='cdNm != null and !cdNm.equals("")'>AND CONCAT(CD, CD_NM) LIKE CONCAT('%', #{cdNm}, '%')</if>
+            <if test='upperCd != null and !upperCd.equals("")'>AND UPPER_CD=#{upperCd}</if>
+            <if test='cdRemark != null and !cdRemark.equals("")'>AND CD_REMARK=#{cdRemark}</if>
+            <if test='addData1 != null and !addData1.equals("")'>AND ADD_DATA1=#{addData1}</if>
+            <if test='addData2 != null and !addData2.equals("")'>AND ADD_DATA2=#{addData2}</if>
+            <if test='addData3 != null and !addData3.equals("")'>AND ADD_DATA3=#{addData3}</if>
+            <if test='displayAt != null'>AND DISPLAY_AT=#{displayAt}</if>
+            <if test='useAt != null'>AND USE_AT=#{useAt}</if>
+        </where>
+        ORDER BY CG_ID, DISPLAY_ORD
+    </select>
+
+    <!-- 공통 코드 조회(단건) -->
+    <select id="selectCodeByKey" resultMap="codeResult" parameterType="java.lang.String">
+        SELECT /* CodeMapper.selectCodeByKey */
+            CG_ID,
+            CD,
+            CD_NM,
+            UPPER_CD,
+            CD_REMARK,
+            ADD_DATA1,
+            ADD_DATA2,
+            ADD_DATA3,
+            DEFAULT_AT,
+            DISPLAY_AT,
+            DISPLAY_ORD,
+            USE_AT
+        FROM ST_CODE WITH(NOLOCK)
+        WHERE CG_ID = #{cgId} AND CD = #{cd}
+    </select>
+
+    <select id="selectDefaultCode" resultType="String">
+        SELECT /* CodeMapper.selectDefaultCode */
+            TOP 1 CD
+        FROM ST_CODE
+        WHERE CG_ID = #{cgId} AND DEFAULT_AT = 'Y' AND USE_AT = 'Y'
+    </select>
+
+    <!-- 공통 코드 등록 -->
+    <insert id="insertCode" parameterType="code">
+        INSERT /* CodeMapper.insertCode */
+        INTO ST_CODE(
+            CG_ID, CD, CD_NM,
+        <if test='upperCd != null and !upperCd.equals("")'> UPPER_CD, </if>
+        <if test='cdRemark != null and !cdRemark.equals("")'> CD_REMARK, </if>
+        <if test='addData1 != null and !addData1.equals("")'> ADD_DATA1, </if>
+        <if test='addData2 != null and !addData2.equals("")'> ADD_DATA2, </if>
+        <if test='addData3 != null and !addData3.equals("")'> ADD_DATA3, </if>
+        <if test='defaultAt != null'> DEFAULT_AT, </if>
+        <if test='displayAt != null'> DISPLAY_AT, </if>
+        <if test='displayOrd != null and displayOrd gt 0'> DISPLAY_ORD, </if>
+            USE_AT, REG_DT, REG_UID
+        ) VALUES (
+            #{cgId}, #{cd}, #{cdNm},
+        <if test='upperCd != null and !upperCd.equals("")'> #{upperCd}, </if>
+        <if test='cdRemark != null and !cdRemark.equals("")'> #{cdRemark}, </if>
+        <if test='addData1 != null and !addData1.equals("")'> #{addData1}, </if>
+        <if test='addData2 != null and !addData2.equals("")'> #{addData2}, </if>
+        <if test='addData3 != null and !addData3.equals("")'> #{addData3}, </if>
+        <if test='defaultAt != null'> #{defaultAt}, </if>
+        <if test='displayAt != null'> #{displayAt}, </if>
+        <if test='displayOrd != null and displayOrd gt 0'> #{displayOrd}, </if>
+            'Y', GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 공통 코드 수정 -->
+    <update id="updateCode" parameterType="code">
+        UPDATE /* CodeMapper.updateCode */
+            ST_CODE
+        <set>
+            <if test='cdNm != null and !cdNm.equals("")'> CD_NM=#{cdNm}, </if>
+            <if test='upperCd != null'> UPPER_CD=#{upperCd}, </if>
+            <if test='cdRemark != null'> CD_REMARK=#{cdRemark}, </if>
+            <if test='addData1 != null'> ADD_DATA1=#{addData1}, </if>
+            <if test='addData2 != null'> ADD_DATA2=#{addData2}, </if>
+            <if test='addData3 != null'> ADD_DATA3=#{addData3}, </if>
+            <if test='defaultAt != null'> DEFAULT_AT=#{defaultAt}, </if>
+            <if test='displayAt != null'> DISPLAY_AT=#{displayAt}, </if>
+            <if test='displayOrd != null and displayOrd gt 0'> DISPLAY_ORD=#{displayOrd}, </if>
+            <if test='useAt != null'> USE_AT=#{useAt}, </if>
+            MOD_DT=GETDATE(), MOD_UID=#{modUid}
+        </set>
+        <where>
+            <if test='cgId != null and !cgId.equals("")'>AND CG_ID = #{cgId}</if>
+            <if test='cd != null and !cd.equals("")'>AND CD = #{cd}</if>
+        </where>
+    </update>
+
+    <!-- 공통 코드 삭제 -->
+    <delete id="deleteCode" parameterType="code">
+        DELETE /* CodeMapper.deleteCode */
+        FROM ST_CODE
+        <where>
+            <if test='cgId != null and !cgId.equals("")'>AND CG_ID = #{cgId}</if>
+            <if test='cd != null and !cd.equals("")'>AND CD = #{cd}</if>
+        </where>
+
+    </delete>
+</mapper>

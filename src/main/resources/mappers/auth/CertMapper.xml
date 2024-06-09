@@ -1,0 +1,85 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.auth.dao.IdentifyVerficationDAO">
+
+    <!-- 인증코드 확인 -->
+    <insert id="insertIdentifyVerification" parameterType="IdentifyVerification">
+        <selectKey keyProperty="certSeq" resultType="long" order="BEFORE">
+            SELECT NEXT VALUE FOR CERT_SEQ
+        </selectKey>
+        INSERT /* CertMapper.insertIdentifyVerification */
+          INTO ST_IDENTIFY_VERIFICATION (
+            cert_seq, account_id,
+        <if test='userEmail neq null and userEmail neq ""'>
+            user_email,
+        </if>
+        <if test='userPhone neq null and userPhone neq ""'>
+            user_phone,
+        </if>
+            cert_code, expired_dt, check_at
+        )  VALUES (
+            #{certSeq}, #{accountId},
+        <if test='userEmail neq null and userEmail neq ""'>
+            #{userEmail},
+        </if>
+        <if test='userPhone neq null and userPhone neq ""'>
+            #{userPhone},
+        </if>
+            #{certCode}, TO_DATE(#{expiredDt}, 'YYYY-MM-DD HH24:MI:SS'), #{checkAt}
+        )
+    </insert>
+
+    <!-- 인증코드 정보 수정 -->
+    <update id="updateIdentifyVerification" parameterType="IdentifyVerification">
+        UPDATE /* CertMapper.updateIdentifyVerification */
+            ST_IDENTIFY_VERIFICATION
+        SET check_at = #{checkAt}
+        <where>
+            <if test="certSeq gt 0">
+                AND cert_seq = #{certSeq}
+            </if>
+            <if test='accountId neq null and accountId neq ""'>
+                AND account_id = #{accountId}
+            </if>
+        </where>
+    </update>
+
+    <delete id="deleteIdentifyVerification" parameterType="IdentifyVerification">
+        DELETE /* CertMapper.deleteIdentifyVerification */
+          FROM ST_IDENTIFY_VERIFICATION
+         WHERE account_id = #{accountId}
+    </delete>
+
+    <!-- 인증정보 조회 -->
+    <select id="selectIdentifyVerification" parameterType="IdentifyVerification" resultType="IdentifyVerification">
+        SELECT /* CertMapper.selectIdentifyVerification */
+            cert_seq AS certSeq,
+            account_id AS accountId,
+            user_email AS userEmail,
+            user_phone AS userPhone,
+            cert_code AS certCode,
+            CONVERT(NVARCHAR(19), expired_dt, 120) AS expiredDt
+            check_at AS checkAt
+        FROM ST_IDENTIFY_VERIFICATION
+        <where>
+            <if test="certSeq gt 0">
+                AND cert_seq = #{certSeq}
+            </if>
+            <if test='accountId neq null and accountId neq ""'>
+                AND account_id = #{accountId}
+            </if>
+            <if test='userEmail neq null and userEmail neq ""'>
+                AND user_email = #{userEmail}
+            </if>
+            <if test='userPhone neq null and userPhone neq ""'>
+                AND user_phone = #{userPhone}
+            </if>
+            <if test='checkAt neq null and checkAt neq ""'>
+                AND check_at = #{checkAt}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

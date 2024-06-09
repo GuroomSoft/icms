@@ -1,0 +1,158 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.common.dao.AttacheFileDAO">
+
+    <!-- 첨부파일 단건 조회 -->
+    <select id="selectFileByKey" resultType="attachFile">
+        SELECT /* FileMapper.selectAttachFileByKey */
+            atch_file_id AS atchFileId
+        FROM CT_FILES
+        WHERE atch_file_id = #{atchFileId}
+        AND use_at = 'Y'
+    </select>
+
+    <!-- 첨부파일 UUID 조회 -->
+    <select id="selectAttachUUID" resultType="java.lang.String">
+        SELECT CAST(NEWID() AS NVARCHAR(100))
+    </select>
+
+    <!-- 첨부파일 등록 -->
+    <insert id="insertFile" parameterType="attachFile">
+        MERGE CT_FILES a
+            USING (
+                SELECT  #{atchFileId} AS atch_file_id, 'Y' AS use_at, #{regUid} AS reg_uid
+            ) b
+            ON (a.atch_file_id = b.atch_file_id)
+        WHEN NOT MATCHED THEN
+        INSERT (atch_file_id, use_at, reg_uid, reg_dt)
+        VALUES (b.atch_file_id, b.use_at, b.reg_uid, GETDATE());
+    </insert>
+
+    <insert id="insertFileWithKey" parameterType="attachFile">
+        <selectKey keyProperty="atchFileId" resultType="java.lang.String" order="BEFORE">
+            SELECT CAST(NEWID() AS NVARCHAR(100))
+        </selectKey>
+        INSERT /* FileMapper.insertFile*/
+            INTO CT_FILES(
+                atch_file_id,
+                use_at,
+                reg_uid,
+                reg_dt
+        ) VALUES(
+            #{atchFileId}, 'Y',
+            #{regUid},
+            GETDATE()
+        )
+    </insert>
+
+    <!-- 첨부파일 수정 -->
+    <update id="updateFile" parameterType="attachFile">
+        UPDATE /* FileMapper.updateFile*/
+            CT_FILES
+        SET USE_AT = #{useAt},
+            MOD_UID = #{modUid},
+            MOD_DT = GETDATE()
+        WHERE ATCH_FILE_ID = #{atchFileId}
+    </update>
+
+    <delete id="deleteFile">
+        DELETE /* FileMapper.deleteFile*/
+        FROM CT_FILES
+        WHERE atch_file_id = #{atchFileId}
+    </delete>
+
+    <!-- 첨부파일 상세 목록 조회 -->
+    <select id="selectFileDtls" resultType="attachFileDtl">
+        SELECT /* FileMapper.selectFileDtls */
+            ATCH_FILE_ID AS atchFileId,
+            FILE_SN AS fileSn,
+            FILE_STORE_PATH AS fileStorePath,
+            RELATIVE_PATH AS relativePath,
+            STORE_FILE_NM AS storeFileNm,
+            ORIGINAL_FILE_NM AS originalFileNm,
+            FILE_EXTENSION AS fileExtension,
+            FILE_SIZE AS fileSize,
+            USE_AT AS useAt
+        FROM CT_FILE_DTL
+        WHERE atch_file_id = #{atchFileId}
+        AND use_at = 'Y'
+    </select>
+
+    <!-- 첨부파일 수 -->
+    <select id="selectFileDtlCount" resultType="int">
+        SELECT /* FileMapper.selectFileDtlCount */
+            COUNT(*)
+        FROM CT_FILE_DTL
+        WHERE ATCH_FILE_ID = #{atchFileId}
+    </select>
+
+    <!-- 첨부파일 상세 목록 조회 -->
+    <select id="selectFileDtlByKey" resultType="attachFileDtl">
+        SELECT /* FileMapper.selectFileDtlByKey */
+            ATCH_FILE_ID AS atchFileId,
+            FILE_SN AS fileSn,
+            FILE_STORE_PATH AS fileStorePath,
+            RELATIVE_PATH AS relativePath,
+            STORE_FILE_NM AS storeFileNm,
+            ORIGINAL_FILE_NM AS originalFileNm,
+            FILE_EXTENSION AS fileExtension,
+            FILE_SIZE AS fileSize,
+            USE_AT AS useAt
+        FROM CT_FILE_DTL
+        WHERE atch_file_id = #{atchFileId}
+          AND file_sn = #{fileSn}
+          AND use_at = 'Y'
+    </select>
+
+
+    <!-- 첨부파일 상세 등록 -->
+    <insert id="insertFileDtl" parameterType="attachFileDtl">
+        <selectKey keyProperty="fileSn" resultType="java.lang.Integer" order="BEFORE">
+            SELECT ISNULL(MAX(FILE_SN), 0) + 1
+            FROM CT_FILE_DTL WITH(NOLOCK)
+            WHERE ATCH_FILE_ID = #{atchFileId}
+        </selectKey>
+        INSERT /* FileMapper.insertFileDtl*/
+        INTO CT_FILE_DTL(
+            ATCH_FILE_ID,FILE_SN, FILE_STORE_PATH, RELATIVE_PATH, STORE_FILE_NM, ORIGINAL_FILE_NM, FILE_EXTENSION, FILE_SIZE,
+            USE_AT,REG_UID,REG_DT
+        ) VALUES(
+            #{atchFileId}, #{fileSn}, #{fileStorePath}, #{relativePath}, #{storeFileNm}, #{originalFileNm}, #{fileExtension}, #{fileSize},
+            'Y', #{regUid},GETDATE()
+        )
+    </insert>
+
+    <!-- 첨부파일 상세 수정 -->
+    <update id="updateFileDtl" parameterType="attachFileDtl">
+        UPDATE /* FileMapper.updateFileDtl*/
+            CT_FILE_DTL
+        <set>
+            <if test="fileStorePath != null">FILE_STORE_PATH = #{fileStorePath},</if>
+            <if test="relativePath != null">RELATIVE_PATH = #{relativePath},</if>
+            <if test="storeFileNm != null">STORE_FILE_NM = #{storeFileNm},</if>
+            <if test="originalFileNm != null">ORIGINAL_FILE_NM = #{originalFileNm},</if>
+            <if test="fileExtension != null">FILE_EXTENSION = #{fileExtension},</if>
+            <if test="fileSize != null">FILE_SIZE = #{fileSize},</if>
+            MOD_UID = #{modUid},
+            MOD_DT = GETDATE()
+        </set>
+        WHERE ATCH_FILE_ID = #{atchFileId}
+            <if test="fileSn != null and fileSn gt 0">AND FILE_SN = #{fileSn}</if>
+    </update>
+
+    <!-- 첨부파일 상세 수정 -->
+    <select id="selectLastFileSn" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT ISNULL(MAX(FILE_SN), 0)
+        FROM CT_FILE_DTL WITH(NOLOCK)
+        WHERE ATCH_FILE_ID = #{atchFileId}
+    </select>
+
+    <delete id="deleteFileDtl" parameterType="attachFileDtl">
+        DELETE /* FileMapper.deleteFileDtl */
+        FROM CT_FILE_DTL
+        WHERE ATCH_FILE_ID = #{atchFileId}
+        <if test="fileSn != null and fileSn gt 0">AND FILE_SN = #{fileSn}</if>
+    </delete>
+
+</mapper>

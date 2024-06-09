@@ -1,0 +1,385 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.material.dao.AnnouncePriceDAO">
+    <!-- 공시단가 문서 등록 -->
+    <insert id="insertAnnouncePriceDoc" parameterType="announcePriceDoc">
+        <selectKey resultType="java.lang.String" keyColumn="doc_no" keyProperty="docNo" order="BEFORE">
+            SELECT CONCAT(CONVERT (NVARCHAR(4), GETDATE(), 112 ) ,
+                '-' , RIGHT(CONCAT('00000', CAST( (ISNULL(RIGHT(MAX(doc_no), 6), 0) + 1) AS NVARCHAR(5))), 6))
+            FROM BT_ANNOUNCE_PRICE_DOC
+            WHERE doc_no LIKE CONCAT(CONVERT(NVARCHAR(4), GETDATE(), 112 ), '-', '%')
+        </selectKey>
+
+        insert /* AnnouncePriceMapper.insertAnnouncePriceDoc */
+        into BT_ANNOUNCE_PRICE_DOC (
+            doc_no, doc_title, country_cd, writer_uid, writer_dt, announced_date, doc_status,
+        <if test="docRemark != null"> doc_remark, </if>
+        <if test="docContent != null"> doc_content, </if>
+            reg_dt, reg_uid
+        ) values (
+            #{docNo}, #{docTitle}, #{countryCd}, #{writerUid}, GETDATE(), #{announcedDate}, #{docStatus},
+        <if test="docRemark != null"> #{docRemark}, </if>
+        <if test="docContent != null"> #{docContent}, </if>
+            GETDATE(), #{regUid}
+        );
+    </insert>
+
+    <!-- 공시단가 문서 수정 -->
+    <update id="updateAnnouncePriceDoc" parameterType="announcePriceDoc">
+        update /* AnnouncePriceMapper.updateAnnouncePriceDoc */
+            BT_ANNOUNCE_PRICE_DOC
+        <set>
+            <if test="announcedDate != null"> announced_date = #{announcedDate}, </if>
+            <if test='docTitle != null and !docTitle.equals("")'>doc_title = #{docTitle},</if>
+            <if test="docRemark != null"> doc_remark = #{docRemark}, </if>
+            <if test="docContent != null"> doc_content = #{docContent}, </if>
+            mod_uid = #{modUid},
+            mod_dt = GETDATE()
+        </set>
+        where doc_no = #{docNo}
+    </update>
+
+    <!-- 문서 상태 변경 -->
+    <update id="updateDocStatus" parameterType="announcePriceDoc">
+        update /* AnnouncePriceMapper.updateDocStatus */
+            BT_ANNOUNCE_PRICE_DOC
+        set
+            doc_status = #{docStatus},
+            <choose>
+                <when test='docStatus.equalsIgnoreCase("Y")'>confirm_dt = GETDATE(),</when>
+                <otherwise>confirm_dt = NULL,</otherwise>
+            </choose>
+            mod_uid = #{modUid},
+            mod_dt = GETDATE()
+        where doc_no = #{docNo}
+    </update>
+
+    <!-- 공시단가 문서 삭제 -->
+    <delete id="deleteAnnouncePriceDoc" parameterType="java.lang.String">
+        delete /* AnnouncePriceMapper.deleteAnnouncePriceDoc */
+        from BT_ANNOUNCE_PRICE_DOC
+        where doc_no = #{docNo}
+    </delete>
+
+    <!-- 공시단가 문서 목록 조회 -->
+    <select id="selectAnnouncePriceDoc" parameterType="announcePriceDoc" resultType="announcePriceDoc">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDoc */
+            a.doc_no, a.doc_title,
+            a.country_cd, dbo.FN_GET_CODE_NAME('C08', a.country_cd) AS countryNm,
+            a.writer_uid, b.account_id AS writerId, b.account_name AS writerNm,
+            CONVERT(NVARCHAR(19), a.writer_dt, 120 ) AS writerDt, a.announced_date AS announcedDate,
+            a.doc_status, dbo.FN_GET_CODE_NAME('C09', a.doc_status) AS docStatusNm,
+            CONVERT(NVARCHAR(19), a.confirm_dt, 120) as confirmDt,
+            a.doc_remark,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120) as reg_dt, a.reg_uid, c.account_id AS reg_account_id,
+            CONVERT(NVARCHAR(19), a.mod_dt, 120) AS mod_dt,  a.mod_uid, d.account_id AS mod_account_id
+        from BT_ANNOUNCE_PRICE_DOC a WITH(NOLOCK)
+             left outer join ST_USERS b WITH(NOLOCK) ON a.writer_uid = b.user_uid
+             left outer join ST_USERS c WITH(NOLOCK) ON a.reg_uid = c.user_uid
+             left outer join ST_USERS d WITH(NOLOCK) ON a.mod_uid = d.user_uid
+        <where>
+            <if test='docTitle != null and !docTitle.equals("")'>AND CONCAT(a.doc_no, a.doc_title) LIKE CONCAT('%', #{docTitle}, '%')</if>
+            <if test='countryCd != null and !countryCd.equals("")'>AND a.country_cd = #{countryCd}</if>
+            <if test='docStatus != null and !docStatus.equals("")'>AND a.doc_status = #{docStatus}</if>
+            <if test='announcedDate != null and !announcedDate.equals("")'>AND a.announced_date = #{announcedDate}</if>
+            <if test='fromDate != null'><![CDATA[ AND CONVERT (NVARCHAR(10), a.writer_dt, 23 ) >= #{fromDate} ]]></if>
+            <if test='toDate != null'><![CDATA[ AND CONVERT (NVARCHAR(10), a.writer_dt, 23 ) <= #{toDate} ]]></if>
+        </where>
+    </select>
+
+    <!-- 공시단가 문서 상세 조회 -->
+    <select id="selectAnnouncePriceDocByKey" resultType="announcePriceDoc" parameterType="java.lang.String">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDoc */
+            a.doc_no, a.doc_title, a.country_cd, dbo.FN_GET_CODE_NAME('C08', a.country_cd) AS countryNm,
+            a.writer_uid, b.account_id AS writerId, b.account_name AS writerNm,
+            CONVERT(NVARCHAR(19), a.writer_dt, 120 ) AS writerDt, a.announced_date AS announcedDate,
+            a.doc_status, dbo.FN_GET_CODE_NAME('C09', a.doc_status) AS docStatusNm,
+            CONVERT(NVARCHAR(19), a.confirm_dt, 120) as confirmDt,
+            a.doc_remark, a.doc_content
+        from BT_ANNOUNCE_PRICE_DOC a WITH(NOLOCK)
+            LEFT OUTER JOIN ST_USERS b WITH(NOLOCK) ON a.writer_uid = b.user_uid
+        where a.doc_no = #{docNo}
+    </select>
+
+    <!-- 공시단가 문서 단순 조회 -->
+    <select id="selectAnnouncePriceDocByKeySimple" resultType="announcePriceDoc" parameterType="java.lang.String">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDocSimple */
+            *
+        from BT_ANNOUNCE_PRICE_DOC WITH(NOLOCK)
+        where doc_no = #{docNo}
+    </select>
+
+    <!-- 더 최근 적용일자 재질 공시단가 건수 조회 -->
+    <select id="getNewerMaterialCount" parameterType="announcePriceDetail" resultType="int">
+        select /* AnnouncePriceMapper.getNewerMaterialCount */
+            count(*)
+          from BT_ANNOUNCE_PRICE_DOC a WITH(NOLOCK)
+               join BT_ANNOUNCE_PRICE_DTL b WITH(NOLOCK) ON a.doc_no = b.doc_no
+        where b.country_cd = #{countryCd}
+          and b.material_cd = #{materialCd}
+          and b.material_nm = #{materialNm}
+          and b.bgn_date > #{bgnDate}
+          and a.doc_status = 'Y'
+    </select>
+
+    <!-- 공시단가 등록 -->
+    <insert id="insertAnnouncePriceDtl" parameterType="announcePriceDetail">
+        <selectKey keyProperty="apSeq" resultType="java.lang.Integer" order="BEFORE" >
+            select ISNULL(MAX(ap_seq), 0) + 1
+                from BT_ANNOUNCE_PRICE_DTL
+            where doc_no = #{docNo}
+        </selectKey>
+
+        insert /* AnnouncePriceMapper.insertAnnouncePriceDtl */
+        into BT_ANNOUNCE_PRICE_DTL (
+            doc_no, ap_seq, material_cd, material_nm,
+            bgn_date, end_date,
+            bf_mat_unit_price,
+            mat_unit_price,
+            diff_mat_price,
+            bf_scrap_price,
+            scrap_price,
+            diff_scrap_price,
+            currency_unit, country_cd, mp_remark,
+            reg_dt, reg_uid
+        ) values (
+            #{docNo}, #{apSeq}, #{materialCd}, #{materialNm},
+            ISNULL(#{bgnDate}, '19000101'), ISNULL(#{endDate}, '99991231'),
+            CASE WHEN #{bfMatUnitPrice} IS NULL THEN 0 ELSE #{bfMatUnitPrice} END,
+            CASE WHEN #{matUnitPrice} IS NULL THEN 0 ELSE #{matUnitPrice} END,
+            CASE WHEN #{diffMatPrice} IS NULL THEN 0 ELSE #{diffMatPrice} END,
+            CASE WHEN #{bfScrapPrice} IS NULL THEN 0 ELSE #{bfScrapPrice} END,
+            CASE WHEN #{scrapPrice} IS NULL THEN 0 ELSE #{scrapPrice} END,
+            CASE WHEN #{diffScrapPrice} IS NULL THEN 0 ELSE #{diffScrapPrice} END,
+            ISNULL(#{currencyUnit}, 'KRW'), ISNULL(#{countryCd}, 'KR'), #{mpRemark},
+            GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 공시단가 멀티 등록 -->
+    <insert id="insertMultiAnnouncePriceDtl" parameterType="java.util.List">
+        insert /* AnnouncePriceMapper.insertMultiAnnouncePriceDtl */
+            into BT_ANNOUNCE_PRICE_DTL (
+                doc_no, ap_seq, material_cd, material_nm, bgn_date, end_date, bf_mat_unit_price, mat_unit_price, diff_mat_price,
+                bf_scrap_price, scrap_price, diff_scrap_price, currency_unit,
+                country_cd, mp_remark,
+                reg_dt, reg_uid)
+        values
+        <foreach collection="list" item="item" separator=" , ">
+            (
+                #{item.docNo}, #{item.apSeq}, #{item.materialCd}, #{item.materialNm},
+                ISNULL(#{item.bgnDate}, '19000101'), ISNULL(#{item.endDate}, '99991231'),
+                CASE WHEN #{item.bfMatUnitPrice} IS NULL THEN 0 ELSE #{item.bfMatUnitPrice} END,
+                CASE WHEN #{item.matUnitPrice} IS NULL THEN 0 ELSE #{item.matUnitPrice} END,
+                CASE WHEN #{item.diffMatPrice} IS NULL THEN 0 ELSE #{item.diffMatPrice} END,
+                CASE WHEN #{item.bfScrapPrice} IS NULL THEN 0 ELSE #{item.bfScrapPrice} END,
+                CASE WHEN #{item.scrapPrice} IS NULL THEN 0 ELSE #{item.scrapPrice} END,
+                CASE WHEN #{item.diffScrapPrice} IS NULL THEN 0 ELSE #{item.diffScrapPrice} END,
+                ISNULL(#{item.currencyUnit}, 'KRW'), ISNULL(#{item.countryCd}, 'KR'),#{item.mpRemark},
+                GETDATE(), #{item.regUid}
+            )
+        </foreach>
+    </insert>
+
+
+    <!-- 공시단가 수정 -->
+    <update id="updateAnnouncePriceDtl" parameterType="announcePriceDetail">
+        update /* AnnouncePriceMapper.updateAnnouncePriceDtl */
+            BT_ANNOUNCE_PRICE_DTL
+        <set>
+            <if test='materialCd != null'>material_cd = #{materialCd},</if>
+            <if test='materialNm != null'>material_nm = #{materialNm},</if>
+            <if test='bgnDate != null'>bgn_date = ISNULL(#{bgnDate}, '19000101'),</if>
+            <if test='endDate != null'>end_date = #{endDate},</if>
+            <if test='bfMatUnitPrice != null'>bf_mat_unit_price = #{bfMatUnitPrice},</if>
+            <if test='matUnitPrice != null'>mat_unit_price = #{matUnitPrice},</if>
+            <if test='diffMatPrice != null'>diff_mat_price = #{diffMatPrice},</if>
+            <if test='bfScrapPrice != null'>bf_scrap_price = #{bfScrapPrice},</if>
+            <if test='scrapPrice != null'>scrap_price = #{scrapPrice},</if>
+            <if test='diffScrapPrice != null'>diff_scrap_price = #{diffScrapPrice},</if>
+            <if test='currencyUnit != null'>currency_unit = #{currencyUnit},</if>
+            <if test='countryCd != null'>country_cd = #{countryCd},</if>
+            <if test='mpRemark != null'>mp_remark = #{mpRemark},</if>
+            mod_dt = GETDATE(),
+            mod_uid = #{modUid}
+        </set>
+        where doc_no = #{docNo}
+          and ap_seq = #{apSeq}
+    </update>
+
+    <!-- 공시단가 삭제 -->
+    <delete id="deleteAnnouncePriceDtl" parameterType="announcePriceDetail">
+        delete /* AnnouncePriceMapper.deleteAnnouncePriceDtl */
+        from BT_ANNOUNCE_PRICE_DTL
+        where doc_no = #{docNo}
+        <if test='apSeq != null and apSeq gt 0'>and ap_seq = #{apSeq}</if>
+        <if test='materialCd != null'>and material_cd = #{materialCd}</if>
+        <if test='materialNm != null'>and material_cd = #{materialNm}</if>
+        <if test='bgnDate != null'>and bgn_date = #{bgnDate}</if>
+    </delete>
+
+    <!-- 최종 공시단가 목록 -->
+    <select id="selectAnnouncePriceLast" parameterType="Map" resultType="java.util.Map">
+        select /* AnnouncePriceMapper.selectAnnouncePriceLast */
+            country_cd AS countryCd, country_nm AS countryNm,
+            raw_material_cd AS rawMaterialCd, raw_material_nm AS rawMaterialNm, steel_grade AS steelGrade,
+            material_cd AS materialCd, material_nm AS materialNm, customer_mat_cd AS customerMatCd,
+            bgn_date AS bgnDate, end_date AS endDate,
+            bf_mat_unit_price AS bfMatUnitPrice, mat_unit_price AS matUnitPrice, diff_mat_price AS diffMatPrice,
+            bf_scrap_price AS bfScrapPrice, scrap_price AS scrapPrice, diff_scrap_price AS diffScrapPrice,
+            currency_unit AS currencyUnit, mp_remark AS mpRemark, doc_no AS docNo, doc_title AS docTitle,
+            CONVERT(NVARCHAR(19), reg_dt, 120) as regDt, reg_uid AS regUid, reg_account_id AS regAccountId,
+            CONVERT(NVARCHAR(19), mod_dt, 120) AS modDt, mod_uid AS modUid, mod_account_id AS modAccountId
+        from BV_ANNOUNCE_PRICE
+        <where>
+            <if test='countryCd != null'>and country_cd = #{countryCd}</if>
+            <if test='rawMaterialCd != null'>and raw_material_cd = #{rawMaterialCd}</if>
+            <if test='customerMatCd != null'>and customer_mat_cd = #{customerMatCd}</if>
+            <if test='materialNm != null'>and CONCAT(material_cd, material_nm) LIKE CONCAT('%s', #{materialNm}, '%s') </if>
+            <if test='docNo != null'>and CONCAT(doc_no, doc_title) LIKE CONCAT('%s', #{docNo}, '%s')</if>
+        </where>
+        order by country_cd, raw_material_nm, steel_grade, material_cd
+    </select>
+
+    <!-- 공시단가 목록 조회 -->
+    <select id="selectAnnouncePriceDtl" resultType="announcePriceDetail" parameterType="announcePriceDetail">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDtl */
+            a.doc_no, a.ap_seq, m.raw_material_cd, dbo.FN_GET_CODE_NAME('B01', m.raw_material_cd) AS rawMaterialNm,
+            m.steel_grade, a.material_cd, m.material_nm, m.customer_mat_cd,
+            a.bgn_date, a.end_date,
+            a.bf_mat_unit_price,  a.mat_unit_price, a.diff_mat_price,
+            a.bf_scrap_price, a.scrap_price, a.diff_scrap_price, a.currency_unit,
+            a.country_cd, dbo.FN_GET_CODE_NAME('C08', a.country_cd) AS countryNm,
+            a.mp_remark,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120) as reg_dt, a.reg_uid, b.account_id AS reg_account_id,
+            CONVERT(NVARCHAR(19), a.mod_dt, 120) AS mod_dt,  a.mod_uid, u.account_id AS mod_account_id
+        from BT_ANNOUNCE_PRICE_DTL a WITH(NOLOCK)
+            left outer join MT_MATERIAL m WITH(NOLOCK) ON a.material_cd = m.material_cd and a.material_nm = m.material_nm
+            left outer join ST_USERS b WITH(NOLOCK) ON a.reg_uid = b.user_uid
+            left outer join ST_USERS u WITH(NOLOCK) ON a.mod_uid = u.user_uid
+        <where>
+            <if test='docNo != null and !docNo.equals("")'>AND a.doc_no = #{docNo}</if>
+            <if test='materialCd != null and !materialCd.equals("")'>AND a.material_cd LIKE concat('%', #{materialCd}, '%')</if>
+            <if test='customerMatCd != null and !customerMatCd.equals("")'>AND a.customer_mat_cd LIKE concat('%', #{customerMatCd},'%') </if>
+            <if test='bgnDate != null and !bgnDate.equals("")'>AND a.bgn_date = #{bgnDate}</if>
+            <if test='countryCd != null and !countryCd.equals("")'>AND a.country_cd = #{countryCd}</if>
+            <if test='materialNm != null and !materialNm.equals("")'>AND CONCAT(a.material_cd, a.material_nm) LIKE CONCAT('%s', #{materialNm}, '%s') </if>
+            <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>AND m.raw_material_cd = #{rawMaterialCd}</if>
+            <if test='steelGrade != null and !steelGrade.equals("")'>AND m.steel_grade LIKE CONCAT('%s', #{steelGrade}, '%s')</if>
+        </where>
+        order by m.raw_material_cd, m.steel_grade, a.material_cd
+    </select>
+
+    <!-- 원소재 공시단가 이력 조회 -->
+    <select id="selectAnnouncePriceHistory" resultType="announcePriceDetail" parameterType="String">
+        select /* AnnouncePriceMapper.selectAnnouncePriceHistory */
+                a.bgn_date, a.end_date, a.bf_mat_unit_price, a.mat_unit_price, a.diff_mat_price,
+                a.bf_scrap_price, a.scrap_price, a.diff_scrap_price, a.currency_unit,
+                a.country_cd, a.mp_remark,
+                a.doc_no, a.material_cd,
+                CONVERT(NVARCHAR(19), a.reg_dt, 120) as reg_dt, a.reg_uid, c.account_id AS reg_account_id,
+                CONVERT(NVARCHAR(19), a.mod_dt, 120) AS mod_dt,  a.mod_uid, d.account_id AS mod_account_id
+        from BT_ANNOUNCE_PRICE_DTL a WITH(NOLOCK)
+            join BT_ANNOUNCE_PRICE_DOC b WITH(NOLOCK) ON a.doc_no = b.doc_no and b.doc_status = 'Y'
+            left outer join ST_USERS c WITH(NOLOCK) ON a.reg_uid = c.user_uid
+            left outer join ST_USERS d WITH(NOLOCK) ON a.mod_uid = d.user_uid
+        where a.country_cd = #{countryCd}
+          and a.material_cd = #{materialCd}
+          and a.material_nm = #{materialNm}
+        order by country_cd, bgn_date desc
+    </select>
+
+    <!-- 공시단가 상세 조회 -->
+    <select id="selectAnnouncePriceDtlByKey" resultType="announcePriceDetail" parameterType="announcePriceDetail">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDtlByKey */
+            a.doc_no, a.ap_seq, m.raw_material_cd, dbo.FN_GET_CODE_NAME('B01', m.raw_material_cd) AS rawMaterialNm,
+            m.steel_grade, a.material_cd, m.customer_mat_cd, a.material_nm,
+            a.bgn_date, a.end_date, a.bf_mat_unit_price, a.mat_unit_price, a.diff_mat_price,
+            a.bf_scrap_price, a.scrap_price, a.diff_scrap_price, a.currency_unit,
+            a.country_cd, dbo.FN_GET_CODE_NAME('C08', a.country_cd) AS countryNm,
+            a.mp_remark, a.reg_dt, a.reg_uid, b.account_name AS regUserNm,
+            a.mod_dt, a.mod_uid, u.account_name AS modUserNm
+        from BT_ANNOUNCE_PRICE_DTL a WITH(NOLOCK)
+            join MT_MATERIAL m WITH(NOLOCK) ON a.material_cd = m.material_cd and a.material_nm = m.material_nm
+            left outer join ST_USERS b WITH(NOLOCK) ON a.reg_uid = b.user_uid
+            left outer join ST_USERS u WITH(NOLOCK) ON a.mod_uid = u.user_uid
+        where a.doc_no = #{docNo}
+          and a.ap_seq = #{apSeq}
+    </select>
+
+    <!-- 공시단가 목록 단순 조회 -->
+    <select id="selectAnnouncePriceDtlInOthers" resultType="announcePriceDetail" parameterType="announcePriceDetail">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDtlInOthers */
+            *
+        from BT_ANNOUNCE_PRICE_DTL a WITH(NOLOCK)
+        where a.doc_no != #{docNo}
+          and a.material_cd = #{materialCd}
+          and a.material_nm = #{materialNm}
+          and a.bgn_date = ISNULL(#{bgnDate}, '19000101')
+    </select>
+
+    <!-- 공시단가 목록 단순 조회 -->
+    <select id="selectAnnouncePriceDtlSimple" resultType="announcePriceDetail" parameterType="announcePriceDetail">
+        select /* AnnouncePriceMapper.selectAnnouncePriceDtlSimple */
+            *
+        from BT_ANNOUNCE_PRICE_DTL WITH(NOLOCK)
+        <where>
+            <if test="docNo != null">
+                and doc_no = #{docNo}
+            </if>
+            <if test="materialCd != null">
+                and material_cd = #{materialCd}
+            </if>
+            <if test="materialNm != null">
+                and material_nm = #{materialNm}
+            </if>
+            <if test="bgnDate != null">
+                and isnull(bgn_date, '19000101') = #{bgnDate}
+            </if>
+        </where>
+    </select>
+
+    <!-- 공시단가 문서 마감 처리 -->
+    <select id="closeAnnouncePriceDoc" statementType="CALLABLE" parameterType="HashMap" resultType="HashMap">
+        {
+            call SP_CLOSE_ANNOUNCE_PRICE_DOC(
+                  #{pDocNo, mode=IN, jdbcType=NVARCHAR, javaType=String}
+                , #{pRequestUserUid, mode=IN, jdbcType=NUMERIC, javaType=Long}
+                , #{errCode,          mode=OUT, jdbcType=NUMERIC, javaType=int}
+                , #{errMsg,           mode=OUT, jdbcType=VARCHAR, javaType=String})
+
+        }
+    </select>
+
+    <!-- 공시단가 문서 마감 취소 처리 -->
+    <select id="cancelAnnouncePriceDoc" statementType="CALLABLE" parameterType="HashMap" resultType="HashMap">
+        {
+            call SP_CANCEL_ANNOUNCE_PRICE_DOC(
+              #{pDocNo,       mode=IN, jdbcType=NVARCHAR, javaType=String}
+            , #{pReqUserUid,  mode=IN, jdbcType=NUMERIC, javaType=Long}
+            , #{pErrCode,      mode=OUT, jdbcType=NUMERIC, javaType=int}
+            , #{pErrMsg,       mode=OUT, jdbcType=VARCHAR, javaType=String})
+
+            }
+    </select>
+
+
+    <!-- 고시일 리스트 -->
+    <select id="selectAnnouncedDate" resultType="java.util.Map">
+        select /* AnnouncePriceMapper.selectApplyDate */
+            top 20 announced_date AS announcedDate, doc_no AS docNo
+          from BT_ANNOUNCE_PRICE_DOC WITH (NOLOCK)
+         where doc_status = 'Y'
+         order by announced_date desc
+    </select>
+
+    <!-- 기준일 리스트 -->
+    <select id="selectApplyDate" parameterType="String" resultType="String">
+        select distinct bgn_date
+          from BT_ANNOUNCE_PRICE_DTL WITH (NOLOCK)
+         where doc_no = #{docNo}
+         order by bgn_date
+    </select>
+
+</mapper>

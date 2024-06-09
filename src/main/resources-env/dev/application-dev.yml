@@ -1,0 +1,102 @@
+server:
+  port: 18787
+#     url: jdbc:log4jdbc:sqlserver://192.168.10.101:1433;SelectMethod=cursor;databaseName=ICMS;integratedSecurity=true;encrypt=true;trustServerCertificate=true
+# com.microsoft.sqlserver.jdbc.SQLServerDriver
+# net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+spring:
+  datasource:
+    url: jdbc:log4jdbc:sqlserver://guroomsw.iptime.org:1433;SelectMethod=cursor;databaseName=ICMS;encrypt=true;trustServerCertificate=true
+    username: icmsadmin
+    password: Imsi!0000
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    hikari:
+      maximum-pool-size: 20
+      connection-test-query: select 1
+      minimum-idle: 5
+      connection-timeout: 100000
+      max-lifetime: 580000
+      validation-timeout: 10000
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      location: c:/icms/dev/files/temp
+      max-file-size: 200MB
+      max-request-size: 200MB
+      resolve-lazily: false
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: Imsi!0000
+  mail:
+    host: smtp.gmail.com            # SMTP 서버 주소
+    port: 587                       # SMTP 서버 포트
+    username: uecho71@gmail.com     # SMTP 서버 로그인 ID (발신자)
+    password: dpctroxivydudqmb      # 구글 계정관리 보안, 2단계 인증 필수, 앱 비밀번호로 설정 해야함 그렇지 않으면 MailAuthenticationException발생
+    properties:
+      mail:
+        mime:
+          charset: UTF-8
+        debug: true
+        smtp:
+          auth: true                # 사용자 인증 시도여부( Default : false )
+          timeout: 5000             # Socket read timeout ( Default : 0 무한대 )
+          starttls:
+            enable: true            # startTLS 활성화 여부 ( Default : false )
+
+    # Naver SMTP 설정
+    #host: smtp.naver.com            # SMTP 서버 주소
+    #port: 465                       # SMTP 서버 포트
+    #username: nam_sang_jin          # SMTP 서버 로그인 ID (발신자)
+    #password: Quant!3487            # 메일 계정 비밀번호 사용
+    #properties:
+    #  mail.smtp.auth: true
+    #  mail.smtp.ssl.enable: true
+    #  mail.smtp.ssl.trust: smtp.naver.com
+
+# SAP Jco Environment
+jco:
+  client:
+    ashost: 172.50.2.65
+    sysnr: 20
+    client: 100
+    user: DSCRFC
+    passwd: Dsc2006#
+    lang: KO
+    peak-limit: 10
+    pool-capacity: 3
+
+# Spring Doc Setting
+springdoc:
+  api-docs:
+    path: /api-docs/json      # Json 정보 접속경로
+  packages-to-scan:
+    - com.guroomsoft.icms
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  swagger-ui:
+    path: /api-docs
+
+#JWT secret key
+jwt:
+  secret: R3Vyb29tc29mdC1EU0MtSW50ZWdyYXRlZENvc3RNYW5hZ2VtZW50U3lzdGVtLVNlY3VyaXR5S2V5LTk2NTdlNTM4ZmQ=
+
+# ==================================
+# Custom File local storage property
+# ==================================
+file:
+  upload-root-dir: c:\\icms\\dev\\files
+  preview-path-pattern: /images/**
+  download-path-pattern: /download/**
+
+logging:
+  config: classpath:logback-${spring.profiles.active}.xml
+  level:
+    com.guroomsoft.icms: debug
+    com.zaxxer.hikari: debug
+    jdbc.sqlonly: info
+    jdbc.sqltiming: info
+    jdbc.resultsettable: info
+    jdbc.audit: off
+    jdbc.connection: off

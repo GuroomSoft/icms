@@ -1,0 +1,719 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.auth.dao.UserDAO">
+
+    <!-- 로그인 계정 등록 -->
+    <insert id="insertUser" parameterType="user">
+        <selectKey keyProperty="userUid" resultType="java.lang.Long" order="BEFORE">
+            SELECT NEXT VALUE FOR USER_SEQ
+        </selectKey>
+        INSERT /* UsersMapper.insertUser */
+          INTO ST_USERS (
+            USER_UID, ACCOUNT_ID, ACCOUNT_NAME, ACCOUNT_PWD, ACCOUNT_NICKNAME,ACCOUNT_TYPE,
+            PWD_HASH_VALUE, PWD_EXPIRED_DT, ACTIVE, EMAIL, VERIFIED_EMAIL, MOBILE,
+            VERIFIED_MOBILE, ACCOUNT_LOCKED, ACCOUNT_EXPIRED_DT, ACCOUNT_TEL, corp_cd,
+            plant_cd, ORG_CD, TEAM_CD, BP_CD, user_sign, REG_DT, REG_UID
+        )  VALUES (
+            #{userUid}, #{accountId}, #{accountName}, #{accountPwd}, #{accountNickname},#{accountType},
+            #{pwdHashValue}, null, #{active}, #{email}, #{verifiedEmail}, #{mobile} ,
+            #{verifiedMobile}, #{accountLocked}, null, #{accountTel}, #{corpCd},
+            #{plantCd}, #{orgCd}, #{teamCd}, #{bpCd}, #{userSign}, GETDATE() , #{userUid}
+        )
+    </insert>
+
+    <!-- 계정 정보 수정 -->
+    <update id="updateUser" parameterType="user">
+        UPDATE ST_USERS
+        <set>
+            <if test='accountName != null and !accountName.equals("")'>
+                account_name = #{accountName},
+            </if>
+            <if test='accountNickname != null and !accountNickname.equals("")'>
+                account_nickname = #{accountNickname},
+            </if>
+            <if test='accountPwd != null and !accountPwd.equals("")'>
+                account_pwd = #{accountPwd},
+            </if>
+            <if test='accountType != null and !accountType.equals("")'>
+                account_type = #{accountType},
+            </if>
+            <if test='pwdHashValue != null  and !pwdHashValue.equals("")'>
+                pwd_hash_value = #{pwdHashValue},
+            </if>
+            <if test='pwdExpiredDt != null and !pwdExpiredDt.equals("")'>
+                pwd_expired_dt = CONVERT(DATETIME, #{pwdExpiredDt},    120),
+            </if>
+            <if test='active != null and !active.equals("")'>
+                active = #{active},
+            </if>
+            <if test='email != null and !email.equals("")'>
+                email = #{email},
+            </if>
+            <if test='verifiedEmail != null and !verifiedEmail.equals("")'>
+                verified_email = #{verifiedEmail},
+            </if>
+            <if test='mobile != null and !mobile.equals("")'>
+                mobile = #{mobile} ,
+            </if>
+            <if test='verifiedMobile != null and !verifiedMobile.equals("")'>
+                verified_mobile = #{verifiedMobile},
+            </if>
+            <if test='accountLocked != null and !accountLocked.equals("")'>
+                account_locked = #{accountLocked},
+            </if>
+            <if test='accountTel != null and !accountTel.equals("")'>
+                account_tel = #{accountTel},
+            </if>
+            <if test='corpCd != null and !corpCd.equals("")'>
+                corp_cd = #{corpCd},
+            </if>
+            <if test='plantCd != null and !plantCd.equals("")'>
+                plant_cd = #{plantCd},
+            </if>
+            <if test='orgCd != null and !orgCd.equals("")'>
+                org_cd = #{orgCd},
+            </if>
+            <if test='bpCd neq null and !bpCd.equals("")'>
+                bp_cd = #{bpCd},
+            </if>
+            <if test='userSign neq null and !userSign.equals("")'>
+                user_sign = #{userSign},
+            </if>
+            <if test='teamCd != null and !teamCd.equals("")'>
+                team_cd = #{teamCd},
+            </if>
+            <if test='lastLoginIp != null and !lastLoginIp.equals("")'>
+                last_login_ip = #{lastLoginIp},
+            </if>
+            <if test='lastLoginDt != null and !lastLoginDt.equals("")'>
+                last_login_dt = CONVERT(DATETIME, #{lastLoginDt}, 120),
+            </if>
+                mod_uid = #{modUid},
+                mod_dt = GETDATE()
+        </set>
+        <where>
+            <if test="userUid != null and userUid gt 0">
+                AND USER_UID = #{userUid}
+            </if>
+            <if test='accountId != null and accountId.equals("")'>
+                AND account_id = #{accountId}
+            </if>
+        </where>
+    </update>
+
+    <!-- 계정 정보 삭제 -->
+    <delete id="deleteUser" parameterType="java.lang.Long">
+        DELETE /* usersMapper.deleteUser */
+        FROM ST_USERS
+        WHERE user_uid = #{userUid}
+    </delete>
+
+
+    <!-- 회원 상세 정보 조회(UID 찾기)-->
+    <select id="selectUserByKey" parameterType="java.lang.Long" resultType="user">
+        SELECT /* UsersMapper.selectUserByKey */
+            user_uid,
+            account_id,
+            account_name,
+            account_pwd,
+            account_nickname,
+            account_type,
+            pwd_hash_value,
+            CONVERT(NVARCHAR(19), pwd_expired_dt, 120) AS pwdExpiredDt,
+            active,
+            email,
+            verified_email,
+            mobile,
+            verified_mobile,
+            account_locked,
+            CONVERT(NVARCHAR(19), account_expired_dt, 120) AS accountExpiredDt,
+            account_tel,
+            last_login_ip,
+            CONVERT(NVARCHAR(19), last_login_dt, 120) AS lastLoginDt,
+            corp_cd,
+            plant_cd,
+            org_cd,
+            team_cd,
+            bp_cd,
+            CONVERT(NVARCHAR(19), reg_dt, 20) AS regDt,
+            reg_uid
+        FROM ST_USERS
+        WHERE USER_UID = #{userUid}
+    </select>
+
+    <!-- 회원 상세 정보 조회(아이디로 찾기)-->
+    <select id="selectUserById" resultType="user">
+        SELECT /* UsersMapper.selectUserById */
+            a.user_uid,
+            a.account_id,
+            a.account_name,
+            a.account_pwd,
+            a.account_nickname,
+            a.account_type,
+            a.pwd_hash_value,
+            CONVERT(NVARCHAR(19), a.pwd_expired_dt, 120) AS pwdExpiredDt,
+            a.active,
+            a.email,
+            a.verified_email,
+            a.mobile,
+            a.verified_mobile,
+            a.account_locked,
+            CONVERT(NVARCHAR(19), a.account_expired_dt, 120) AS accountExpiredDt,
+            a.account_tel,
+            a.last_login_ip,
+            CONVERT(NVARCHAR(19), a.last_login_dt, 120) AS lastLoginDt,
+            a.corp_cd,
+            b.corp_nm,
+            a.plant_cd,
+            c.plant_nm,
+            a.org_cd,
+            dbo.FN_GET_CODE_NAME('C06', a.org_cd) as org_nm,
+            a.team_cd,
+            dbo.FN_GET_CODE_NAME('C07', a.team_cd) as team_nm,
+            a.bp_cd,
+            d.bp_nm,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120) AS regDt,
+            a.reg_uid
+        FROM ST_USERS a
+             left outer join MT_CORPORATION b on a.corp_cd = b.corp_cd
+             left outer join MT_PLANT c on a.plant_cd = c.plant_cd
+             left outer join MT_BIZ_PARTNER d on a.bp_cd = d.bp_cd
+        WHERE ACCOUNT_ID = #{accountId}
+    </select>
+
+    <select id="selectUserByBpCd" resultType="user" parameterType="java.lang.String">
+        SELECT /* UsersMapper.selectUserByBpCd */
+            TOP 1 *
+        FROM ST_USERS
+        WHERE bp_cd = #{bpCd}
+    </select>
+
+    <select id="selectUserByBizRegNo" resultType="user" parameterType="java.lang.String">
+        SELECT /* UsersMapper.selectUserByBpCd */
+            TOP 1 *
+        FROM ST_USERS
+        WHERE bp_cd IN (
+                SELECT bp_cd FROM MT_BIZ_PARTNER WHERE biz_reg_no = #{bizRegNo}
+            )
+    </select>
+
+
+    <!-- 계정목록 조회-->
+    <select id="selectUsers" parameterType="user" resultType="user">
+        SELECT /* UsersMapper.selectUsers */
+            a.user_uid,
+            a.account_id,
+            a.account_name,
+            a.account_pwd,
+            a.account_nickname,
+            a.account_type,
+            a.pwd_hash_value,
+            CONVERT(NVARCHAR(19), a.pwd_expired_dt, 120) AS pwdExpiredDt,
+            a.active,
+            a.email,
+            a.verified_email,
+            a.mobile,
+            a.verified_mobile,
+            a.account_locked,
+            CONVERT(NVARCHAR(19), a.account_expired_dt, 120) AS accountExpiredDt,
+            a.account_tel,
+            a.last_login_ip,
+            CONVERT(NVARCHAR(19), a.last_login_dt, 120) AS lastLoginDt,
+            a.corp_cd,
+            a.plant_cd,
+            c.plant_nm,
+            a.org_cd,
+            ISNULL(a.org_cd, '') AS orgCd, ISNULL(dbo.FN_GET_CODE_NAME('C06',  a.org_cd), '') AS orgNm,
+            a.team_cd,
+            ISNULL(a.team_cd, '') AS teamCd, ISNULL(dbo.FN_GET_CODE_NAME('C07',  a.team_cd), '') AS teamNm,
+            a.bp_cd,
+            b.bp_nm,
+            a.user_sign,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120) AS regDt,
+            a.reg_uid,
+            ISNULL(d.is_enabled, 'N') AS eformIsEnabled
+        FROM ST_USERS a with (nolock)
+             left outer join MT_BIZ_PARTNER b with (nolock) ON a.bp_cd = b.bp_cd
+             left outer join MT_PLANT c with (nolock) on a.plant_cd = c.plant_cd
+             left outer join MT_EFORM_MEMBER d with (nolock) on a.email = d.ef_id
+        <where>
+            <if test="userUid != null and userUid gt 0">AND a.user_uid = #{userUid}</if>
+            <if test='accountId != null and !accountId.equals("")'>AND a.account_id = #{accountId}</if>
+            <if test='accountName != null and !accountName.equals("")'>AND a.account_name LIKE CONCAT('%', #{accountName} '%')</if>
+            <if test='accountType != null and !accountType.equals("")'>AND a.account_type = #{accountType}</if>
+            <if test='accountPwd != null and !accountPwd.equals("")'>AND a.account_pwd = #{accountPwd}</if>
+            <if test='pwdHashValue != null and !pwdHashValue.equals("")'>AND a.pwd_hash_value = #{pwdHashValue}</if>
+            <if test='active != null and !active.equals("")'>AND a.active = #{active}</if>
+            <if test='email != null and !email.equals("")'>AND a.email LIKE CONCAT('%', #{email} '%')</if>
+            <if test='verifiedEmail != null and !verifiedEmail.equals("")'>AND a.verified_email = #{verifiedEmail}</if>
+            <if test='mobile != null and !mobile.equals("")'>AND a.mobile LIKE CONCAT('%', #{mobile} '%')</if>
+            <if test='verifiedMobile != null and !verifiedMobile.equals("")'>AND a.verified_mobile = #{verifiedMobile}</if>
+            <if test='corpCd != null and !corpCd.equals("")'>AND a.corp_cd = #{corpCd}</if>
+            <if test='plantCd != null and !plantCd.equals("")'>AND a.plant_cd = #{plantCd}</if>
+            <if test='orgCd != null and !orgCd.equals("")'>AND a.org_cd = #{orgCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>AND a.bp_cd = #{bpCd}</if>
+        </where>
+    </select>
+
+    <!-- 사원목록 -->
+    <select id="selectEmployeeUsers" resultType="user" parameterType="java.util.Map">
+        select /* UsersMapper.selectEmployeeUsers */
+            a.user_uid AS userUid,
+            a.account_id AS accountId,
+            a.account_name AS accountNm,
+            ISNULL(a.corp_cd, '') AS corpCd, ISNULL(c.corp_nm, '') AS corpNm,
+            ISNULL(a.plant_cd, '') AS plantCd, ISNULL(b.plant_nm, '') AS plantNm,
+            ISNULL(a.org_cd, '') AS orgCd, ISNULL(dbo.FN_GET_CODE_NAME('C06',  a.org_cd), '') AS orgNm,
+            ISNULL(a.team_cd, '') AS teamCd, ISNULL(dbo.FN_GET_CODE_NAME('C07',  a.team_cd), '') AS teamNm,
+            b.plant_country AS plantCountry, ISNULL(dbo.FN_GET_CODE_NAME('C08',  b.plant_country), '') AS plantCountryNm
+        from ST_USERS a WITH(NOLOCK)
+            left outer join MT_CORPORATION c WITH(NOLOCK) ON a.corp_cd = c.corp_cd
+            left outer join MT_PLANT b WITH(NOLOCK) ON a.plant_cd = b.plant_cd
+        where ISNULL(a.corp_cd, '') > ''
+        <if test='corpCd != null and !corpCd.equals("")'>AND a.corp_cd = #{corpCd}</if>
+        <if test='plantCd != null and !plantCd.equals("")'>AND a.plant_cd = #{plantCd}</if>
+        <if test='orgCd != null and !orgCd.equals("")'>AND a.org_cd = #{orgCd}</if>
+        <if test='teamCd != null and !teamCd.equals("")'>AND a.team_cd = #{teamCd}</if>
+    </select>
+
+    <!-- 그룹 멤버 목록 조회 -->
+    <select id="selectGroupMemberById" parameterType="java.lang.Long" resultType="user">
+        SELECT /* UsersMapper.selectGroupMemberById */
+            user_uid,
+            account_id,
+            account_name,
+            account_pwd,
+            account_nickname,
+            account_type,
+            pwd_hash_value,
+            CONVERT(NVARCHAR(19), pwd_expired_dt, 120) AS pwdExpiredDt,
+            active,
+            email,
+            verified_email,
+            mobile,
+            verified_mobile,
+            account_locked,
+            CONVERT(NVARCHAR(19), account_expired_dt, 120) AS accountExpiredDt,
+            account_tel,
+            last_login_ip,
+            CONVERT(NVARCHAR(19), last_login_dt, 120) AS lastLoginDt,
+            plant_cd,
+            org_cd,
+            team_cd,
+            bp_cd,
+            user_sign
+        FROM ST_USERS WITH(NOLOCK)
+        WHERE active = 'Y'
+            AND user_uid IN (
+                SELECT user_uid FROM ST_AUTH_GROUP_MEMBER
+                 WHERE grp_uid = #{grpId}
+            )
+    </select>
+
+
+    <!-- 계정 권한 목록 -->
+    <select id="selectUserRoleByKey" parameterType="java.lang.Long" resultType="userRole">
+        SELECT /* UsersMapper.selectUserRoleByKey selectUserAuthoritiesByKey */
+            user_uid,
+            user_role,
+            reg_dt
+        FROM ST_USER_ROLES WITH(NOLOCK)
+        WHERE user_uid = #{userUid}
+    </select>
+
+    <!-- 계정 권한 목록 -->
+    <select id="selectUserRoleById" parameterType="java.lang.String" resultType="userRole">
+        SELECT /* UsersMapper.selectUserRoleById */
+            user_uid,
+            user_role,
+            reg_dt
+        FROM ST_USER_ROLES WITH(NOLOCK)
+        WHERE user_uid IN (
+            SELECT user_uid FROM ST_USERS
+            WHERE account_id = #{accountId}
+        )
+    </select>
+
+    <!-- 사용자 Role 등록 -->
+    <insert id="insertUserRole" parameterType="userRole">
+        INSERT /* UsersMapper.insertUserRole */
+          INTO ST_USER_ROLES (
+            user_uid, user_role, reg_dt
+        ) VALUES (
+            #{userUid}, #{userRole}, CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 사용자 Role 삭제 -->
+    <delete id="deleteUserRole" parameterType="userRole">
+        DELETE /* UsersMapper.deleteUserRole */
+          FROM ST_USER_ROLES
+         WHERE user_uid = #{userUid}
+           AND user_role = #{userRole}
+    </delete>
+
+    <!-- 사용자 그룹 목록 조회 -->
+    <select id="selectGroups" parameterType="group" resultType="group">
+        SELECT /* UsersMapper.selectGroups */
+            grp_uid, grp_name, grp_remark, use_at
+          FROM ST_AUTH_GROUPS WITH(NOLOCK)
+        <where>
+            <if test="grpUid != null and grpUid gt 0">AND grp_uid = #{grpUid}</if>
+            <if test='grpName != null and !grpName.equals("")'>AND grp_name LIKE CONCAT('%', #{grpName}, '%')</if>
+            <if test='grpRemark != null and !grpRemark.equals("")'>AND grp_remark LIKE CONCAT('%', #{grpRemark}, '%')</if>
+            <if test='useAt != null and !useAt.equals("")'>AND use_at = #{useAt}</if>
+        </where>
+    </select>
+
+    <!-- 사용자 그룹 목록 조회 -->
+    <select id="selectGroupsForHelper" parameterType="group" resultType="java.util.Map">
+        SELECT /* UsersMapper.selectGroupsForHelper */
+            CAST(grp_uid AS VARCHAR(100)) AS grpUid,
+            grp_name AS grpName,
+            grp_remark AS grpRemark,
+            use_at AS useAt
+        FROM ST_AUTH_GROUPS WITH(NOLOCK)
+        <where>
+            <if test="grpUid != null and grpUid gt 0">AND grp_uid = #{grpUid}</if>
+            <if test='grpName != null and !grpName.equals("")'>AND grp_name LIKE CONCAT('%', #{grpName}, '%')</if>
+            <if test='grpRemark != null and !grpRemark.equals("")'>AND grp_remark LIKE CONCAT('%', #{grpRemark}, '%')</if>
+            <if test='useAt != null and !useAt.equals("")'>AND use_at = #{useAt}</if>
+        </where>
+    </select>
+
+    <!-- 사용자 그룹 조회 -->
+    <select id="selectGroupsByKey" parameterType="group" resultType="java.lang.Long">
+        SELECT /* UsersMapper.selectGroupsByKey */
+            GRP_UID AS grpUid, GRP_NAME AS grpName, GRP_REMARK AS grpRemark, USE_AT AS useAt
+        FROM ST_AUTH_GROUPS WITH(NOLOCK)
+        WHERE GRP_UID = #{grpUid}
+    </select>
+
+    <!-- 사용자 그룹 등록 -->
+    <insert id="insertGroups" parameterType="group">
+        <selectKey keyProperty="grpUid" resultType="long" order="BEFORE">
+            SELECT NEXT VALUE FOR GROUP_SEQ
+        </selectKey>
+
+        INSERT /* UsersMapper.insertGroups */
+          INTO ST_AUTH_GROUPS (
+            grp_uid, grp_name, grp_remark, reg_dt, reg_uid
+        ) VALUES (
+            #{grpUid}, #{grpName}, #{grpRemark}, CURRENT_TIMESTAMP, #{regUid}
+        )
+    </insert>
+
+    <!-- 사용자 그룹 수정 -->
+    <update id="updateGroups" parameterType="group">
+        UPDATE /* UsersMapper.updateGroups */
+            ST_AUTH_GROUPS
+        <set>
+            <if test='grpName != null and !grpName.equals("")'>GRP_NAME = #{grpName},</if>
+            <if test='grpRemark != null'>GRP_REMARK = #{grpRemark},</if>
+            <if test='useAt != null and !useAt.equals("")'>USE_AT = #{useAt},</if>
+            MOD_DT = CURRENT_TIMESTAMP,
+            MOD_UID = #{modUid}
+        </set>
+        WHERE GRP_UID = #{grpUid}
+    </update>
+
+    <!-- 사용자 그룹 삭제 -->
+    <delete id="deleteGroups" parameterType="java.lang.Long">
+        DELETE /* UsersMapper.deleteGroups */
+          FROM ST_AUTH_GROUPS
+         WHERE grp_uid = #{grpUid}
+    </delete>
+
+    <!-- 그룹 멤버 조회 -->
+    <select id="selectGroupMembers" resultType="user" parameterType="java.lang.Long">
+        SELECT /* UsersMapper.selectGroupMembers */
+            #{grpUid} AS grpUid,
+            a.USER_UID AS userUid,
+            a.ACCOUNT_ID AS accountId,
+            a.ACCOUNT_NAME AS accountName,
+            a.ACCOUNT_NICKNAME AS accountNickname,
+            a.ACCOUNT_TYPE AS accountType,
+            a.ACTIVE AS active,
+            a.EMAIL AS email,
+            a.VERIFIED_EMAIL AS verifiedEmail,
+            a.MOBILE AS mobile,
+            a.VERIFIED_MOBILE AS verifiedMobile,
+            a.ACCOUNT_LOCKED AS accountLocked,
+            a.ACCOUNT_EXPIRED_DT AS accountExpiredDt,
+            a.ACCOUNT_TEL AS accountTel,
+            a.LAST_LOGIN_IP AS lastLoginIp,
+            a.LAST_LOGIN_DT AS lastLoginDt,
+            a.plant_cd AS plantCd,
+            a.ORG_CD AS orgCd,
+            a.TEAM_CD AS teamCd,
+            a.BP_CD AS bpCd
+        FROM ST_USERS a WITH(NOLOCK)
+        WHERE user_uid IN (
+            SELECT USER_UID
+            FROM ST_AUTH_GROUP_MEMBER
+            WHERE grp_uid = #{grpUid}
+              AND use_at = 'Y'
+        )
+    </select>
+
+    <!-- 그룹 멤버 조회 -->
+    <select id="selectGroupOtherMembers" resultType="user" parameterType="java.lang.Long">
+        SELECT /* UsersMapper.selectGroupOtherMembers */
+            #{grpUid} AS grpUid,
+            a.USER_UID AS userUid,
+            a.ACCOUNT_ID AS accountId,
+            a.ACCOUNT_NAME AS accountName,
+            a.ACCOUNT_NICKNAME AS accountNickname,
+            a.ACCOUNT_TYPE AS accountType,
+            a.ACTIVE AS active,
+            a.EMAIL AS email,
+            a.VERIFIED_EMAIL AS verifiedEmail,
+            a.MOBILE AS mobile,
+            a.VERIFIED_MOBILE AS verifiedMobile,
+            a.ACCOUNT_LOCKED AS accountLocked,
+            a.ACCOUNT_EXPIRED_DT AS accountExpiredDt,
+            a.ACCOUNT_TEL AS accountTel,
+            a.LAST_LOGIN_IP AS lastLoginIp,
+            a.LAST_LOGIN_DT AS lastLoginDt,
+            a.plant_cd AS plantCd,
+            a.ORG_CD AS orgCd,
+            a.TEAM_CD AS teamCd,
+            a.BP_CD AS bpCd
+        FROM ST_USERS a WITH(NOLOCK)
+        WHERE user_uid NOT IN (
+            SELECT USER_UID
+            FROM ST_AUTH_GROUP_MEMBER
+            WHERE grp_uid = #{grpUid}
+              AND use_at = 'Y'
+        )
+    </select>
+
+    <!-- 그룹 멤버 등록 -->
+    <insert id="insertGroupMember" parameterType="groupMember">
+        INSERT /* UsersMapper.insertGroupMember */
+          INTO ST_AUTH_GROUP_MEMBER (
+            USER_UID, GRP_UID, USE_AT, REG_DT, REG_UID
+        ) VALUES(
+            #{userUid}, #{grpUid}, 'Y', GETDATE(), #{regUid}
+        )
+    </insert>
+
+    <!-- 그룹 멤버 삭제 -->
+    <delete id="deleteGroupMember" parameterType="groupMember">
+        DELETE /* UsersMapper.deleteGroupMember */
+          FROM ST_AUTH_GROUP_MEMBER
+        <where>
+            <if test="userUid != null and userUid gt 0">AND user_uid = #{userUid}</if>
+            <if test="grpUid != null and grpUid gt 0">AND grp_uid = #{grpUid}</if>
+        </where>
+    </delete>
+
+    <!-- 그룹 멤버 전체 삭제 -->
+    <delete id="deleteAllGroupMember" parameterType="java.lang.Long">
+        DELETE /* UsersMapper.deleteAllGroupMember */
+          FROM ST_AUTH_GROUP_MEMBER
+         WHERE grp_uid = #{grpUid}
+    </delete>
+
+    <!-- 그룹 권한 목록 조회 -->
+    <select id="selectGroupAuthority" resultType="groupAuthority" parameterType="groupAuthority">
+        SELECT /* UsersMapper.selectGroupAuthority */
+            GRP_UID, MENU_UID, REG_PERM_AT, MOD_PERM_AT, DEL_PERM_AT, EXEC_PERM_AT
+        FROM ST_GROUP_AUTHORITY WITH (NOLOCK)
+        <where>
+            <if test="grpUid != null and grpUid gt 0">AND GRP_UID = #{grpUid}</if>
+            <if test="menuUid != null and menuUid gt 0">AND MENU_UID = #{menuUid}</if>
+        </where>
+    </select>
+
+    <!-- 그룹 권한 목록 조회 , 사용자 그룹 권한 조회용-->
+    <select id="selectGroupAuthorityWithMenu" resultType="groupAuthority" parameterType="java.lang.Long">
+        SELECT /* UsersMapper.selectGroupAuthority */
+            case when a.grp_uid is not null  then a.grp_uid else #{grpUid} end as grp_uid,
+            a.menu_uid,
+            b.menu_nm,
+            b.menu_type,
+            b.menu_short_nm,
+            b.parent_uid,
+            b.menu_icon,
+            b.menu_lvl,
+            b.menu_type,
+            b.menu_path,
+            b.redirect_path,
+            b.display_at,
+            ISNULL(a.view_perm_at, 'N') AS VIEW_PERM_AT,
+            ISNULL(a.reg_perm_at, 'N') AS REG_PERM_AT,
+            ISNULL(a.mod_perm_at, 'N') AS MOD_PERM_AT,
+            ISNULL(a.del_perm_at, 'N') AS DEL_PERM_AT,
+            ISNULL(a.exec_perm_at, 'N') AS EXEC_PERM_AT
+        FROM ST_MENU b WITH (NOLOCK)
+             LEFT OUTER JOIN ST_GROUP_AUTHORITY a WITH (NOLOCK) ON a.menu_uid = b.menu_uid
+            AND b.use_at = 'Y'
+            AND a.grp_uid = #{grpUid}
+        WHERE b.parent_uid = #{parentUid}
+        ORDER BY b.display_ord
+    </select>
+
+    <!-- 그룹 권한 전체 목록 조회, 권한 설정용-->
+    <select id="selectGroupAuthorityAllMenu" resultType="groupAuthority" parameterType="java.lang.Long">
+        SELECT /* UsersMapper.selectGroupAuthorityAllMenu */
+            a.MENU_UID, a.MENU_NM, a.MENU_TYPE,
+            ISNULL(b.VIEW_PERM_AT, 'N') AS VIEW_PERM_AT,
+            ISNULL(b.REG_PERM_AT, 'N') AS REG_PERM_AT,
+            ISNULL(b.MOD_PERM_AT, 'N') AS MOD_PERM_AT,
+            ISNULL(b.DEL_PERM_AT, 'N') AS DEL_PERM_AT,
+            ISNULL(b.EXEC_PERM_AT, 'N') AS EXEC_PERM_AT
+        FROM ST_MENU a
+                 LEFT OUTER JOIN ST_GROUP_AUTHORITY b ON
+            a.MENU_UID = b.MENU_UID AND b.GRP_UID = #{grpUid} AND a.USE_AT = 'Y'
+        WHERE a.PARENT_UID = #{parentUid}
+        ORDER BY a.DISPLAY_ORD
+    </select>
+
+    <!-- 그룹 권한 초기화 및 Append -->
+    <insert id="saveGroupAuthority" parameterType="groupAuthority">
+        MERGE /* UsersMapper.saveGroupAuthority */
+            INTO ST_GROUP_AUTHORITY a
+            USING (
+                SELECT
+                    #{grpUid} AS grp_uid,
+                    #{menuUid} AS menu_uid,
+                    #{viewPermAt} AS view_perm_at,
+                    #{regPermAt} AS reg_perm_at,
+                    #{modPermAt} AS mod_perm_at,
+                    #{delPermAt} AS del_perm_at,
+                    #{execPermAt} AS exec_perm_at,
+                    GETDATE() AS reg_dt,
+                    #{regUid} AS reg_uid
+            ) b
+            ON (a.grp_uid = b.grp_uid AND a.menu_uid = b.menu_uid)
+            WHEN MATCHED THEN
+                UPDATE SET
+                    view_perm_at = b.view_perm_at,
+                    reg_perm_at = b.reg_perm_at,
+                    mod_perm_at = b.mod_perm_at,
+                    del_perm_at = b.del_perm_at,
+                    exec_perm_at = b.exec_perm_at,
+                    mod_uid = b.reg_uid,
+                    mod_dt = b.reg_dt
+            WHEN NOT MATCHED THEN
+            INSERT (grp_uid, menu_uid, view_perm_at, reg_perm_at, mod_perm_at, del_perm_at, exec_perm_at, reg_dt, reg_uid)
+            VALUES (b.grp_uid, b.menu_uid, b.view_perm_at, b.reg_perm_at, b.mod_perm_at, b.del_perm_at, b.exec_perm_at, b.reg_dt, b.reg_uid);
+    </insert>
+
+
+    <!-- 그룹 권한 초기화 및 Append -->
+    <insert id="appendGroupAuthority" parameterType="java.lang.Long">
+        MERGE /* UsersMapper.appendGroupAuthority */
+            INTO ST_GROUP_AUTHORITY a
+            USING (
+                SELECT
+                    #{grpUid} AS grp_uid,
+                    MENU_UID AS menu_uid,
+                    'N' AS view_perm_at,
+                    'N' AS reg_perm_at,
+                    'N' AS mod_perm_at,
+                    'N' AS del_perm_at,
+                    'N' AS exec_perm_at,
+                    GETDATE() AS reg_dt,
+                    #{regUid} AS reg_uid
+                FROM ST_MENU
+                WHERE USE_AT = 'Y'
+            ) b
+            ON (a.grp_uid = b.grp_uid AND a.menu_uid = b.menu_uid)
+            WHEN NOT MATCHED THEN
+                INSERT (grp_uid, menu_uid, view_perm_at, reg_perm_at, mod_perm_at, del_perm_at, exec_perm_at, reg_dt, reg_uid)
+                VALUES (b.grp_uid, b.menu_uid, b.view_perm_at, b.reg_perm_at, b.mod_perm_at, b.del_perm_at, b.exec_perm_at, b.reg_dt, b.reg_uid);
+    </insert>
+
+    <!-- 그룹 권한 초기화 및 Append -->
+    <insert id="copyGroupAuthority" parameterType="java.lang.Long">
+        MERGE /* UsersMapper.copyGroupAuthority */
+        INTO ST_GROUP_AUTHORITY a
+            USING (
+                SELECT #{toGrpUid} as GRP_UID, MENU_UID, VIEW_PERM_AT, REG_PERM_AT, MOD_PERM_AT, DEL_PERM_AT, EXEC_PERM_AT,
+                       GETDATE() AS REG_DT, #{regUid} AS REG_UID
+                FROM ST_GROUP_AUTHORITY
+                WHERE GRP_UID = #{fromGrpUid}
+        ) b ON (a.GRP_UID = b.GRP_UID AND a.MENU_UID = b.MENU_UID)
+        WHEN MATCHED THEN
+        UPDATE SET a.VIEW_PERM_AT = b.VIEW_PERM_AT, a.REG_PERM_AT = b.REG_PERM_AT, a.MOD_PERM_AT = b.MOD_PERM_AT,
+                   a.DEL_PERM_AT = b.DEL_PERM_AT, a.EXEC_PERM_AT = b.EXEC_PERM_AT,
+                   a.MOD_DT = b.REG_DT, a.MOD_UID = b.REG_UID
+        WHEN NOT MATCHED THEN
+        INSERT (grp_uid, menu_uid, view_perm_at, reg_perm_at, mod_perm_at, del_perm_at, exec_perm_at, reg_dt, reg_uid)
+        VALUES (b.GRP_UID, b.MENU_UID, b.VIEW_PERM_AT, b.REG_PERM_AT, b.MOD_PERM_AT, b.DEL_PERM_AT, b.EXEC_PERM_AT, b.REG_DT, b.REG_UID);
+    </insert>
+
+    <!-- 그룹 권한 삭제 -->
+    <delete id="deleteGroupAuthority" parameterType="groupAuthority">
+        DELETE /* UsersMapper.deleteGroupAuthority */
+        FROM ST_GROUP_AUTHORITY
+        <where>
+            <if test="grpUid != null and grpUid gt 0">AND GRP_UID = #{grpUid}</if>
+            <if test="menuUid != null and menuUid gt 0">AND MENU_UID = #{menuUid}</if>
+        </where>
+    </delete>
+
+
+    <!-- User Refresh token -->
+    <insert id="insertRefreshToken" parameterType="RefreshToken">
+        <selectKey keyProperty="tokenId" resultType="long" order="BEFORE">
+            SELECT NEXT VALUE FOR TOKEN_SEQ
+        </selectKey>
+
+        INSERT /* UsersMapper.insertRefreshToken */
+        INTO ST_REFRESH_TOKEN (
+            token_id, user_uid, token
+        ) VALUES (
+            #{tokenId}, #{userUid}, #{token}
+        )
+    </insert>
+
+    <!-- Refresh token 업데이트 -->
+    <update id="updateRefreshToken" parameterType="RefreshToken">
+        UPDATE /* UsersMapper.updateRefreshToken */
+            ST_REFRESH_TOKEN
+            SET token = #{token}
+        <where>
+            <if test="tokenId != null">AND token_id = #{tokenId}</if>
+            <if test="userUid != null and userUid gt 0">AND user_uid = #{userUid}</if>
+        </where>
+    </update>
+
+    <!-- Refresh token 삭제 -->
+    <delete id="deleteRefreshToken" parameterType="java.lang.Long">
+        DELETE /* UsersMapper.deleteRefreshToken */
+        FROM ST_REFRESH_TOKEN
+        WHERE user_uid = #{userUid}
+    </delete>
+
+    <select id="selectRefreshToken" resultType="RefreshToken" parameterType="java.lang.Long">
+        SELECT /* UsersMapper.selectRefreshToken */
+            TOKEN_ID as tokenId, USER_UID as userUid, TOKEN as token
+        FROM ST_REFRESH_TOKEN
+        WHERE user_uid = #{userUid}
+    </select>
+
+    <!-- 전자계약 사용자정보 -->
+    <select id="getEmployeeUsers" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT /* UsersMapper.getEmployeeUsers */
+            user_uid as sysUserUid, ef_id as efId, sys_account_id as sysAccountId, ef_account_id as efAccountId,
+            sys_account_name as sysAccountName, sys_account_nickname as sysAccountNickname, ef_name as efName,
+            account_type as accountType, account_type_nm as accountTypeNm,
+            active, active_nm as activeNm, email, mobile, account_tel as accountTel,
+            account_locked as accountLocked, ef_is_refused as efIsRefused,
+            ef_is_invited as efIsInvited, ef_is_withdrawal as efIsWithdrawal, ef_is_expired as efIsExpired,
+            ef_is_deleted as efIsDeleted, ef_is_enabled as efIsEnabled, efis_enabled_nm as efisEnabledNm,
+            corp_cd as corpCd, corp_nm as corpNm, plant_cd as plantCd, plant_nm as plantNm, org_cd as orgCd,
+            org_nm as orgNm, team_cd, team_nm,
+            user_sign AS userSign
+        FROM SV_SENDER
+        <where>
+            <if test='sysUserUid != null and sysUserUid gt 0'> AND user_uid = #{sysUserUid}</if>
+            <if test='sysAccountId != null and !sysAccountId.equals("")'> AND sys_account_id = #{sysAccountId}</if>
+            <if test='email != null and !email.equals("")'> AND email = #{email}</if>
+        </where>
+    </select>
+</mapper>

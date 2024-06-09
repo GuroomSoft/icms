@@ -1,0 +1,118 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.code.dao.ItemDAO">
+    <!-- 품목 조회 -->
+    <select id="selectItem" resultType="item" parameterType="itemReq">
+        select /* ItemMapper.selectItem */
+               a.item_no, a.item_nm,
+               isnull(b.raw_material_cd, '') raw_material_cd, isnull(dbo.FN_GET_CODE_NAME('B01', b.raw_material_cd), '') as raw_material_nm,
+               isnull(a.material_cd, '') as material_cd, isnull(a.material_nm, '') AS material_nm,
+               isnull(b.steel_grade, '') as steel_grade, isnull(b.customer_mat_cd, '') as customer_mat_cd,
+               CONVERT(NVARCHAR(19), a.reg_dt, 120 ) AS reg_dt, a.reg_uid, c.account_id as reg_account_id
+        from mt_item a with (nolock)
+            left outer join MT_MATERIAL b with (nolock) ON a.material_cd = b.material_cd and a.material_nm = b.material_nm
+            left outer join ST_USERS c with (nolock) ON a.reg_uid = c.user_uid
+        <where>
+            <if test='searchWord != null and !searchWord.equals("")'>
+                and concat(isnull(a.item_no, ''), isnull(a.item_nm, '')) like concat('%', #{searchWord}, '%')
+            </if>
+            <if test='materialCd != null and !materialCd.equals("")'>
+                and concat(isnull(b.material_cd, ''), isnull(a.material_nm, '')) LIKE concat('%', #{materialCd}, '%')
+            </if>
+            <if test="rawMaterialCd != null">and b.raw_material_cd = #{rawMaterialCd}</if>
+            <if test='customerMatCd != null and !customerMatCd.equals("")'>
+                and isnull(b.customer_mat_cd, '') = concat('%', #{customerMatCd}, '%')
+            </if>
+        </where>
+        order by a.item_no
+        offset #{startOffset} rows
+            fetch next #{rowCountPerPage} rows only
+    </select>
+
+    <select id="selectItemByKey" parameterType="java.lang.String" resultType="item">
+        select /* ItemMapper.selectItemByKey */
+                *
+            from MT_ITEM with (nolock)
+          where item_no = #{itemNo}
+    </select>
+
+    <select id="getTotalItemCount" parameterType="itemReq" resultType="int">
+        select /* ItemMapper.getTotalItemCount */
+            count(*)
+        from mt_item a with (nolock)
+            left outer join MT_MATERIAL b with (nolock) ON a.material_cd = b.material_cd and a.material_nm = b.material_nm
+            left outer join ST_USERS c with (nolock) ON a.reg_uid = c.user_uid
+        <where>
+            <if test='searchWord != null and !searchWord.equals("")'>
+                and concat(isnull(a.item_no, ''), isnull(a.item_nm, '')) like concat('%', #{searchWord}, '%')
+            </if>
+            <if test='materialCd != null and !materialCd.equals("")'>
+                and concat(isnull(b.material_cd, ''), isnull(a.material_nm, '')) LIKE concat('%', #{materialCd}, '%')
+            </if>
+            <if test="rawMaterialCd != null">and b.raw_material_cd = #{rawMaterialCd}</if>
+            <if test='customerMatCd != null and !customerMatCd.equals("")'>and isnull(b.customer_mat_cd, '') = concat('%', #{customerMatCd}, '%')</if>
+        </where>
+    </select>
+
+    <!-- 품목 저장 -->
+    <insert id="mergeItem" parameterType="item" >
+        MERGE /* ItemMapper.mergeItem */
+        INTO MT_ITEM a
+        USING (
+            SELECT
+                #{itemNo} AS item_no,
+                #{itemNm} AS item_no,
+                #{materialCd} AS material_cd,
+                #{materialNm} AS material_nm,
+                GETDATE() AS reg_dt,
+                #{regUid} AS reg_uid
+            ) b ON (a.item_no = b.item_no)
+        WHEN MATCHED THEN
+            UPDATE SET
+                item_nm = b.item_nm,
+                material_cd = b.material_cd,
+                material_nm = b.material_nm,
+                mod_uid = b.reg_uid,
+                mod_dt = b.reg_dt
+        WHEN NOT MATCHED THEN
+            INSERT (
+                item_no, item_nm, material_cd, material_nm, reg_dt, reg_uid
+            ) VALUES (
+                b.item_no, b.item_nm, b.material_cd, b.material_nm, b.reg_dt, b.reg_uid
+            );
+    </insert>
+
+    <insert id="mergeItem2" parameterType="item" >
+        MERGE /* ItemMapper.mergeItem */
+        INTO MT_ITEM a
+        USING (
+            SELECT
+                #{itemNo} AS item_no,
+                #{itemNm} AS item_nm,
+                #{materialCd} AS material_cd,
+                #{materialNm} AS material_nm,
+                GETDATE() AS reg_dt,
+                #{regUid} AS reg_uid
+        ) b ON (a.item_no = b.item_no)
+        WHEN MATCHED THEN
+        UPDATE SET
+            item_nm = b.item_nm,
+            mod_uid = b.reg_uid,
+            mod_dt = b.reg_dt
+        WHEN NOT MATCHED THEN
+        INSERT (
+            item_no, item_nm, reg_dt, reg_uid
+        ) VALUES (
+                b.item_no, b.item_nm, b.reg_dt, b.reg_uid
+        );
+    </insert>
+
+    <!-- 품번 마스터 삭제 -->
+    <delete id="deleteItem" parameterType="item">
+        delete /* ItemMapper.deleteItem */
+          from MT_ITEM
+         where item_no = #{itemNo}
+    </delete>
+
+</mapper>

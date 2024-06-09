@@ -1,0 +1,48 @@
+
+**** Log file opened at 2024-02-28 09:38:55 KST (GMT+09:00 Korean Standard Time) Rel. 3.1.8 (2023-07-11) [753.1216]
+Error:     >Wed Feb 28 09:38:55,007<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.65 SYSNR=20 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.65:3320' not reached
+TIME        Wed Feb 28 09:38:55 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      /bas/753_REL/src/base/ni/nibuf.cpp
+LINE        4593
+DETAIL      NiBufIConnect: connection pending after 60000ms
+SYSTEM CALL connect
+ERRNO       36
+ERRNO TEXT  Operation now in progress
+COUNTER     2
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+
+**** Log file opened at 2024-03-11 09:19:05 KST (GMT+09:00 Korean Standard Time) Rel. 3.1.8 (2023-07-11) [753.1216]
+Error:     >Mon Mar 11 09:19:05,903<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.65 SYSNR=20 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.65:3320' not reached
+TIME        Mon Mar 11 09:19:05 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      /bas/753_REL/src/base/ni/nibuf.cpp
+LINE        4593
+DETAIL      NiBufIConnect: connection pending after 60000ms
+SYSTEM CALL connect
+ERRNO       36
+ERRNO TEXT  Operation now in progress
+COUNTER     2
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+

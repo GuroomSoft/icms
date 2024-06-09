@@ -1,0 +1,102 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.marketprice.dao.MarketPriceDAO">
+    <!-- 고객사 사급단가 병합 -->
+    <insert id="mergeNonferrousPrice" parameterType="nonferrousPrice">
+        MERGE /* MarketPriceMapper.mergeNonferrousPrice */
+            INTO HT_MARKET_PRICE_NONFERROUS a
+        USING (
+            SELECT
+                #{mnDate} AS mn_date,
+                #{cuPrc} AS cu_prc,
+                #{alPrc} AS al_prc,
+                #{znPrc} AS zn_prc,
+                #{pbPrc} AS pb_prc,
+                #{niPrc} AS ni_prc,
+                #{snPrc} AS sn_prc,
+                GETDATE() AS reg_dt,
+                1 AS reg_uid
+            ) b ON (a.mn_date = b.mn_date)
+        WHEN MATCHED THEN
+        UPDATE SET
+            cu_prc = b.cu_prc,
+            al_prc = b.al_prc,
+            zn_prc = b.zn_prc,
+            pb_prc = b.pb_prc,
+            ni_prc = b.ni_prc,
+            sn_prc = b.sn_prc
+        WHEN NOT MATCHED THEN
+        INSERT (
+            mn_date, cu_prc, al_prc, zn_prc, pb_prc, ni_prc, sn_prc, reg_dt, reg_uid
+        ) VALUES (
+            b.mn_date, b.cu_prc, b.al_prc, b.zn_prc, b.pb_prc, b.ni_prc, b.sn_prc, b.reg_dt, b.reg_uid
+        );
+    </insert>
+    
+    <select id="selectNonferrousMetal" resultType="nonferrousPrice">
+        select TOP 30 *
+        from HT_MARKET_PRICE_NONFERROUS;
+    </select>
+
+    <select id="getNonferrouseMetalData" resultType="nonferrousPrice">
+        SELECT /* MarketPriceMapper.getNonferrouseMetalData */
+            mn_date as mnDate, cu_prc as cuPrc, al_prc as alPrc, zn_prc as znPrc, pb_prc as pbPrc,
+            ni_prc as niPrc, sn_prc as snPrc
+        FROM HT_MARKET_PRICE_NONFERROUS
+        ORDER BY mn_date DESC;
+    </select>
+
+    <!-- 철강재 시세 등록 -->
+    <insert id="insertMarketPriceFerrous" parameterType="java.util.List">
+        insert /* MarketPriceMapper.insertMarketPriceFerrous */
+        into HT_MARKET_PRICE_FERROUS
+        (
+            mn_date, item, unit, market, futures, price, prev_week_avg, prev_month_avg,
+            prev_date_amt, prev_date_rate, prev_week_amt, prev_week_rate,
+            prev_month_amt, prev_month_rate, reg_dt
+        ) values
+        <foreach collection="list" item="item" separator=" , ">
+        (
+            #{item.mnDate}, #{item.item}, #{item.unit}, #{item.market}, #{item.futures}, #{item.price},
+            #{item.prevWeekAvg}, #{item.prevMonthAvg},
+            #{item.prevDateAmt}, #{item.prevDateRate},
+            #{item.prevWeekAmt}, #{item.prevWeekRate},
+            #{item.prevMonthAmt}, #{item.prevMonthRate}, GETDATE()
+        )
+        </foreach>
+    </insert>
+
+    <delete id="deleteMarketPriceFerrous" parameterType="String">
+        delete /* MarketPriceMapper.deleteMarketPriceFerrous */
+        from HT_MARKET_PRICE_FERROUS
+        where mn_date = #{mnDate}
+    </delete>
+
+    <select id="selectMarketPriceFerrous" resultType="ferrousPrice" parameterType="ferrousPrice">
+        select /* MarketPriceMapper.deleteMarketPriceFerrous */
+            *
+        from HT_MARKET_PRICE_FERROUS with(nolock)
+        where mn_date = #{mnDate}
+    </select>
+
+    <select id="getFerrousLastDate" resultType="String">
+        select isnull(max(mn_date), convert(nvarchar(8), getdate(), 112))
+          from HT_MARKET_PRICE_FERROUS with(nolock)
+    </select>
+
+    <select id="getFerrousLastDateList" resultType="String">
+        SELECT /* MarketPriceMapper.getFerrousLastDateList */
+             DISTINCT TOP 30 isnull(mn_date, convert(nvarchar(8), getdate(), 112))
+         FROM HT_MARKET_PRICE_FERROUS with(nolock)
+        order by isnull(mn_date, convert(nvarchar(8), getdate(), 112));
+    </select>
+
+    <select id="getFerrousePriceList" resultType="java.math.BigDecimal" parameterType="String">
+        SELECT TOP 30 cast(price AS NUMERIC(20, 3))
+        FROM HT_MARKET_PRICE_FERROUS WITH(NOLOCK)
+        WHERE item = #{item}
+        ORDER BY mn_date;
+    </select>
+
+</mapper>

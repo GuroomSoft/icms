@@ -1,0 +1,51 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.common.dao.AppConfigDAO">
+
+    <!-- 시스템 환경 구성정보 조회 -->
+    <select id="selectConfig" parameterType="appConfig" resultType="appConfig">
+        SELECT /* UsersMapper.selectConfig */
+            env_key AS envKey, env_value AS envValue, category AS category, env_remark AS envRemark
+        FROM ST_CONFIG
+        <where>
+            <if test='envKey != null and !envKey.equals("")'>
+                AND env_key LIKE CONCAT('%', #{envKey}, '%')
+            </if>
+            <if test='envValue != null and !envValue.equals("")'>
+                AND env_value LIKE CONCAT('%', #{envValue}, '%')
+            </if>
+            <if test='category != null and category.equals("")'>
+                AND category = #{category}
+            </if>
+        </where>
+    </select>
+
+    <!-- 설정값 조회-->
+    <select id="selectValueByKey" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT /* UsersMapper.selectValueByKey */
+            env_value
+        FROM ST_CONFIG
+        WHERE env_key = #{envKey}
+    </select>
+
+    <!--    설정값 등록 및 수정 -->
+    <insert id="saveConfig" parameterType="appConfig">
+        MERGE /* AppConfigMapper.saveConfig */
+            INTO ST_CONFIG a
+        USING (
+            SELECT
+                LOWER(#{envKey}) AS env_key,
+                #{envValue} AS env_value,
+                #{category} AS category,
+                #{envRemark} AS env_remark
+        ) b
+        ON (a.env_key = b.env_key)
+        WHEN MATCHED THEN
+        UPDATE SET env_value = b.env_value, category = b.category, env_remark = b.env_remark
+        WHEN NOT MATCHED THEN
+        INSERT (env_key, env_value, category, env_remark, reg_dt, reg_uid)
+            VALUES (b.env_key, b.env_value, b.category, b.env_remark, GETDATE(), #{regUid});
+    </insert>
+
+</mapper>

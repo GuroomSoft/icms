@@ -1,0 +1,43 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.econtract.dao.EformMemberDAO">
+
+    <!-- 이폼사인 멤버등록 등록 -->
+    <insert id="insertEformMember" parameterType="eformMember">
+        INSERT /* EformsignMapper.insertEformMember */
+        INTO MT_EFORM_MEMBER(
+            ef_id, account_id, ef_name, is_refused, is_invited, is_withdrawal, is_expired, is_deleted, is_enabled, reg_dt
+        ) VALUES (
+            #{efId}, #{accountId}, #{efName}, #{isRefused}, #{isInvited}, #{isWithdrawal},
+            #{isExpired}, #{isDeleted}, #{isEnabled}, getdate()
+        )
+    </insert>
+
+    <!-- 멤버 삭제 -->
+    <delete id="deleteEformMember" parameterType="String">
+        DELETE /* EformsignMapper.deleteEformMember */
+          FROM MT_EFORM_MEMBER
+        <if test='efId != null and !efId.equals("")'>
+            WHERE ef_id = #{efId}
+        </if>
+    </delete>
+
+    <!-- 멤버 조회 -->
+    <select id="selectEformMember" parameterType="String" resultType="eformMember">
+        SELECT /* EformsignMapper.selectEformMember */
+            TOP 1 *
+          FROM MT_EFORM_MEMBER
+         WHERE ef_id = #{email}
+            OR account_id = #{email}
+    </select>
+
+    <!-- 멤버 목록 -->
+    <select id="selectEformMemberList" resultType="eformMember">
+        SELECT /* EformsignMapper.selectEformMemberList */
+            *
+        FROM MT_EFORM_MEMBER
+    </select>
+
+
+</mapper>

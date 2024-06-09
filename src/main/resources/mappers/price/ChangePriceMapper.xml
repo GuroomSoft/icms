@@ -1,0 +1,290 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.price.dao.ChangePriceDAO">
+    <!-- _PRICE_SEQ 을 사용해서 등록 -->
+    <select id="selectTargetBp" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT /* ChangePriceMapper.selectTargetBp */
+            a.doc_no as docNo, a.announced_date as announcedDate, a.plant_cd as plantCd, a.bp_cd as bpCd, b.bp_nm AS bpNm,
+            case when isnull(b.contact_email, '') != '' then b.contact_email
+                 when isnull(c.email, '') != '' then c.email
+                 when isnull(b.bp_email, '') != '' then b.bp_email
+                 else '' end as email,
+            case when isnull(b.contact_mobile, '') != '' then b.contact_mobile
+                 when isnull(c.mobile, '') != '' then c.mobile
+                 when isnull(b.bp_tel_no, '') != '' then b.bp_tel_no
+                 else '' end as mobile,
+            a.doc_status as docStatus,
+            a.eform_doc_id as eformDocId,
+            dbo.FN_GET_CODE_NAME('C09', a.doc_status) as docStatusNm
+        FROM BT_PRICE_CHANGE a
+             JOIN MT_BIZ_PARTNER b on a.bp_cd = b.bp_cd
+             LEFT OUTER JOIN (
+                select bp_cd, email, mobile
+                  from ST_USERS
+                 where account_type = 'E'
+            ) c ON a.bp_cd = c.bp_cd
+        WHERE a.plant_cd = #{plantCd}
+          AND a.announced_date = #{announcedDate}
+          AND a.doc_status != 'C'
+        ORDER BY a.bp_cd
+    </select>
+
+    <!-- 가격변경 합의서 문서 조회 -->
+    <select id="getPriceChangeDoc" parameterType="java.util.Map" resultType="priceChange">
+        SELECT /* ChangePriceMapper.getPriceChangeDoc */
+            TOP 1 doc_no, plant_cd, bp_cd, announced_date, agreement_date, org_cd, team_cd, writer_id, doc_remark,
+            doc_status, confirm_dt, approval_status, eform_doc_id, ref_doc_no
+          FROM BT_PRICE_CHANGE
+         WHERE plant_cd = #{plantCd}
+           AND announced_date = #{announcedDate}
+           AND bp_cd = #{bpCd}
+    </select>
+
+    <!-- 가격변경이력 -->
+    <select id="selectChangedPrice" resultType="changePrice" parameterType="com.guroomsoft.icms.biz.price.dto.DetailReq">
+        select /* ChangePriceMapper.selectChangedPrice */
+            a.doc_no, a.announced_date, a.plant_cd, a.bp_cd, a.doc_order, a.car_model, a.pcs_item_no, a.base_date,
+            format(a.cur_item_price, '0.00##') as curItemPrice, a.part_type, a.sub_item_bp_cd, a.sub_item_no,
+            a.raw_material_cd, a.apply_date, a.material_cd, a.material_nm, a.us, a.steel_grade, a.m_spec, a.m_type,
+            format(a.thick_thick, '0.0##') as thickThick ,
+            format(a.width_outer, '0.###') as widthOuter,
+            format(a.height_in_len, '0.###') as heightInLen,
+            format(a.bl_width, '0.###') as blWidth,
+            format(a.bl_length, '0.###') as blLength,
+            format(a.bl_cavity, '0.###') as blCavity ,
+            format(round(a.net_weight, 3), '0.000') as net_weight,
+            format(a.specific_gravity, '0.##') as specificGravity,
+            format(a.slitt_loss_rate, '0.##') as slittLossRate,
+            format(a.loss_rate, '0.##') as lossRate,
+            format(round(a.input_weight,3), '0.###') as inputWeight,
+            format(round(a.bf_consigned_price, 2), '#,##0.##') as bfConsignedPrice,
+            format(round(a.af_consigned_price, 2), '#,##0.##') as afConsignedPrice,
+            format(round(a.diff_consigned_price, 2), '#,##0.##') as diffConsignedPrice,
+            format(round(a.bf_cnsgn_mat_price, 2), '#,##0.##') as bfCnsgnMatPrice,
+            format(round(a.af_cnsgn_mat_price, 2), '#,##0.##') as afCnsgnMatPrice,
+            format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice,
+            format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice,
+            format(round(a.af_scrap_unit_price, 2), '#,##0.##') as afScrapUnitPrice,
+            format(round(a.diff_scrap_unit_price, 2), '#,##0.##') as diffScrapUnitPrice,
+            format(round(a.scrap_weight, 3), '0.000') as scrapWeight,
+            format(a.scrap_recovery_rate, '##') as scrapRecoveryRate,
+            format(round(a.bf_scrap_price, 2), '#,##0.00') as bfScrapPrice,
+            format(round(a.af_scrap_price, 2), '#,##0.00') as afScrapPrice,
+            format(round(a.diff_scrap_price, 2), '#,##0.00') as diffScrapPrice,
+            format(round(a.bf_part_mat_cost, 2), '#,##0.00') as bfPartMatCost,
+            format(round(a.af_part_mat_cost, 2), '#,##0.00') as afPartMatCost,
+            format(round(a.diff_part_mat_cost, 2), '#,##0.00') as diffPartMatCost,
+            format(a.mat_admin_rate, '0.0') as matAdminRate,
+            format(a.os_mat_admin_rate, '0.0') as osMatAdminRate ,
+            format(round(a.changed_amount, 2), '#,##0.00') as changedAmount,
+            a.changed_status, a.sub_item_count, a.completed_cnt, a.incompleted_cnt, a.error_cnt,
+            format(round(a.total_changed_amt, 2), '#,##0.00') as totalChangedAmt,
+            format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt,
+            p.plant_nm, m.bp_nm AS bp_nm, b.item_nm AS pcs_item_nm,
+            dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,
+            sm.bp_nm AS sub_item_bp_nm, sb.item_nm,
+            dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) AS raw_material_nm
+          from HT_CHANGED_PRICE a WITH (NOLOCK)
+               join MT_PLANT p WITH (NOLOCK) ON a.plant_cd = p.plant_cd
+               left outer join MT_BIZ_PARTNER m WITH (NOLOCK) ON a.bp_cd = m.bp_cd
+               left outer join MT_BIZ_PARTNER sm WITH (NOLOCK) ON a.sub_item_bp_cd = sm.bp_cd
+               left outer join MT_ITEM b WITH (NOLOCK) ON a.pcs_item_no = b.item_no
+               left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no
+        where a.doc_no = #{docNo}
+            AND a.plant_cd = #{plantCd}
+        <if test="bpList != null">
+            AND a.bp_cd in
+            <foreach collection="bpList" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test='partType != null and !partType.equals("")'>AND a.part_type = #{partType}</if>
+        <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>AND a.raw_material_cd = #{rawMaterialCd}</if>
+        <if test='carModel != null and !carModel.equals("")'>AND a.car_model = #{carModel}</if>
+        <if test='pcsItemNo != null and !pcsItemNo.equals("")' >AND a.pcs_item_no like concat('%', #{pcsItemNo}, '%')</if>
+        <if test='subItemNo != null and !subItemNo.equals("")'>AND a.sub_item_no like concat('%', #{subItemNo}, '%')</if>
+        <if test='materialCd != null and !materialCd.equals("")'>AND a.material_cd like concat('%', #{materialCd}, '%')</if>
+
+        order by a.doc_no, a.apply_date, a.plant_cd, a.car_model, a.bp_cd, a.pcs_item_no, a.part_type
+    </select>
+
+    <!-- 매입품번 가격변경 조회 -->
+    <select id="selectChangePricePurchaseItem" parameterType="com.guroomsoft.icms.biz.price.dto.PurchaseItemReq"  resultType="java.util.Map">
+        SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
+            w.plant_cd as plantCd, w.car_model as carModel, w.bp_cd as bpCd, w.bp_nm as bpNm
+           , w.item_no as itemNo, w.item_nm AS itemNm, w.cur_price AS curPrice
+           , w.af_price AS afPrice, w.diff_amount AS diffAmount, w.apply_date as applyDate
+           , w.sub_item_cnt as subItemCnt, w.completed_cnt as completedCnt, w.incompleted_cnt as incompletedCnt
+           , w.error_cnt as errorCnt
+        FROM (
+            SELECT
+                a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
+                format(round(b.cur_price, 0), '#,###') as cur_price,
+                format(round(b.af_price, 0), '#,###') as af_price,
+                format(round(b.diff_amount, 0), '#,###') as diff_amount,
+                b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
+                sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
+            FROM BT_PRICE_CHANGE a WITH (NOLOCK)
+                JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
+                LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
+                LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
+            WHERE a.announced_date = #{announcedDate}
+                AND a.plant_cd = #{plantCd}
+            <if test='applyDate != null and !applyDate.equals("")'>AND b.apply_date = #{applyDate}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>AND a.bp_cd = #{bpCd}</if>
+            <if test="bpList != null">
+                AND a.bp_cd in
+                <foreach collection="bpList" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test='itemNo != null and !itemNo.equals("")'>AND b.item_no = #{itemNo}</if>
+            ) w
+         WHERE w.sum_diff != 0
+         ORDER BY w.bp_cd, w.apply_date
+    </select>
+
+    <!-- 합의서 요약정보 -->
+    <select id="selectAgreementDescList" parameterType="com.guroomsoft.icms.biz.price.dto.PurchaseItemReq" resultType="java.util.Map">
+        WITH src AS (
+            select distinct a.apply_date, dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) as raw_material_nm
+            from BT_PRICE_CHANGE m
+                     join BT_PRICE_CHANGE_DTL a on m.doc_no = a.doc_no
+            where m.plant_cd = #{plantCd}
+              and m.announced_date = #{announcedDate}
+              and a.bp_cd = #{bpCd}
+              and isnull(a.raw_material_cd, '') > ''
+        )
+        SELECT s.apply_date AS applyDate
+             , STUFF((SELECT ',' + raw_material_nm
+                      FROM src
+                      WHERE apply_date = s.apply_date
+                          FOR XML PATH('')), 1, 1, '') AS rawMaterialNm
+        FROM src s
+        group by s.apply_date
+        order by s.apply_date
+    </select>
+
+    <!-- 매입품번 가격변경 조회 -->
+    <select id="selectPriceChangeItem" parameterType="String" resultType="java.util.Map">
+        SELECT /* ChangePriceMapper.selectPriceChangeItem */
+            w.plant_cd as plantCd, w.car_model as carModel, w.bp_cd as bpCd, w.bp_nm as bpNm
+             , w.item_no as itemNo, w.item_nm AS itemNm, w.cur_price AS curPrice
+             , w.af_price AS afPrice, w.diff_amount AS diffAmount, w.apply_date as applyDate
+             , w.sub_item_cnt as subItemCnt, w.completed_cnt as completedCnt, w.incompleted_cnt as incompletedCnt
+             , w.error_cnt as errorCnt
+        FROM (
+                 SELECT
+                     a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
+                     format(round(b.cur_price, 0), '#,###') as cur_price,
+                     format(round(b.af_price, 0), '#,###') as af_price,
+                     format(round(b.diff_amount, 0), '#,###') as diff_amount,
+                     b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
+                     sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
+                 FROM BT_PRICE_CHANGE a WITH (NOLOCK)
+                JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
+                     LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
+                     LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
+                 WHERE a.doc_no = #{docNo}
+             ) w
+        WHERE w.sum_diff != 0
+        ORDER BY w.bp_cd, w.apply_date
+    </select>
+
+    <!-- 합의서 상세 요약본 조회 -->
+    <select id="selectChangePriceSummary" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT /* ChangePriceMapper.selectChangePriceSummary */
+            w.plant_cd AS plantCd, w.car_model AS carModel, w.bp_cd AS bpCd, w.bp_nm AS bpNm
+               , w.item_no AS itemNo, w.item_nm AS itemNm, w.cur_price AS curPrice ,
+        <foreach collection="list" item="item" separator=" , ">
+            max(${item.colName}) as ${item.colName}
+        </foreach>
+          FROM (
+            SELECT a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no
+                , isnull(i.item_nm, '') as item_nm
+                , format(round(b.cur_price, 0), '#,###') as cur_price,
+            <foreach collection="list" item="item" separator=" , ">
+                case when b.apply_date = #{item.applyDate} then format(round(b.af_price, 0), '#,###') else '' end as ${item.colName}
+            </foreach>
+              FROM BT_PRICE_CHANGE a
+                JOIN BT_PRICE_CHANGE_ITEM b ON a.doc_no = b.doc_no
+                LEFT OUTER JOIN MT_ITEM i ON b.item_no = i.item_no
+                LEFT OUTER JOIN MT_BIZ_PARTNER p on a.bp_cd = p.bp_cd
+              WHERE a.doc_no = #{docNo}
+            ) w
+        GROUP BY w.plant_cd, w.car_model, w.bp_cd, w.bp_nm, w.item_no, w.item_nm, w.cur_price
+        ORDER BY w.item_no
+    </select>
+
+    <!-- 적용일 리스트 -->
+    <select id="getApplyDateList" parameterType="String" resultType="java.util.Map">
+        SELECT /* ChangePriceMapper.getApplyDateList */
+            w.applyDate, w.colTitle,  concat('mon', ROW_NUMBER() OVER(ORDER BY w.applyDate ASC)) as colName
+        FROM(
+            SELECT /* ChangePriceMapper.getApplyDateList */
+                distinct apply_date AS applyDate
+                 , CONCAT(LEFT(SUBSTRING(apply_date, 3, 4), 2), '년', RIGHT(SUBSTRING(apply_date, 3, 4), 2), '월') AS colTitle
+            FROM BT_PRICE_CHANGE_ITEM
+            WHERE doc_no = #{docNo}
+        ) w
+    </select>
+
+    <!-- 협의서 제목 리스트 -->
+    <select id="getAgreementTitleList" parameterType="String" resultType="String">
+        SELECT /* ChangePriceMapper.getAgreementTitleList */
+            distinct CONCAT(LEFT(SUBSTRING(apply_date, 3, 4), 2), '년', RIGHT(SUBSTRING(apply_date, 3, 4), 2), '월')
+          FROM BT_PRICE_CHANGE_ITEM
+         WHERE doc_no = #{docNo}
+         ORDER BY apply_date
+    </select>
+
+    <!-- 문서 등록 -->
+    <insert id="calculateChangePrice" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            CALL SP_APPLY_PRICE_ALL(
+                #{plantCd,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{announcedDate,  mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{reqUserUid,     mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{errCode,        mode=OUT, jdbcType=NUMERIC, javaType=Integer},
+                #{errMsg,         mode=OUT, jdbcType=VARCHAR, javaType=String})
+            }
+    </insert>
+
+    <!-- 원소재 단가 문서 확정 시 모든 플랜트의 가격 변경처리  -->
+    <insert id="createPriceChangeAll" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            call SP_AUTO_CREATE_PRICE_CHANGE(
+                #{pDocNo,           mode=IN, jdbcType=NVARCHAR, javaType=String}
+              , #{pReqUserUid,      mode=IN, jdbcType=NUMERIC, javaType=Long}
+              , #{pErrCode,         mode=OUT, jdbcType=NUMERIC, javaType=Integer}
+              , #{pErrMsg,          mode=OUT, jdbcType=VARCHAR, javaType=String})
+        }
+    </insert>
+
+    <select id="selectChangePriceDocNoList" parameterType="java.util.Map" resultType="String">
+        select /* ChangePriceMapper.selectChangePriceDocList */
+            a.doc_no as docNo
+         from BT_PRICE_CHANGE a WITH (NOLOCK)
+        where a.announced_date = #{announcedDate}
+          and a.plant_cd = #{plantCd}
+          AND a.bp_cd in
+            <foreach collection="bpList" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+    </select>
+
+    <!-- 가격변경 확정처리 -->
+    <update id="closePriceChange" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            CALL SP_CLOSE_PRICE_CHANGE_DOC(
+                #{pDocNo,         mode=IN,  jdbcType=VARCHAR, javaType=String}
+              , #{pReqUserUid,    mode=IN, jdbcType=NUMERIC, javaType=Long}
+              , #{pErrCode,         mode=OUT, jdbcType=NUMERIC, javaType=Integer}
+              , #{pErrMsg,          mode=OUT, jdbcType=VARCHAR, javaType=String})
+
+        }
+    </update>
+
+
+</mapper>

@@ -1,0 +1,318 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guroomsoft.icms.biz.templateDoc.dao.TemplateDocDAO">
+
+    <!-- 문서 목록 조회 -->
+    <select id="selectTemplateDoc" parameterType="java.util.Map" resultType="templateDoc">
+        SELECT /* TemplateMapper.selectTemplateDoc */
+            a.doc_no, a.doc_title, a.doc_filename,
+            CONVERT(NVARCHAR(19), a.write_dt, 120 ) AS write_dt, a.writer_uid, b.account_id AS writerId,
+            a.doc_status, dbo.FN_GET_CODE_NAME('C09', a.doc_status) AS docStatusNm,
+            CONVERT(NVARCHAR(19), a.confirm_dt, 120 ) AS confirmDt,
+            a.doc_remark, a.doc_content,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120) as reg_dt, a.reg_uid, c.account_id AS regAccountId,
+            CONVERT(NVARCHAR(19), a.mod_dt, 120) AS mod_dt, a.mod_uid, d.account_id AS modAccountId
+        FROM BT_TEMPLATE_DOC a WITH(NOLOCK)
+            left outer join ST_USERS b WITH(NOLOCK) ON a.writer_uid = b.user_uid
+            left outer join ST_USERS c WITH(NOLOCK) ON a.reg_uid = c.user_uid
+            left outer join ST_USERS d WITH(NOLOCK) ON a.mod_uid = d.user_uid
+        <where>
+            <if test='searchDoc != NULL and !searchDoc.equals("")'>AND concat(a.doc_no, isnull(a.doc_title, '')) LIKE CONCAT('%', #{searchDoc}, '%')</if>
+            <if test='docStatus != NULL and !docStatus.equals("")'>AND a.doc_status = #{docStatus}</if>
+            <if test='writerUid != NULL and writerUid gt 0'>AND a.writer_uid = #{writerUid}</if>
+            <if test='carModel != NULL and !carModel.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where plant_cd = #{plantCd}
+                )
+            </if>
+            <if test='carModel != NULL and !carModel.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where car_model LIKE CONCAT('%', #{carModel},'%')
+                )
+            </if>
+            <if test='bpCd != NULL and !bpCd.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where bp_cd = #{bp_cd}
+                )
+            </if>
+            <if test='searchItem != NULL and !searchItem.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where pcs_item_no LIKE CONCAT('%', #{searchItem}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="selectTemplateDocByKey" parameterType="java.lang.String" resultType="templateDoc">
+        SELECT /* TemplateMapper.selectTemplateDocByKey */
+            a.doc_no, a.doc_title, a.doc_filename, CONVERT(NVARCHAR(19), a.write_dt, 120 ) AS write_dt,
+            a.writer_uid, b.account_id AS writerId, a.doc_status,
+            CONVERT(NVARCHAR(19), a.confirm_dt, 120 ) AS writerDt, a.doc_remark,
+            a.doc_content, a.reg_dt, a.reg_uid, a.mod_dt, a.mod_uid
+        FROM BT_TEMPLATE_DOC a WITH(NOLOCK)
+            left outer join ST_USERS b WITH(NOLOCK) ON a.writer_uid = b.user_uid
+        WHERE a.doc_no = #{docNo}
+    </select>
+
+    <!-- 문서 등록 -->
+    <insert id="insertTemplateDoc" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            CALL sp_create_template_doc(
+                #{docTitle,      mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docFilename,    mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{writerUid,      mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{docPwd,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docRemark,      mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docContent,     mode=IN,  jdbcType=LONGVARCHAR, javaType=String},
+                #{docNo,          mode=OUT,  jdbcType=VARCHAR, javaType=String},
+                #{errCode,        mode=OUT, jdbcType=NUMERIC, javaType=Integer},
+                #{errMsg,         mode=OUT, jdbcType=VARCHAR, javaType=String})
+        }
+    </insert>
+
+    <!-- 문서 수정 -->
+    <update id="updateTemplateDoc" parameterType="java.util.Map" statementType="CALLABLE">
+        {
+            CALL sp_update_template_doc(
+                #{docNo,          mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docTitle,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docFilename,    mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docStatus,      mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docPwd,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{confirmDt,      mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docRemark,      mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docContent,     mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{modUid,         mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{errCode,        mode=OUT, jdbcType=NUMERIC, javaType=Integer},
+                #{errMsg,         mode=OUT, jdbcType=VARCHAR, javaType=String})
+        }
+    </update>
+
+    <!-- 문서 삭제 -->
+    <delete id="deleteTemplateDoc" parameterType="java.lang.String">
+        DELETE /* TemplateMapper.deleteTemplateDoc */
+        FROM BT_TEMPLATE_DOC
+        WHERE doc_no = #{docNo};
+    </delete>
+
+    <!-- 템플릿 문서 상세 조회 -->
+    <select id="selectTemplateDtl" resultType="templateDtl" parameterType="java.util.Map">
+        select /* TemplateMapper.selectTemplateDtl */
+            *
+          from BT_TEMPLATE_DTL a WITH(NOLOCK)
+         where a.doc_no = #{docNo}
+    </select>
+
+    <select id="selectTemplateDtlWithinDoc" resultType="templateDtl" parameterType="templateDtlReq">
+        select /* TemplateMapper.selectTemplateDtlWithinDoc */
+            a.td_seq, a.plant_cd, b.plant_nm, a.bp_cd, c.bp_nm, a.car_model,
+            a.pcs_item_no, a.pcs_item_nm, a.part_type, dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,
+            a.pcs_sub_item_bp, d.bp_nm AS pcs_sub_item_bp_nm,
+            a.sub_item_no, a.sub_item_nm, a.raw_material_cd,
+            dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) as raw_material_nm,
+            a.material_cd, a.material_nm, a.us, a.steel_grade,
+            a.m_spec, a.m_type, a.thick_thick, a.width_outer, a.height_in_len, a.bl_width, a.bl_length, a.bl_cavity, a.net_weight,
+            a.specific_gravity, a.slitt_loss_rate, a.to_loss_rate, a.input_weight,
+            a.scrap_weight, a.scrap_recovery_rate, a.mat_admin_rate, a.os_mat_admin_rate, a.writer_id,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120 ) AS reg_dt, a.reg_uid, e.account_id AS reg_account_id, e.account_name AS reg_account_nm,
+            a.doc_no
+        FROM BT_TEMPLATE_DTL a WITH (NOLOCK)
+            JOIN BT_TEMPLATE_DOC m WITH (NOLOCK) ON a.doc_no = m.doc_no
+            JOIN MT_PLANT b WITH (NOLOCK) ON a.plant_cd = b.plant_cd
+            JOIN MT_BIZ_PARTNER c WITH (NOLOCK) ON a.bp_cd = c.bp_cd
+            LEFT OUTER JOIN MT_BIZ_PARTNER d WITH (NOLOCK) ON a.pcs_sub_item_bp = d.bp_cd
+            LEFT OUTER JOIN ST_USERS e WITH (NOLOCK) ON a.reg_uid = e.user_uid
+        where a.doc_no = #{docNo}
+        order by a.td_seq
+        offset #{startOffset} rows
+            fetch next #{rowCountPerPage} rows only
+    </select>
+
+    <select id="getCountDtlWithinDoc" resultType="int" parameterType="templateDtlReq">
+        select /* TemplateMapper.getCountDtlWithinDoc */
+            COUNT(*)
+        FROM BT_TEMPLATE_DTL a WITH (NOLOCK)
+            JOIN BT_TEMPLATE_DOC m WITH (NOLOCK) ON a.doc_no = m.doc_no
+            JOIN MT_PLANT b WITH (NOLOCK) ON a.plant_cd = b.plant_cd
+            JOIN MT_BIZ_PARTNER c WITH (NOLOCK) ON a.bp_cd = c.bp_cd
+        where a.doc_no = #{docNo}
+    </select>
+
+
+    <!-- 템플릿 세부항목 조회 (단건 )-->
+    <select id="selectTemplateDtlByKey" resultType="templateDtl" parameterType="java.util.Map">
+        select /* TemplateMapper.selectTemplateDtlByKey */
+            *
+        from BT_TEMPLATE_DTL a WITH(NOLOCK)
+        where a.doc_no = #{docNo}
+          and a.td_seq = #{tdSeq}
+    </select>
+
+    <!-- 템플릿 세부항목 등록 -->
+    <insert id="insertTemplateDtl" parameterType="java.util.Map"  statementType="CALLABLE">
+        {
+            CALL sp_create_template_dtl(
+                #{docNo,            mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{plantCd,          mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{bpCd,             mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docOrder,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{carModel,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pcsItemNo,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pcsItemNm,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{partType,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pcsSubItemBp,     mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{subItemNo,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{subItemNm,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{rawMaterialCd,    mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{materialCd,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{materialNm,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{us,               mode=IN,  jdbcType=NUMERIC, javaType=Integer},
+                #{steelGrade,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{mSpec,            mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{mType,            mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{thickThick,       mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{widthOuter,       mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{heightInLen,      mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{blWidth,          mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{blLength,         mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{blCavity,         mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{netWeight,        mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{toLossRate,       mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{inputWeight,      mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{scrapWeight,      mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{scrapRecoveryRate, mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{writerId,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{regUid,           mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{tdSeq,            mode=OUT,  jdbcType=NUMERIC, javaType=Long},
+                #{errCode,          mode=OUT, jdbcType=NUMERIC, javaType=Integer},
+                #{errMsg,           mode=OUT, jdbcType=VARCHAR, javaType=String})
+        }
+    </insert>
+
+    <!-- 템플릿 세부항목 수정 -->
+    <update id="updateTemplateDtl" parameterType="java.util.Map"  statementType="CALLABLE">
+        {
+            CALL sp_update_template_dtl(
+                #{docNo,            mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{tdSeq,            mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{plantCd,          mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{bpCd,             mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{docOrder,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{carModel,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pcsItemNo,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pcsItemNm,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{partType,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{pcsSubItemBp,     mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{subItemNo,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{subItemNm,        mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{rawMaterialCd,    mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{materialCd,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{materialNm,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{us,               mode=IN,  jdbcType=NUMERIC, javaType=Integer},
+                #{steelGrade,       mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{mSpec,            mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{mType,            mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{thickThick,       mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{widthOuter,       mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{heightInLen,      mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{blWidth,          mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{blLength,         mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{blCavity,         mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{netWeight,        mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{toLossRate,       mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{inputWeight,      mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{scrapWeight,      mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{scrapRecoveryRate, mode=IN,  jdbcType=NUMERIC, javaType=BigDecimal},
+                #{writerId,         mode=IN,  jdbcType=VARCHAR, javaType=String},
+                #{regUid,           mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{errCode,          mode=OUT, jdbcType=NUMERIC, javaType=Integer},
+                #{errMsg,           mode=OUT, jdbcType=VARCHAR, javaType=String})
+            }
+    </update>
+
+    <!-- 템플릿 문서 상태 업데이트 -->
+    <update id="updateDocStatus" parameterType="templateDtl">
+        update /* TemplateMapper.updateDocStatus */
+            BT_TEMPLATE_DOC
+           set doc_status = #{docStatus} ,
+        <if test='docStatus.equals("Y")'>confirm_dt = GETDATE() ,</if>
+        <if test='docStatus.equals("N")'>confirm_dt = NULL ,</if>
+               mod_uid = #{modUid},
+               mod_dt = GETDATE()
+         where doc_no = #{docNo}
+    </update>
+
+    <!-- 템플릿 세부항목 삭제 -->
+    <delete id="deleteTemplateDtl" parameterType="java.util.Map">
+        delete /* TemplateMapper.deleteTemplateDtl */
+          from BT_TEMPLATE_DTL
+         where doc_no = #{docNo}
+        <if test="tdSeq != null">and td_seq = #{tdSeq}</if>
+    </delete>
+
+    <!-- 협력사 품목 조회 -->
+    <select id="selectBpItem" resultType="templateDtl" parameterType="templateDtlReq">
+        SELECT /* TemplateDocMapper.selectBpItem */
+            a.plant_cd, b.plant_nm, a.bp_cd, c.bp_nm, a.car_model,
+            a.pcs_item_no, g.item_nm AS pcs_item_nm, a.part_type, dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,
+            a.pcs_sub_item_bp, d.bp_nm AS pcs_sub_item_bp_nm,
+            a.sub_item_no, h.item_nm AS sub_item_nm,
+            a.raw_material_cd, dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) as raw_material_nm,
+            a.material_cd, a.material_nm, a.us, a.steel_grade,
+            a.m_spec, a.m_type, a.thick_thick, a.width_outer, a.height_in_len, a.bl_width, a.bl_length, a.bl_cavity,
+            ROUND(a.net_weight, 3) AS netWeight,
+            a.specific_gravity, a.slitt_loss_rate, a.to_loss_rate,
+            ROUND(a.input_weight, 2) AS inputWeight,
+            ROUND(a.scrap_weight, 4) AS scrapWeight, a.scrap_recovery_rate, a.mat_admin_rate, a.os_mat_admin_rate, a.writer_id,
+            CONVERT(NVARCHAR(19), a.reg_dt, 120 ) AS reg_dt, a.reg_uid, e.account_id AS reg_account_id, e.account_name AS reg_account_nm,
+            CONVERT(NVARCHAR(19), a.mod_dt, 120 ) AS mod_dt, a.mod_uid, f.account_id AS mod_account_id, f.account_name AS mod_account_nm,
+            a.doc_no
+        FROM BT_TEMPLATE_DTL a WITH (NOLOCK)
+            JOIN BT_TEMPLATE_DOC m WITH (NOLOCK) ON a.doc_no = m.doc_no AND ISNULL(m.doc_status, 'N') = 'Y'
+            JOIN MT_PLANT b WITH (NOLOCK) ON a.plant_cd = b.plant_cd
+            JOIN MT_BIZ_PARTNER c WITH (NOLOCK) ON a.bp_cd = c.bp_cd
+            LEFT OUTER JOIN MT_ITEM g WITH (NOLOCK) ON a.pcs_item_no = g.item_no
+            LEFT OUTER JOIN MT_ITEM h WITH (NOLOCK) ON a.sub_item_no = h.item_no
+            LEFT OUTER JOIN MT_BIZ_PARTNER d WITH (NOLOCK) ON a.pcs_sub_item_bp = d.bp_cd
+            LEFT OUTER JOIN ST_USERS e WITH (NOLOCK) ON a.reg_uid = e.user_uid
+            LEFT OUTER JOIN ST_USERS f WITH (NOLOCK) ON a.mod_uid = f.user_uid
+        <where>
+            <if test='plantCd != null and !plantCd.equals("")'>and a.plant_cd = #{plantCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>and a.bp_cd = #{bpCd}</if>
+            <if test='carModel != null and !carModel.equals("")'>and a.car_model = #{carModel}</if>
+            <if test='pcsItemNo != null and !pcsItemNo.equals("")'>and concat(a.pcs_item_no, isnull(g.item_nm, '')) like concat('%', #{pcsItemNo}, '%')</if>
+            <if test='partType != null and !partType.equals("")'>and a.part_type = #{partType}</if>
+            <if test='subItemNo != null and !subItemNo.equals("")'>and concat(a.sub_item_no, isnull(h.item_nm, '')) like concat('%', #{subItemNo}, '%')</if>
+            <if test='pcsSubItemBp != null and !pcsSubItemBp.equals("")'>and a.pcs_sub_item_bp = #{pcsSubItemBp}</if>
+            <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>and a.raw_material_cd = #{rawMaterialCd}</if>
+            <if test='materialCd != null and !materialCd.equals("")'>and concat(a.material_cd, a.material_nm) like concat('%', #{materialCd}, '%')</if>
+        </where>
+        order by a.td_seq
+        <if test="rowCountPerPage gt 0">
+            offset #{startOffset} rows
+            fetch next #{rowCountPerPage} rows only
+        </if>
+    </select>
+
+    <!-- 협력사 품목 조회 -->
+    <select id="getBpItemCount" resultType="int" parameterType="templateDtlReq">
+        SELECT /* TemplateDocMapper.getBpItemCount */
+            COUNT(*)
+        FROM BT_TEMPLATE_DTL a WITH (NOLOCK)
+            JOIN BT_TEMPLATE_DOC m WITH (NOLOCK) ON a.doc_no = m.doc_no AND ISNULL(m.doc_status, 'N') = 'Y'
+            JOIN MT_PLANT b WITH (NOLOCK) ON a.plant_cd = b.plant_cd
+            JOIN MT_BIZ_PARTNER c WITH (NOLOCK) ON a.bp_cd = c.bp_cd
+        <where>
+            <if test='plantCd != null and !plantCd.equals("")'>and a.plant_cd = #{plantCd}</if>
+            <if test='bpCd != null and !bpCd.equals("")'>and a.bp_cd = #{bpCd}</if>
+            <if test='carModel != null and !carModel.equals("")'>and a.car_model LIKE CONCAT('%', #{carModel}, '%')</if>
+            <if test='pcsItemNo != null and !pcsItemNo.equals("")'>and concat(a.pcs_item_no, a.pcs_item_nm) like concat('%', #{pcsItemNo}, '%')</if>
+            <if test='partType != null and !partType.equals("")'>and a.part_type = #{partType}</if>
+            <if test='subItemNo != null and !subItemNo.equals("")'>and concat(a.sub_item_no, a.sub_item_nm) like concat('%', #{subItemNo}, '%')</if>
+            <if test='pcsSubItemBp != null and !pcsSubItemBp.equals("")'>and a.pcs_sub_item_bp = #{pcsSubItemBp}</if>
+            <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>and a.raw_material_cd = #{rawMaterialCd}</if>
+            <if test='materialCd != null and !materialCd.equals("")'>and concat(a.material_cd, a.material_nm) like concat('%', #{materialCd}, '%')</if>
+        </where>
+    </select>
+</mapper>
