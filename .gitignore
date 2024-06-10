@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+/docs/oracle/db_ddl_ora.sql
+/docs/oracle/db_dml_ora.sql
+/docs/oracle/db_procedure_ora.sql

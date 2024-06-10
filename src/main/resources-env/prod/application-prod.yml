@@ -21,12 +21,12 @@ spring:
       max-file-size: 200MB
       max-request-size: 200MB
       resolve-lazily: false
-  data:
+  data:                             # 사용안함
     redis:
       host: 127.0.0.1
       port: 6379
       password: Imsi!0000
-  mail:
+  mail:                             # 사용안함
     host: smtp.gmail.com            # SMTP 서버 주소
     port: 587                       # SMTP 서버 포트
     username: uecho71@gmail.com     # SMTP 서버 로그인 ID (발신자)
