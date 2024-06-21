@@ -17,6 +17,7 @@ import java.util.Map;
 @Mapper
 public interface TemplateDocDAO {
     /* BT_TEMPLATE_DOC */
+    List<TemplateDoc> selectTemplateDocNotContent(Map<String, Object> cond) throws Exception;
     List<TemplateDoc> selectTemplateDoc(Map<String, Object> cond) throws Exception;
     TemplateDoc selectTemplateDocByKey(String docNo) throws Exception;
     int insertTemplateDoc(Map<String, Object> data) throws Exception;
