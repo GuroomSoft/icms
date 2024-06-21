@@ -54,7 +54,8 @@ public class TemplateDocService {
         List<TemplateDoc> dataset = null;
 
         try {
-            dataset = templateDocDAO.selectTemplateDoc(cond);
+            dataset = templateDocDAO.selectTemplateDocNotContent(cond);
+            //dataset = templateDocDAO.selectTemplateDoc(cond);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new CDatabaseException();

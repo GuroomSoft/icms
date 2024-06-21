@@ -44,6 +44,47 @@
         </where>
     </select>
 
+    <!-- 문서 목록 조회 -->
+    <select id="selectTemplateDocNotContent" parameterType="java.util.Map" resultType="templateDoc">
+        SELECT /* TemplateMapper.selectTemplateDocNotContent */
+        a.doc_no, a.doc_title, a.doc_filename,
+        CONVERT(NVARCHAR(19), a.write_dt, 120 ) AS write_dt, a.writer_uid, b.account_id AS writerId,
+        a.doc_status, dbo.FN_GET_CODE_NAME('C09', a.doc_status) AS docStatusNm,
+        CONVERT(NVARCHAR(19), a.confirm_dt, 120 ) AS confirmDt,
+        a.doc_remark,
+        CONVERT(NVARCHAR(19), a.reg_dt, 120) as reg_dt, a.reg_uid, c.account_id AS regAccountId,
+        CONVERT(NVARCHAR(19), a.mod_dt, 120) AS mod_dt, a.mod_uid, d.account_id AS modAccountId
+        FROM BT_TEMPLATE_DOC a WITH(NOLOCK)
+        left outer join ST_USERS b WITH(NOLOCK) ON a.writer_uid = b.user_uid
+        left outer join ST_USERS c WITH(NOLOCK) ON a.reg_uid = c.user_uid
+        left outer join ST_USERS d WITH(NOLOCK) ON a.mod_uid = d.user_uid
+        <where>
+            <if test='searchDoc != NULL and !searchDoc.equals("")'>AND concat(a.doc_no, isnull(a.doc_title, '')) LIKE CONCAT('%', #{searchDoc}, '%')</if>
+            <if test='docStatus != NULL and !docStatus.equals("")'>AND a.doc_status = #{docStatus}</if>
+            <if test='writerUid != NULL and writerUid gt 0'>AND a.writer_uid = #{writerUid}</if>
+            <if test='carModel != NULL and !carModel.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where plant_cd = #{plantCd}
+                )
+            </if>
+            <if test='carModel != NULL and !carModel.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where car_model LIKE CONCAT('%', #{carModel},'%')
+                )
+            </if>
+            <if test='bpCd != NULL and !bpCd.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where bp_cd = #{bp_cd}
+                )
+            </if>
+            <if test='searchItem != NULL and !searchItem.equals("")'>AND a.doc_no IN (
+                select distinct doc_no from BT_TEMPLATE_DTL WITH(NOLOCK)
+                where pcs_item_no LIKE CONCAT('%', #{searchItem}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
     <select id="selectTemplateDocByKey" parameterType="java.lang.String" resultType="templateDoc">
         SELECT /* TemplateMapper.selectTemplateDocByKey */
             a.doc_no, a.doc_title, a.doc_filename, CONVERT(NVARCHAR(19), a.write_dt, 120 ) AS write_dt,
