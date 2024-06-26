@@ -93,18 +93,20 @@
                 #{materialCd} AS material_cd,
                 #{materialNm} AS material_nm,
                 GETDATE() AS reg_dt,
-                #{regUid} AS reg_uid
+                #{regUid} AS reg_uid,
+                #{carModel} AS car_model
         ) b ON (a.item_no = b.item_no)
         WHEN MATCHED THEN
         UPDATE SET
             item_nm = b.item_nm,
             mod_uid = b.reg_uid,
-            mod_dt = b.reg_dt
+            mod_dt = b.reg_dt,
+            car_model = b.car_model
         WHEN NOT MATCHED THEN
         INSERT (
             item_no, item_nm, reg_dt, reg_uid
         ) VALUES (
-                b.item_no, b.item_nm, b.reg_dt, b.reg_uid
+                b.item_no, b.item_nm, b.reg_dt, b.reg_uid, b.car_model
         );
     </insert>
 
