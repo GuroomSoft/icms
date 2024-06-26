@@ -300,10 +300,22 @@ public class PartnerController {
     @Operation(summary = "담당 협력업체 멀티 삭제 처리", description = "담당 협력업체 멀티 삭제 처리")
     @RequestMapping(value = "/assigned/release/multiple", method = {RequestMethod.POST})
     public DataResult<Map<String, Object>> removeEmpMultiBp(
-            @Parameter(description = "사용자 UID", required = true) @RequestParam Long userUid,
-            @Parameter(description = "BP 코드", required = true) @RequestParam List<String> bpList)
+            /*@Parameter(description = "사용자 UID", required = true) @RequestParam Long userUid,
+            @Parameter(description = "BP 코드", required = true) @RequestBody List<String> bpList*/
+            @Parameter(description = "요청정보", required = true) @RequestBody Map<String, Object> param,
+            @Parameter(hidden = true) @RequestParam long reqUserUid
+    )
+
     {
         Map<String, Object> resultMap = new HashMap<>();
+
+        Long userUid = null;
+        List<String> bpList = new ArrayList<>();
+        if (param.containsKey("userUid"))
+            userUid = Long.valueOf(((Integer)param.get("userUid")).longValue());
+
+        if (param.containsKey("bpList"))
+            bpList = (List)param.get("bpList");
 
         try {
             int deleted = partnerService.removeEmpMultiBp(userUid, bpList);
