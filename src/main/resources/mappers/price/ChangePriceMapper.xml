@@ -286,5 +286,137 @@
         }
     </update>
 
+    <!-- 매입단가 업로드 조회 -->
+    <select id="findPurchaseForSap" parameterType="changePrice"  resultType="changePrice">
+        SELECT /* ChangePriceMapper.findPurchaseForSap */
+            w.plant_nm AS plantNm
+             ,(CASE WHEN (w.plant_nm = '경주' OR w.plant_nm = '아산' OR w.plant_nm = '광주' OR w.plant_nm = '영인' OR w.plant_nm = '물류센타') THEN '110'
+                    WHEN (w.plant_nm = '동탄') THEN '103'
+                    WHEN (w.plant_nm = '모화') THEN '180'
+                    WHEN (w.plant_nm = '디이시') THEN '190'
+            END) AS purchasingGroup
+             , w.plant_cd as plantCd
+             , w.bp_cd as bpCd
+             , w.bp_nm as bpNm
+             , w.item_no as pcsItemNo
+             , w.item_nm AS pcsItemNm
+             , w.pcs_unit AS pcsUnit
+             , w.currency_unit AS currencyUnit
+             , w.price_unit AS priceUnit
+             , w.price_status AS priceStatus
+--              , w.cur_price AS '종전가'
+             , w.af_price AS afPrice
+--              , w.diff_amount AS '차액'
+             , w.apply_date as applyDate
+--              , w.sub_item_cnt as 'SUB 품목'
+--              , w.completed_cnt as '처리 완료 건수'
+--              , w.incompleted_cnt as '미처리 완료 건수'
+--              , w.error_cnt as '에러 건수'
+        FROM (
+                 SELECT
+                     a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
+                     format(round(b.cur_price, 0), '#,###') as cur_price,
+                     format(round(b.af_price, 0), '#,###') as af_price,
+                     format(round(b.diff_amount, 0), '#,###') as diff_amount,
+                     b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
+                     sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
+                         , b.pcs_unit
+                         , b.currency_unit
+                         , c.price_unit
+                         , c.price_status
+                         , d.plant_nm
+                 FROM BT_PRICE_CHANGE a WITH (NOLOCK)
+                          JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
+                          LEFT OUTER JOIN HT_PURCHASE_PRICE c WITH (NOLOCK) ON b.item_no = c.mat_cd AND b.plant_cd = c.plant_cd
+                          LEFT OUTER JOIN MT_PLANT d WITH (NOLOCK) ON a.plant_cd = d.plant_cd
+                          LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
+                          LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
+                 WHERE 1 = 1
+<!--                <if test='plant_cd != null and !plant_cd.equals("")'>AND a.plant_cd = #{plant_cd}</if>-->
+             ) w
+        WHERE w.sum_diff != 0
+        ORDER BY w.bp_cd, w.apply_date
+    </select>
+
+    <!-- 사급 단가 업로드 조회 -->
+    <select id="findConsignedForSap" parameterType="changePrice"  resultType="changePrice">
+        select /* ChangePriceMapper.selectChangedPrice */
+        a.doc_no
+        , a.announced_date
+        , a.plant_cd
+        , a.bp_cd
+        , a.doc_order
+        , a.car_model
+        , a.pcs_item_no
+        , a.base_date
+        , format(a.cur_item_price, '0.00##') as curItemPrice
+        , a.part_type
+        , a.sub_item_bp_cd
+        , a.sub_item_no
+        , a.raw_material_cd
+        , a.apply_date
+        , a.material_cd
+        , a.material_nm
+        , a.us
+        , a.steel_grade
+        , a.m_spec
+        , a.m_type
+        , format(a.thick_thick, '0.0##') as thickThick
+        , format(a.width_outer, '0.###') as widthOuter
+        , format(a.height_in_len, '0.###') as heightInLen
+        , format(a.bl_width, '0.###') as blWidth
+        , format(a.bl_length, '0.###') as blLength
+        , format(a.bl_cavity, '0.###') as blCavity
+        , format(round(a.net_weight, 3), '0.000') as net_weight
+        , format(a.specific_gravity, '0.##') as specificGravity
+        , format(a.slitt_loss_rate, '0.##') as slittLossRate
+        , format(a.loss_rate, '0.##') as lossRate
+        , format(round(a.input_weight,3), '0.###') as inputWeight
+        , format(round(a.bf_consigned_price, 2), '#,##0.##') as bfConsignedPrice
+        , format(round(a.af_consigned_price, 2), '#,##0.##') as afConsignedPrice
+        , format(round(a.diff_consigned_price, 2), '#,##0.##') as diffConsignedPrice
+        , format(round(a.bf_cnsgn_mat_price, 2), '#,##0.##') as bfCnsgnMatPrice
+        , format(round(a.af_cnsgn_mat_price, 2), '#,##0.##') as afCnsgnMatPrice
+        , format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice
+        , format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice
+        , format(round(a.af_scrap_unit_price, 2), '#,##0.##') as afScrapUnitPrice
+        , format(round(a.diff_scrap_unit_price, 2), '#,##0.##') as diffScrapUnitPrice
+        , format(round(a.scrap_weight, 3), '0.000') as scrapWeight
+        , format(a.scrap_recovery_rate, '##') as scrapRecoveryRate
+        , format(round(a.bf_scrap_price, 2), '#,##0.00') as bfScrapPrice
+        , format(round(a.af_scrap_price, 2), '#,##0.00') as afScrapPrice
+        , format(round(a.diff_scrap_price, 2), '#,##0.00') as diffScrapPrice
+        , format(round(a.bf_part_mat_cost, 2), '#,##0.00') as bfPartMatCost
+        , format(round(a.af_part_mat_cost, 2), '#,##0.00') as afPartMatCost
+        , format(round(a.diff_part_mat_cost, 2), '#,##0.00') as diffPartMatCost
+        , format(a.mat_admin_rate, '0.0') as matAdminRate
+        , format(a.os_mat_admin_rate, '0.0') as osMatAdminRate
+        , format(round(a.changed_amount, 2), '#,##0.00') as changedAmount
+        , a.changed_status
+        , a.sub_item_count
+        , a.completed_cnt
+        , a.incompleted_cnt
+        , a.error_cnt
+        , format(round(a.total_changed_amt, 2), '#,##0.00') as totalChangedAmt
+        , format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt
+        , p.plant_nm
+        , m.bp_nm AS bp_nm
+        , b.item_nm AS pcs_item_nm
+        , dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm
+        , sm.bp_nm AS sub_item_bp_nm
+        , sb.item_nm
+        , dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) AS raw_material_nm
+        , c.cur_unit AS currencyUnit
+        , c.price_unit AS priceUnit
+        , c.price_status AS priceStatus
+        from HT_CHANGED_PRICE a WITH (NOLOCK)
+        join MT_PLANT p WITH (NOLOCK) ON a.plant_cd = p.plant_cd
+        left outer join MT_BIZ_PARTNER m WITH (NOLOCK) ON a.bp_cd = m.bp_cd
+        left outer join MT_BIZ_PARTNER sm WITH (NOLOCK) ON a.sub_item_bp_cd = sm.bp_cd
+        left outer join MT_ITEM b WITH (NOLOCK) ON a.pcs_item_no = b.item_no
+        left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no
+        LEFT OUTER JOIN HT_PURCHASE_PRICE c WITH(NOLOCK) ON a.pcs_item_no = c.mat_cd AND a.plant_cd = c.plant_cd
+        order by a.doc_no, a.apply_date, a.plant_cd, a.car_model, a.bp_cd, a.pcs_item_no, a.part_type
+    </select>
 
 </mapper>

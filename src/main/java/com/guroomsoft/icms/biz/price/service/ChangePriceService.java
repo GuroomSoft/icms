@@ -6,21 +6,24 @@ import com.guroomsoft.icms.biz.code.dao.PartnerDAO;
 import com.guroomsoft.icms.biz.code.dto.Partner;
 import com.guroomsoft.icms.biz.code.service.SupplierService;
 import com.guroomsoft.icms.biz.price.dao.ChangePriceDAO;
-import com.guroomsoft.icms.biz.price.dto.ChangePrice;
-import com.guroomsoft.icms.biz.price.dto.DetailReq;
-import com.guroomsoft.icms.biz.price.dto.PriceChange;
-import com.guroomsoft.icms.biz.price.dto.PurchaseItemReq;
+import com.guroomsoft.icms.biz.price.dto.*;
 import com.guroomsoft.icms.common.event.IcmsEventPublisher;
 import com.guroomsoft.icms.common.exception.CBizProcessFailException;
 import com.guroomsoft.icms.common.exception.CDatabaseException;
 import com.guroomsoft.icms.common.exception.CInvalidArgumentException;
+import com.guroomsoft.icms.common.service.ExcelService;
 import com.guroomsoft.icms.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @Slf4j
@@ -32,6 +35,7 @@ public class ChangePriceService {
     private final PartnerDAO partnerDAO;
 
     private final IcmsEventPublisher icmsEventPublisher;
+    private final ExcelService excelService;
 
     /**
      * 단가 변경 협력사 목록 조회
@@ -282,6 +286,208 @@ public class ChangePriceService {
         icmsEventPublisher.publishClosePriceChange(docs);
 
         return totalCount;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChangePrice> findPurchaseForSap(ChangePrice cond) throws Exception
+    {
+        try {
+            return changePriceDAO.findPurchaseForSap(cond);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CDatabaseException();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChangePrice> findConsignedForSap(ChangePrice cond) throws Exception
+    {
+        try {
+            return changePriceDAO.findConsignedForSap(cond);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CDatabaseException();
+        }
+    }
+
+    /**
+     * Export to Excel
+     * @param fileName
+     * @param reportTitle
+     * @param pageHeader
+     * @param columHeaders
+     * @param rows
+     * @return
+     */
+    public ResponseEntity<byte[]> exportToExcelForPurchaseSap(
+            String fileName,
+            String reportTitle,
+            Map<String, Object> pageHeader,
+            String[] columHeaders,
+            List<ChangePrice> rows)
+    {
+        HttpHeaders httpHeader = null;
+        try {
+            httpHeader = excelService.createHttpHeaders(fileName);
+        } catch (UnsupportedEncodingException e) {
+            return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+        }
+
+        if (rows == null || rows.isEmpty()) {
+            return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+        }
+
+        // Sheet 에 대한 정의
+        Map<String, Object> sheet = new HashMap<String, Object>();
+        sheet.put("sheetName", reportTitle);
+        sheet.put("reportTitle", reportTitle);
+        // Page Header 정의 - 조회조건
+        sheet.put("searchCondition", pageHeader);
+
+        // 컬럼 헤더 정의
+        List<String> colTitles = Arrays.asList(columHeaders);
+        sheet.put("colTitle", colTitles);
+
+        // 데이터 정의
+        List<List<Object>> rowData = new ArrayList<List<Object>>();
+        int rowNum = 1;
+        for (ChangePrice data : rows)
+        {
+            List<Object> row = new ArrayList<Object>();
+            // row.add(String.valueOf(rowNum++));
+            // 컬럼 순서에 해당하는 데이터를 채운다
+            row.add( data.getApplyDate() );
+            row.add( data.getPurchasingGroup() );
+            row.add( "품의번호" );
+            row.add( data.getBpCd() );
+            row.add( data.getBpNm() );
+            //row.add( data.getPlantCd() );
+            //row.add( data.getPlantNm() );
+            row.add( data.getPcsItemNo() );
+            row.add( data.getPcsUnit() );
+            row.add( data.getCurrencyUnit() );
+            row.add( data.getAfPrice() );
+            row.add( data.getPriceUnit() );
+            row.add( data.getPriceStatus() );
+
+            rowData.add(row);
+        }
+
+        sheet.put("rowData", rowData);
+
+        Map<String, Object> sheetMap = new HashMap<String, Object>();
+        sheetMap.put("sheet1", sheet);
+
+        try {
+            byte[] contents = excelService.exportToExcel2(fileName, sheetMap);
+            if (contents == null) {
+                return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<byte[]>(contents, httpHeader, HttpStatus.OK);
+            }
+        } catch (IOException e) {
+            log.error("IOException:::Export to Excel");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+    }
+
+    /**
+     * Export to Excel
+     * @param fileName
+     * @param reportTitle
+     * @param pageHeader
+     * @param columHeaders
+     * @param rows
+     * @return
+     */
+    public ResponseEntity<byte[]> exportToExcelForSap(
+            String fileName,
+            String reportTitle,
+            Map<String, Object> pageHeader,
+            String[] columHeaders,
+            List<ChangePrice> rows)
+    {
+        HttpHeaders httpHeader = null;
+        try {
+            httpHeader = excelService.createHttpHeaders(fileName);
+        } catch (UnsupportedEncodingException e) {
+            return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+        }
+
+        if (rows == null || rows.isEmpty()) {
+            return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+        }
+
+        // Sheet 에 대한 정의
+        Map<String, Object> sheet = new HashMap<String, Object>();
+        sheet.put("sheetName", reportTitle);
+        sheet.put("reportTitle", reportTitle);
+        // Page Header 정의 - 조회조건
+        sheet.put("searchCondition", pageHeader);
+
+        // 컬럼 헤더 정의
+        List<String> colTitles = Arrays.asList(columHeaders);
+        sheet.put("colTitle", colTitles);
+
+        // 데이터 정의
+        List<List<Object>> rowData = new ArrayList<List<Object>>();
+        int rowNum = 1;
+        for (ChangePrice data : rows)
+        {
+            List<Object> row = new ArrayList<Object>();
+            row.add(String.valueOf(rowNum++));
+            // 컬럼 순서에 해당하는 데이터를 채운다
+            row.add( "영업조직" );
+            row.add( "영업조직명" );
+            row.add( "유통채널" );
+            row.add( data.getBpCd() );
+            row.add( data.getBpNm() );
+            row.add( data.getCarModel() );
+            row.add( "차종명" );
+            row.add( data.getPcsItemNo() );
+            row.add( data.getPcsItemNm() );
+            row.add( data.getCurrencyUnit() );
+
+            row.add( data.getBfConsignedPrice() );
+            row.add( data.getAfConsignedPrice() );
+            row.add( data.getDiffConsignedPrice() );
+
+            row.add( data.getPriceUnit() );
+            // 단가 유형에 따른 정단가 가단가 구분 priceStatus
+            row.add( data.getPriceStatus() );
+
+            row.add( "적용관세" );
+            row.add( data.getApplyDate() );
+            row.add( data.getPlantCd() );
+            //row.add( data.getPlantNm() );
+            row.add( "소급유형(1)" );
+            row.add( "시작일(1)" );
+            row.add( "종료일(1)" );
+            row.add( "소급단가(1)" );
+
+            rowData.add(row);
+        }
+
+        sheet.put("rowData", rowData);
+
+        Map<String, Object> sheetMap = new HashMap<String, Object>();
+        sheetMap.put("sheet1", sheet);
+
+        try {
+            byte[] contents = excelService.exportToExcel2(fileName, sheetMap);
+            if (contents == null) {
+                return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<byte[]>(contents, httpHeader, HttpStatus.OK);
+            }
+        } catch (IOException e) {
+            log.error("IOException:::Export to Excel");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.guroomsoft.icms.biz.price.controller;
 
+import com.guroomsoft.icms.biz.code.service.PlantService;
 import com.guroomsoft.icms.biz.price.dto.ChangePrice;
 import com.guroomsoft.icms.biz.price.dto.DetailReq;
 import com.guroomsoft.icms.biz.price.dto.PurchaseItemReq;
@@ -7,11 +8,9 @@ import com.guroomsoft.icms.biz.price.service.ChangePriceService;
 import com.guroomsoft.icms.common.dto.CommonResult;
 import com.guroomsoft.icms.common.dto.DataResult;
 import com.guroomsoft.icms.common.dto.ListResult;
-import com.guroomsoft.icms.common.exception.CBizProcessFailException;
-import com.guroomsoft.icms.common.exception.CDatabaseException;
-import com.guroomsoft.icms.common.exception.CInvalidArgumentException;
-import com.guroomsoft.icms.common.exception.CUnknownException;
+import com.guroomsoft.icms.common.exception.*;
 import com.guroomsoft.icms.common.service.ResponseService;
+import com.guroomsoft.icms.util.DateTimeUtil;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,8 +18,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.Map;
 public class ChangePriceController {
     private final ResponseService responseService;
     private final ChangePriceService changePriceService;
+    private final PlantService plantService;
 
     @Operation(summary = "가격변경 상세 목록 조회", description = "가격변경 상세 목록 조회")
     @RequestMapping(value = "/detail", method = {RequestMethod.POST})
@@ -165,6 +167,81 @@ public class ChangePriceController {
         }
     }
 
+    @Operation(summary = "SAP 매입 단가 엑셀 내보내기", description = "SAP 매입 단가 엑셀 내보내기")
+    @RequestMapping(value = "/SapExportToExcelPurchase", method = {RequestMethod.POST})
+    public ResponseEntity<byte[]> exportToExcelForPurchaseSap(
+            @Parameter(description = "플랜트코드") @RequestParam(required = false) String plantCd)
+    {
+        ChangePrice cond = new ChangePrice();
+        if (StringUtils.isNotBlank(plantCd)) cond.setPlantCd(plantCd);
 
+        try {
+            List<ChangePrice> resultSet = changePriceService.findPurchaseForSap(cond);
+            String reportTitle = "매입단가 업로드 작성";
+            String excelFileName = String.format("%s_%s.xlsx", reportTitle, DateTimeUtil.currentDatetime2());
+
+            // 조회조건 영역
+            Map<String, Object> condMap = new HashMap<String, Object>();
+            //if (StringUtils.isNotBlank(plantCd)) {
+            //    condMap.put("cond0", "[플랜트] : 전체");
+            //} else {
+            //    condMap.put("cond0", String.format("[플랜트] : %s - %s", plantCd, plantService.getName(plantCd)));
+            //}
+
+            String[] colHeaders = {"소급반영일", "구매그룹", "품의번호", "공급업체코드", "공급업체명", "자재코드", "단위"
+                    , "통화", "신규단가", "단가유형", "적용일자", "정산단가", "기간(FROM)1", "기간(TO)1", "정산사유1", "정산단가1"
+            };
+
+            return changePriceService.exportToExcelForPurchaseSap(
+                    excelFileName,
+                    reportTitle,
+                    condMap,
+                    colHeaders,
+                    resultSet);
+        } catch (CNotFoundException e) {
+            throw new CNotFoundException();
+        } catch (Exception e) {
+            throw new CUnknownException();
+        }
+    }
+
+    @Operation(summary = "SAP 사급 단가 엑셀 내보내기", description = "SAP 사급 단가 엑셀 내보내기")
+    @RequestMapping(value = "/SapExportToExcel", method = {RequestMethod.POST})
+    public ResponseEntity<byte[]> exportToExcelForSap(
+            @Parameter(description = "플랜트코드") @RequestParam(required = false) String plantCd)
+    {
+        ChangePrice cond = new ChangePrice();
+        if (StringUtils.isNotBlank(plantCd)) cond.setPlantCd(plantCd);
+
+        try {
+            List<ChangePrice> resultSet = changePriceService.findConsignedForSap(cond);
+            String reportTitle = "사급단가 업로드 작성";
+            String excelFileName = String.format("%s_%s.xlsx", reportTitle, DateTimeUtil.currentDatetime2());
+
+            // 조회조건 영역
+            Map<String, Object> condMap = new HashMap<String, Object>();
+            //if (StringUtils.isNotBlank(plantCd)) {
+            //    condMap.put("cond0", "[플랜트] : 전체");
+            //} else {
+            //    condMap.put("cond0", String.format("[플랜트] : %s - %s", plantCd, plantService.getName(plantCd)));
+            //}
+
+            String[] colHeaders = {"필드명", "영업조직", "영업조직명", "유통채널", "유통채널명", "판매처", "차종"
+                    , "차종명", "자재", "자재명", "통화", "종전판가", "신규판가", "판가차이", "기준수량", "판가유형", "적용관세"
+                    , "적용일자", "PLANT", "소급유형(1)", "시작일(1)", "종료일(1)", "소급단가(1)"
+            };
+
+            return changePriceService.exportToExcelForSap(
+                    excelFileName,
+                    reportTitle,
+                    condMap,
+                    colHeaders,
+                    resultSet);
+        } catch (CNotFoundException e) {
+            throw new CNotFoundException();
+        } catch (Exception e) {
+            throw new CUnknownException();
+        }
+    }
 
 }

@@ -80,4 +80,13 @@ public class ChangePrice extends BaseDTO {
     @Schema(description = "에러수") @JsonProperty("errorCnt") private Integer errorCnt;
     @Schema(description = "변경금액합계") @JsonProperty("totalChangedAmt") private String totalChangedAmt;
     @Schema(description = "새 적용금액") @JsonProperty("newPurchaseAmt") private String newPurchaseAmt;
+
+    @Schema(description = "구매그룹") @JsonProperty("purchasingGroup") private String purchasingGroup;
+    @Schema(description = "구매단위") @JsonProperty("pcsUnit") private String pcsUnit;
+    @Schema(description = "통화단위") @JsonProperty("currencyUnit") private String currencyUnit;
+    @Schema(description = "가격단위") @JsonProperty("priceUnit") private String priceUnit;
+    @Schema(description = "단가유형") @JsonProperty("priceStatus") private String priceStatus;
+    @Schema(description = "단가") @JsonProperty("afPrice") private String afPrice;
+
+
 }
