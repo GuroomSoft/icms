@@ -1,5 +1,7 @@
 package com.guroomsoft.icms.biz.econtract.controller;
 
+import com.guroomsoft.icms.biz.econtract.dao.EformMemberDAO;
+import com.guroomsoft.icms.biz.econtract.dto.EformMember;
 import com.guroomsoft.icms.biz.econtract.service.EformService;
 import com.guroomsoft.icms.common.dto.DataResult;
 import com.guroomsoft.icms.common.dto.ListResult;
@@ -26,6 +28,7 @@ import java.util.*;
 public class EContractController {
     private final ResponseService responseService;
     private final EformService eformService;
+    private final EformMemberDAO eformMemberDAO;
 
     @Operation(summary = "eformsign 인증토큰", description = "eformsign 인증토큰")
     @RequestMapping(value = "/eformsign/authToken", method = {RequestMethod.GET})
@@ -65,7 +68,7 @@ public class EContractController {
             @Parameter(description = "문서 작성일 기준으로 검색할 날짜 범위 (끝)(YYYY-MM-DD)") @RequestParam (required = false) String endCreateDate,
             @Parameter(description = "문서 처리일 기준으로 검색할 날짜 범위 (시작)(YYYY-MM-DD)") @RequestParam (required = false) String startUpdateDate,
             @Parameter(description = "문서 처리일 기준으로 검색할 날짜 범위 (끝)(YYYY-MM-DD)") @RequestParam (required = false) String endUpdateDate,
-            @Parameter(description = "한 번에 표시할 문서 수 (페이징 용)", required = true) @RequestParam(defaultValue = "20") int rowCount,
+            @Parameter(description = "한 번에 표시할 문서 수 (페이징 용)", required = true) @RequestParam(defaultValue = "200") int rowCount,
             @Parameter(description = "목록에서 건너뛰고 표시할 문서 수(1부터 시작)", required = true) @RequestParam(defaultValue = "1") int pageNumber)
     {
         try {
@@ -76,6 +79,9 @@ public class EContractController {
             Long eUpDate = null;
             String limit = "20";
             String skip = "0";
+
+            List<EformMember> members = eformMemberDAO.selectEformMemberList();
+            List<String> memberEnabled = members.stream().filter(f -> Objects.equals(f.getIsEnabled(), "Y")).map(EformMember::getEfId).toList();
 
             try {
                 if (StringUtils.isNotBlank(startCreateDate)) {
@@ -98,16 +104,15 @@ public class EContractController {
                 }
             } catch (ParseException e) {}
 
-            if (rowCount == 0) rowCount = 20;
+            if (rowCount == 0) rowCount = 200;
             limit = String.valueOf(rowCount);
             skip = String.valueOf((pageNumber - 1) * rowCount);
             Map<String, Object> resultMap = eformService.getDocumentListFromBox(null, type, titleAndContent, title,
-                    content, sCreDate, eCreDate, sUpDate, eUpDate, limit, skip);
+                    content, sCreDate, eCreDate, sUpDate, eUpDate, limit, skip, memberEnabled);
             List<Map<String, Object>> docList = new ArrayList<>();
             if ( (resultMap != null) && resultMap.containsKey("documents") ) {
                 docList = (List<Map<String, Object>>)resultMap.get("documents");
             }
-
             return responseService.getListResult(docList);
         } catch (Exception e) {
             log.error(e.getMessage());

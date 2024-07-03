@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,23 +260,59 @@ public class EformService {
             String type, String titleAndContent, String title, String content,
             Long startCreateDate, Long endCreateDate,
             Long startUpdateDate, Long endUpdateDate,
-            String limit, String skip)
+            String limit, String skip, List<String> members)
     {
-        Map<String, Object> authInfo = getAccessToken(memberId);
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("type", type);
-        params.put("title_and_content", StringUtils.defaultString(titleAndContent));
-        params.put("title", StringUtils.defaultString(title));
-        params.put("content", StringUtils.defaultString(content));
-        if (startCreateDate != null && startCreateDate.longValue() > 0) params.put("start_create_date", startCreateDate);
-        if (endCreateDate != null && endCreateDate.longValue() > 0) params.put("end_create_date", endCreateDate);
-        if (startUpdateDate != null && startUpdateDate.longValue() > 0) params.put("start_update_date", startUpdateDate);
-        if (endUpdateDate != null && endUpdateDate.longValue() > 0) params.put("end_update_date", endUpdateDate);
-        params.put("limit", StringUtils.defaultString(limit));
-        params.put("skip", StringUtils.defaultString(skip));
+        Map<String, Object> combinedResult = new LinkedHashMap<>();
 
-        JSONObject resultJson = eformAPI.getDocumentListFromBox(authInfo, params);
-        return EformAPI.getMapFromJsonObject(resultJson);
+        //Map<String, Object> authInfo = getAccessToken(memberId);
+        for (String member : members) {
+            Map<String, Object> authInfo = getAccessToken(member);
+            if(authInfo == null)
+            {
+                continue;
+            }
+            Map<String, Object> params = new LinkedHashMap<>();
+            params.put("type", type);
+            params.put("title_and_content", StringUtils.defaultString(titleAndContent));
+            params.put("title", StringUtils.defaultString(title));
+            params.put("content", StringUtils.defaultString(content));
+            if (startCreateDate != null && startCreateDate.longValue() > 0)
+                params.put("start_create_date", startCreateDate);
+            if (endCreateDate != null && endCreateDate.longValue() > 0) params.put("end_create_date", endCreateDate);
+            if (startUpdateDate != null && startUpdateDate.longValue() > 0)
+                params.put("start_update_date", startUpdateDate);
+            if (endUpdateDate != null && endUpdateDate.longValue() > 0) params.put("end_update_date", endUpdateDate);
+            params.put("limit", StringUtils.defaultString(limit));
+            params.put("skip", StringUtils.defaultString(skip));
+
+            JSONObject resultJson = eformAPI.getDocumentListFromBox(authInfo, params);
+
+            Map<String, Object> resultMap = EformAPI.getMapFromJsonObject(resultJson);
+            resultMap.forEach((key, value) -> {
+                if (combinedResult.containsKey(key)) {
+                    // Handle merging of duplicate keys if necessary
+                    // For simplicity, we're assuming values are lists here
+                    List<Object> combinedList = new ArrayList<>();
+                    if (combinedResult.get(key) instanceof List) {
+                        combinedList.addAll((List<?>) combinedResult.get(key));
+                    } else {
+                        combinedList.add(combinedResult.get(key));
+                    }
+                    if (value instanceof List) {
+                        combinedList.addAll((List<?>) value);
+                    } else {
+                        combinedList.add(value);
+                    }
+                    combinedResult.put(key, combinedList);
+                } else {
+                    combinedResult.put(key, value);
+                }
+            });
+
+            //JSONObject resultJson = eformAPI.getDocumentListFromBox(authInfo, params);
+        }
+        return EformAPI.getMapFromJsonObject(new JSONObject(combinedResult));
+        //return EformAPI.getMapFromJsonObject(resultJson);
     }
 
     // 현재 처리중인 문서 통계 정보 담당자용
