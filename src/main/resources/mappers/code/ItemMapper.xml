@@ -104,7 +104,7 @@
             car_model = b.car_model
         WHEN NOT MATCHED THEN
         INSERT (
-            item_no, item_nm, reg_dt, reg_uid
+            item_no, item_nm, reg_dt, reg_uid, car_model
         ) VALUES (
                 b.item_no, b.item_nm, b.reg_dt, b.reg_uid, b.car_model
         );
