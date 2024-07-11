@@ -2,12 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="kr">
 <head>
     <meta charset="UTF-8"></meta>
-    <link href="https://cdn.jsdelivr.net/font-nanum/1.0/nanumgothic/nanumgothic.css" rel="stylesheet"></link>
+    <link href="https://cdn.jsdelivr.net/font-nanum/1.0/nanumgothic/nanumgothic.css" rel="stylesheet"/>
     <style>
-        body { font-family: 'Nanum Gothic', serif; }
-        div {
+        body { font-family: '맑은 고딕', 'Nanum Gothic', serif }
+        table {
             font-size: 12pt;
-            width: 100%;
         }
         table {
             width: 100%;
@@ -37,6 +36,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
     </style>
 </head>
 <body>
@@ -46,9 +49,9 @@
                 <tr>
                     <th rowspan="2" style="text-align: center; width: 2%;">No</th>
                     <th rowspan="2" style="text-align: center; width: 5%;">플랜트</th>
-                    <th rowspan="2" style="text-align: center; width: 4%;">차종</th>
-                    <th rowspan="2" style="text-align: center; width: 14%;">품번</th>
-                    <th rowspan="2" style="text-align: center; width: 17%;">품명</th>
+                    <th rowspan="2" style="text-align: center; width: 6%;">차종</th>
+                    <th rowspan="2" style="text-align: center; width: 17%;">품번</th>
+                    <th rowspan="2" style="text-align: center; width: 12%;">품명</th>
                     <th rowspan="2" style="text-align: center; width: 6%;">종전가<br />(원/EA)</th>
                     <th:block th:switch="${colspanVal}">
                         <th th:case="2" colspan="2" style="text-align: center;">가결 결정내역(원/EA)</th>
@@ -62,34 +65,34 @@
                 <tr>
                     <th:block th:switch="${colspanVal}">
                         <th:block th:case="2">
-                            <th style="text-align: center; width: 22.5%;"><span th:text="${colTitle1}">23년09월</span></th>
-                            <th style="text-align: center; width: 22.5%;"><span th:text="${colTitle2}">24년01월</span></th>
+                            <th style="text-align: center; width: 22.5%; font-size:11pt;"><span th:text="${colTitle1}">23년09월</span></th>
+                            <th style="text-align: center; width: 22.5%; font-size:11pt;"><span th:text="${colTitle2}">24년01월</span></th>
                         </th:block>
                         <th:block th:case="3">
-                            <th style="text-align: center; width: 15%;"><span th:text="${colTitle1}">23년09월</span></th>
-                            <th style="text-align: center; width: 15%;"><span th:text="${colTitle2}">24년01월</span></th>
-                            <th style="text-align: center; width: 15%;"><span th:text="${colTitle3}">24년01월</span></th>
+                            <th style="text-align: center; width: 15%; font-size:11pt;"><span th:text="${colTitle1}">23년09월</span></th>
+                            <th style="text-align: center; width: 15%; font-size:11pt;"><span th:text="${colTitle2}">24년01월</span></th>
+                            <th style="text-align: center; width: 15%; font-size:11pt;"><span th:text="${colTitle3}">24년01월</span></th>
                         </th:block>
                         <th:block th:case="4">
-                            <th style="text-align: center; width: 11.25%;"><span th:text="${colTitle1}">23년09월</span></th>
-                            <th style="text-align: center; width: 11.25%;"><span th:text="${colTitle2}">24년01월</span></th>
-                            <th style="text-align: center; width: 11.25%;"><span th:text="${colTitle3}">24년01월</span></th>
-                            <th style="text-align: center; width: 11.25%;"><span th:text="${colTitle4}">24년01월</span></th>
+                            <th style="text-align: center; width: 11.25%; font-size:11pt;"><span th:text="${colTitle1}">23년09월</span></th>
+                            <th style="text-align: center; width: 11.25%; font-size:11pt;"><span th:text="${colTitle2}">24년01월</span></th>
+                            <th style="text-align: center; width: 11.25%; font-size:11pt;"><span th:text="${colTitle3}">24년01월</span></th>
+                            <th style="text-align: center; width: 11.25%; font-size:11pt;"><span th:text="${colTitle4}">24년01월</span></th>
                         </th:block>
                         <th:block th:case="5">
-                            <th style="text-align: center; width: 9%;"><span th:text="${colTitle1}">23년09월</span></th>
-                            <th style="text-align: center; width: 9%;"><span th:text="${colTitle2}">24년01월</span></th>
-                            <th style="text-align: center; width: 9%;"><span th:text="${colTitle3}">24년01월</span></th>
-                            <th style="text-align: center; width: 9%;"><span th:text="${colTitle4}">24년01월</span></th>
-                            <th style="text-align: center; width: 9%;"><span th:text="${colTitle5}">24년01월</span></th>
+                            <th style="text-align: center; width: 9%; font-size:11pt;"><span th:text="${colTitle1}">23년09월</span></th>
+                            <th style="text-align: center; width: 9%; font-size:11pt;"><span th:text="${colTitle2}">24년01월</span></th>
+                            <th style="text-align: center; width: 9%; font-size:11pt;"><span th:text="${colTitle3}">24년01월</span></th>
+                            <th style="text-align: center; width: 9%; font-size:11pt;"><span th:text="${colTitle4}">24년01월</span></th>
+                            <th style="text-align: center; width: 9%; font-size:11pt;"><span th:text="${colTitle5}">24년01월</span></th>
                         </th:block>
                         <th:block th:case="6">
-                            <th style="text-align: center; width: 7.5%;"><span th:text="${colTitle1}">23년09월</span></th>
-                            <th style="text-align: center; width: 7.5%;"><span th:text="${colTitle2}">24년01월</span></th>
-                            <th style="text-align: center; width: 7.5%;"><span th:text="${colTitle3}">24년01월</span></th>
-                            <th style="text-align: center; width: 7.5%;"><span th:text="${colTitle4}">24년01월</span></th>
-                            <th style="text-align: center; width: 7.5%;"><span th:text="${colTitle5}">24년01월</span></th>
-                            <th style="text-align: center; width: 7.5%;"><span th:text="${colTitle6}">24년01월</span></th>
+                            <th style="text-align: center; width: 7.5%; font-size:11pt;"><span th:text="${colTitle1}">23년09월</span></th>
+                            <th style="text-align: center; width: 7.5%; font-size:11pt;"><span th:text="${colTitle2}">24년01월</span></th>
+                            <th style="text-align: center; width: 7.5%; font-size:11pt;"><span th:text="${colTitle3}">24년01월</span></th>
+                            <th style="text-align: center; width: 7.5%; font-size:11pt;"><span th:text="${colTitle4}">24년01월</span></th>
+                            <th style="text-align: center; width: 7.5%; font-size:11pt;"><span th:text="${colTitle5}">24년01월</span></th>
+                            <th style="text-align: center; width: 7.5%; font-size:11pt;"><span th:text="${colTitle6}">24년01월</span></th>
                         </th:block>
                     </th:block>
                 </tr>
@@ -98,8 +101,8 @@
                 <tr th:each="item : ${itemList}">
                     <td class="nocol" th:text="${item.no}">1</td>
                     <td style="text-align: center;" th:text="${item.plantCd}">1100</td>
-                    <td style="text-align: center;" th:text="${item.carModel}">US4</td>
-                    <td th:text="${item.itemNo}">88310-CG310NNBSS</td>
+                    <td style="text-align: center;" th:text="${item.carModel}">SU2iD PE 1ST</td>
+                    <td th:text="${item.itemNo}">88310-CG310ANNBSS</td>
                     <td th:text="${item.itemNm}" id="itemNm">FRAME ASSY - PASS, LH (SAB)</td>
                     <td class="number" th:text="${item.curPrice}">40,072</td>
                     <th:block th:switch="${colspanVal}">
