@@ -79,8 +79,12 @@
             format(a.os_mat_admin_rate, '0.0') as osMatAdminRate ,
             format(round(a.changed_amount, 2), '#,##0.00') as changedAmount,
             a.changed_status, a.sub_item_count, a.completed_cnt, a.incompleted_cnt, a.error_cnt,
+            <!--
             format(round(a.total_changed_amt, 2), '#,##0.00') as totalChangedAmt,
             format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt,
+            -->
+            format(round(a.total_changed_amt, 1, 1), '#,##0.0') as totalChangedAmt,
+            format(round(a.new_purchase_amt, 1, 1), '#,##0.0') as newPurchaseAmt,
             p.plant_nm, m.bp_nm AS bp_nm, b.item_nm AS pcs_item_nm,
             dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,
             sm.bp_nm AS sub_item_bp_nm, sb.item_nm,
@@ -121,8 +125,12 @@
             SELECT
                 a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
                 format(round(b.cur_price, 0), '#,###') as cur_price,
+                <!--
                 format(round(b.af_price, 0), '#,###') as af_price,
                 format(round(b.diff_amount, 0), '#,###') as diff_amount,
+                -->
+                format(round(b.af_price, 1, 1), '#,##0.0') as af_price,
+                format(round(b.diff_amount, 1, 1), '#,##0.0') as diff_amount,
                 b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
                 sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
             FROM BT_PRICE_CHANGE a WITH (NOLOCK)
@@ -178,8 +186,12 @@
                  SELECT
                      a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
                      format(round(b.cur_price, 0), '#,###') as cur_price,
+                     <!--
                      format(round(b.af_price, 0), '#,###') as af_price,
                      format(round(b.diff_amount, 0), '#,###') as diff_amount,
+                     -->
+                     format(round(b.af_price, 1, 1), '#,##0.0') as af_price,
+                     format(round(b.diff_amount, 1, 1), '#,##0.0') as diff_amount,
                      b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
                      sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
                  FROM BT_PRICE_CHANGE a WITH (NOLOCK)
