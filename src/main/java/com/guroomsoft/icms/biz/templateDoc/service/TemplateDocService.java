@@ -385,12 +385,12 @@ public class TemplateDocService {
                     }
                 }
             }
-            if ( StringUtils.isBlank(item.getCarModel()) )
-            {
-                item.setInvalidMessage("차종 누락");
-                invalidItems.add(item);
-                continue;
-            }
+            //if ( StringUtils.isBlank(item.getCarModel()) )
+            //{
+            //    item.setInvalidMessage("차종 누락");
+            //    invalidItems.add(item);
+            //    continue;
+            //}
             if ( StringUtils.isBlank(item.getPcsItemNo()) )
             {
                 item.setInvalidMessage("매입품번 누락");
