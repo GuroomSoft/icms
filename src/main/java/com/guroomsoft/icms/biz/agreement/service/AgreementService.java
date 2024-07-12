@@ -159,6 +159,19 @@ public class AgreementService {
         return agreementDAO.selectAgreementDataOnly(cond);
     }
 
+    public List<Map<String, Object>> findAgreementForEformDocId(List<String> EdormDocids) throws Exception
+    {
+
+        if (EdormDocids == null || EdormDocids.isEmpty())
+        {
+            throw new CInvalidArgumentException();
+        }
+
+        Map<String, Object> cond = new LinkedHashMap<>();
+        cond.put("EdormDocids", EdormDocids);
+        return agreementDAO.selectAgreementDataEformDocId(cond);
+    }
+
     /**
      * 단건 업데이트
      * @param srcDocNo

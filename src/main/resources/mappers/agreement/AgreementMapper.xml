@@ -66,6 +66,25 @@
         </foreach>
     </select>
 
+    <!-- 조회 -->
+    <select id="selectAgreementDataEformDocId" parameterType="java.util.Map" resultType="java.util.Map">
+        select /* AgreementMapper.selectAgreementDataOnly */
+        sender_team as team_s,
+        sender as name_s,
+        bp_cd,
+        bp_nm as company_r,
+        ceo_nm as name_r,
+        agr_desc,
+        agr_detail,
+        agr_file
+        from HT_AGREEMENT WITH (NOLOCK)
+        where
+        eform_doc_id in
+        <foreach collection="EdormDocids" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
 
     <update id="updateAgreementDetailImage" parameterType="java.util.Map">
         update HT_AGREEMENT

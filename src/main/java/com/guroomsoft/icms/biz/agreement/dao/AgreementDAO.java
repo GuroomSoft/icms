@@ -14,6 +14,8 @@ public interface AgreementDAO {
     int insertAgreement(Map<String, Object> param) throws Exception;
     List<Map<String, Object>> selectAgreement(Map<String, Object> cond) throws Exception;
     List<Map<String, Object>> selectAgreementDataOnly(Map<String, Object> cond) throws Exception;
+    List<Map<String, Object>> selectAgreementDataEformDocId(Map<String, Object> cond) throws Exception;
+
     int updateAgreementDetailImage(Map<String, String> param) throws Exception;
     int insertEformWebhook(Map<String, Object> param) throws Exception;
 

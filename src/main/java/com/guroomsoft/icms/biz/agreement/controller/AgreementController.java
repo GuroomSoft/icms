@@ -38,6 +38,21 @@ public class AgreementController {
         return responseService.getListResult(resultSet);
     }
 
+    @Operation(summary = "합의서 데이터 조회(이폼사인 문서번호로 조회)", description = "합의서 데이터 조회(이폼사인 문서번호로 조회)")
+    @RequestMapping(value = "/getEformDocData", method = {RequestMethod.POST})
+    public ListResult<Map<String, Object>> getTargetData(
+            @Parameter(description = "조회조건", required = true) @RequestBody List<String> cond)
+    {
+        List<Map<String, Object>> resultSet  = null;
+
+        try {
+            resultSet = agreementService.findAgreementForEformDocId(cond);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return responseService.getListResult(resultSet);
+    }
+
     @Operation(summary = "전자계약용 합의서 데이터 생성", description = "전자계약용 합의서 데이터 생성")
     @RequestMapping(value = "/createAgreement", method = {RequestMethod.POST})
     public CommonResult createAgreement(
