@@ -171,4 +171,8 @@ public class User extends BaseDTO {
             return "";
         }
     }
+
+    @Schema(description = "회사 직인")
+    @JsonProperty("corporateSeal")
+    private String corporateSeal;
 }
