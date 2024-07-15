@@ -239,7 +239,7 @@
             <if test='materialNm != null'>and CONCAT(material_cd, material_nm) LIKE CONCAT('%s', #{materialNm}, '%s') </if>
             <if test='docNo != null'>and CONCAT(doc_no, doc_title) LIKE CONCAT('%s', #{docNo}, '%s')</if>
         </where>
-        order by country_cd, raw_material_nm, steel_grade, material_cd
+        order by country_cd, raw_material_nm, steel_grade, material_cd, bgnDate
     </select>
 
     <!-- 공시단가 목록 조회 -->
