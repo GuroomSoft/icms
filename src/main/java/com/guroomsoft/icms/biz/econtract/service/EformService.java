@@ -578,4 +578,19 @@ public class EformService {
         return parameters;
     }
 
+    /**
+     * 이폼 문서 삭제
+     * @param memberId
+     * @return
+     */
+    public Map<String, Object> delDocuments(String memberId, List<String> documentsIds)
+    {
+        Map<String, Object> authInfo = getAccessToken(memberId);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("document_ids", documentsIds);
+
+        JSONObject resultJson = EformAPI.delDocuments(authInfo, params);
+        return EformAPI.getMapFromJsonObject(resultJson);
+    }
+
 }

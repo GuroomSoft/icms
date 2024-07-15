@@ -216,5 +216,17 @@ public class EContractController {
         }
     }
 
+    @Operation(summary = "eformsign 문서삭제", description = "eformsign 문서삭제")
+    @RequestMapping(value = "/eformsign/documents", method = {RequestMethod.DELETE})
+    public DataResult<Map<String, Object>> documents(
+            @Parameter(description = "문서 번호", required = true) @RequestParam List<String> documents)
+    {
+        try {
+            Map<String, Object> resultMap = eformService.delDocuments(null, documents);
+            return responseService.getDataResult(resultMap);
+        } catch (Exception e) {
+            return responseService.getDataResult(CUnknownException.getCode(), CUnknownException.getCustomMessage(), null);
+        }
+    }
 
 }
