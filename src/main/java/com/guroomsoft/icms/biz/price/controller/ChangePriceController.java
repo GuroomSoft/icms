@@ -1,8 +1,10 @@
 package com.guroomsoft.icms.biz.price.controller;
 
 import com.guroomsoft.icms.biz.code.service.PlantService;
+import com.guroomsoft.icms.biz.econtract.service.EformService;
 import com.guroomsoft.icms.biz.price.dto.ChangePrice;
 import com.guroomsoft.icms.biz.price.dto.DetailReq;
+import com.guroomsoft.icms.biz.price.dto.PriceChange;
 import com.guroomsoft.icms.biz.price.dto.PurchaseItemReq;
 import com.guroomsoft.icms.biz.price.service.ChangePriceService;
 import com.guroomsoft.icms.common.dto.CommonResult;
@@ -35,6 +37,7 @@ public class ChangePriceController {
     private final ResponseService responseService;
     private final ChangePriceService changePriceService;
     private final PlantService plantService;
+    private final EformService eformService;
 
     @Operation(summary = "가격변경 상세 목록 조회", description = "가격변경 상세 목록 조회")
     @RequestMapping(value = "/detail", method = {RequestMethod.POST})
@@ -233,6 +236,61 @@ public class ChangePriceController {
             return responseService.getDataResult(CDatabaseException.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             return responseService.getDataResult(CUnknownException.getCode(), CUnknownException.getCustomMessage(), null);
+        }
+    }
+
+    @Operation(summary = "가격변경 확정 취소 처리", description = "사용자가 지정한 문서번호 목록을 기준으로 가격변경 확정 취소 처리")
+    @RequestMapping(value = "/cancelConfirm", method = {RequestMethod.DELETE})
+    public CommonResult cancelConfirmPriceChange(
+            @Parameter(description = "확정 문서번호 목록", required = true) @RequestBody List<String> docs,
+            @Parameter(hidden = true) @RequestParam long reqUserUid)
+    {
+        try {
+            //1. BT_PRICE_CHANGE 테이블에서 검색
+            List<PriceChange> docList = changePriceService.findBtPriceChangeList(docs);
+            //2. BT_PRICE_CHANGE 테이블  doc_status = 'N' 으로 수정
+
+
+            //3. HT_AGREEMENT 테이블 데이터 검색 SELECT * FROM HT_AGREEMENT WHERE src_doc_no IN docList.doc_no
+
+
+            //4. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT_STATUS_LOG.doc_id  = HT_AGREEMENT.eform_doc_id 삭제
+
+
+            //1. BT_PRICE_CHANGE 테이블 doc_status = 'N' 으로 수정 및 데이터 가져오기 해당
+            // 검색 조건으로 doc_no 로 검색
+            // 여기서 체크
+            //2. HT_AGREEMENT 테이블 데이터 검색
+            //3. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT 테이블에서 검색 후(2번에서 나온 데이터) 그 데이터로 삭제
+            //4. HT_AGREEMENT 테이블 데이터 삭제
+            // 참고 프로시저 SP_CREATE_ECONTRACT_AGREEMENT
+
+            // eformsign 문서삭제
+            // Map<String, Object> resultMap = eformService.delDocuments(null, documents);
+            // EformAPI.getMapFromJsonObject(resultJson);
+
+            //{
+            //    call SP_CANCEL_PRICE_CHANGE(
+            //    #{pDocNo,           mode=IN, jdbcType=NVARCHAR, javaType=String}
+            //  , #{pReqUserUid,      mode=IN, jdbcType=NUMERIC, javaType=Long}
+            //  , #{pEfid,            mode=OUT, jdbcType=VARCHAR, javaType=String}
+            //  , #{pErrCode,         mode=OUT, jdbcType=NUMERIC, javaType=Integer}
+            //  , #{pErrMsg,          mode=OUT, jdbcType=VARCHAR, javaType=String})
+            //}
+            //if (((Integer)param.get("pErrCode")).intValue() < 0 ) {
+            //    throw new CBizProcessFailException();
+            //}
+
+
+            return responseService.getSuccessResult();
+        } catch (CInvalidArgumentException e) {
+            return responseService.getFailResult(CInvalidArgumentException.getCode(), CInvalidArgumentException.getCustomMessage());
+        } catch (CBizProcessFailException e) {
+            return responseService.getFailResult(CBizProcessFailException.getCode(), CBizProcessFailException.getCustomMessage());
+        } catch (CDatabaseException e) {
+            return responseService.getFailResult(CDatabaseException.getCode(), CDatabaseException.getCustomMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
