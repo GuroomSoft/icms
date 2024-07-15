@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -299,12 +300,16 @@ public class ConsignedPriceService {
     {
         log.debug(">>>>> loadToDB");
         int totalUpdated = 0;
+        Long userUid = 1L;
+        if (reqUserUid != null) {
+            userUid = reqUserUid;
+        }
 
         for (ConsignedPrice item : dataRows)
         {
             int t = 0;
             try {
-                item.setRegUid(reqUserUid);
+                item.setRegUid(userUid);
                 // 유효성 체크
                 if (StringUtils.isBlank(item.getPlantCd()) || StringUtils.isBlank(item.getBgnValidDate())
                         || StringUtils.isBlank(item.getBpCd()) || StringUtils.isBlank(item.getMatCd()) )
@@ -343,6 +348,24 @@ public class ConsignedPriceService {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * SAP 로부터 사급 단가
+     * 06시 실행
+     */
+    @Transactional
+    @Scheduled(cron = "0 30 6 * * *")
+    public void scheduleDownloadConsignedFromSAP()
+    {
+        try{
+            List<Plant> plantList = getPlantList("KR");
+            for (Plant item : plantList) {
+                downloadConsignedPriceFromSap(item.getPlantCd(), null);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     /**

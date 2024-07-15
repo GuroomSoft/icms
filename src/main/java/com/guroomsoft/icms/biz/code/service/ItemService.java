@@ -1,13 +1,17 @@
 package com.guroomsoft.icms.biz.code.service;
 
 import com.guroomsoft.icms.biz.code.dao.ItemDAO;
+import com.guroomsoft.icms.biz.code.dao.PlantDAO;
 import com.guroomsoft.icms.biz.code.dto.Item;
 import com.guroomsoft.icms.biz.code.dto.ItemReq;
+import com.guroomsoft.icms.biz.code.dto.Plant;
 import com.guroomsoft.icms.common.exception.CDatabaseException;
 import com.guroomsoft.icms.sap.JcoClient;
+import com.guroomsoft.icms.util.AppContant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +29,7 @@ public class ItemService {
     private static String RFC_TABLE_NAME = "T_HEADER";          // RFC TABLE NAME
     private final JcoClient jcoClient;
 
-
+    private final PlantDAO plantDAO;
     private final ItemDAO itemDAO;
     /**
      * 품목 목록
@@ -138,5 +142,48 @@ public class ItemService {
             }
         }
         return totalUpdated;
+    }
+
+    /**
+     * SAP 로부터 품목 정보 적재
+     * 06시 실행
+     */
+    @Transactional
+    @Scheduled(cron = "0 0 4 * * *")
+    public void scheduleDownloadPurchaseFromSAP()
+    {
+        try{
+            List<Plant> plantList = getPlantList("KR");
+            for (Plant item : plantList) {
+                List<String> plants = new ArrayList<>();
+                plants.add(item.getPlantCd());
+
+                LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+                params.put("plants", plants);
+
+                downloadItemFromSap(params, null);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 플랜트 목록 조회
+     * @return
+     */
+    private List<Plant> getPlantList(String countryCd)
+    {
+        Plant cond = new Plant();
+        if (StringUtils.isNotBlank(countryCd)) cond.setPlantCountry(countryCd);
+        else cond.setPlantCountry("KR");
+
+        cond.setUseAt(AppContant.CommonValue.YES.getValue());
+        try {
+            return plantDAO.selectPlant(cond);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }

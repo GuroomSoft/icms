@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -363,6 +364,30 @@ public class PurchasePriceService {
         return null;
     }
 
+
+    /**
+     * SAP 로부터 매입정보 적재
+     * 06시 실행
+     */
+    @Transactional
+    @Scheduled(cron = "0 0 6 * * *")
+    public void scheduleDownloadPurchaseFromSAP()
+    {
+        try{
+            List<Plant> plantList = getPlantList("KR");
+            for (Plant item : plantList) {
+                List<String> plants = new ArrayList<>();
+                plants.add(item.getPlantCd());
+
+                LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+                params.put("plants", plants);
+
+                downloadPurchasePriceFromSap(params, null);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
 
     /**
      * 전체 플랜트 공급 협력사 사급 단가 다운로드
