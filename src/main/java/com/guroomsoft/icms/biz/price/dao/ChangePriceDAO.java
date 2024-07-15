@@ -34,6 +34,8 @@ public interface ChangePriceDAO {
     List<Map<String, String>> getApplyDateList(String docNo) throws Exception;
     List<String> getAgreementTitleList(String docNo) throws Exception;
 
+    List<PriceChange> getPriceChangeDocList(Map<String, Object> cond) throws Exception;
+
     List<ChangePrice> findPurchaseForSap(ChangePrice cond) throws Exception;
     List<ChangePrice> findConsignedForSap(ChangePrice cond) throws Exception;
 }

@@ -310,6 +310,156 @@ public class ChangePriceService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<PriceChange> findBtPriceChangeList(List<String> docs) throws Exception
+    {
+        try {
+            Map<String, Object> cond = new HashMap<>();
+            cond.put("doclist", docs);
+            return changePriceDAO.getPriceChangeDocList(cond);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CDatabaseException();
+        }
+    }
+
+
+    /**
+     * 매입단가 변경관리 상세내역 출력
+     * Export to Excel
+     * @param fileName
+     * @param reportTitle
+     * @param pageHeader
+     * @param columHeaders
+     * @param rows
+     * @return
+     */
+    public ResponseEntity<byte[]> exportToExcelForDetail(
+            String fileName,
+            String reportTitle,
+            Map<String, Object> pageHeader,
+            String[] columHeaders,
+            List<ChangePrice> rows)
+    {
+        HttpHeaders httpHeader = null;
+        try {
+            httpHeader = excelService.createHttpHeaders(fileName);
+        } catch (UnsupportedEncodingException e) {
+            return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+        }
+
+        if (rows == null || rows.isEmpty()) {
+            return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+        }
+
+        // Sheet 에 대한 정의
+        Map<String, Object> sheet = new HashMap<String, Object>();
+        sheet.put("sheetName", reportTitle);
+        sheet.put("reportTitle", reportTitle);
+        // Page Header 정의 - 조회조건
+        sheet.put("searchCondition", pageHeader);
+
+        // 컬럼 헤더 정의
+        List<String> colTitles = Arrays.asList(columHeaders);
+        sheet.put("colTitle", colTitles);
+
+        // 데이터 정의
+        List<List<Object>> rowData = new ArrayList<List<Object>>();
+        int rowNum = 1;
+        for (ChangePrice data : rows) {
+            List<Object> row = new ArrayList<Object>();
+            row.add(String.valueOf(rowNum++));
+            // 컬럼 순서에 해당하는 데이터를 채운다
+            row.add(data.getApplyDate());
+            row.add(data.getPlantCd());
+            row.add(data.getPlantNm());
+            row.add(data.getBpCd());
+            row.add(data.getBpNm());
+            row.add(data.getCarModel());
+            row.add(data.getPcsItemNo());
+            row.add(data.getPcsItemNm());
+            row.add(data.getBaseDate());
+            row.add(data.getCurItemPrice());
+            row.add(data.getTotalChangedAmt());
+            row.add(data.getNewPurchaseAmt());
+            row.add(data.getPartType());
+            row.add(data.getPartTypeNm());
+            row.add(data.getSubItemBpCd());
+            row.add(data.getSubItemBpNm());
+            row.add(data.getSubItemNo());
+            row.add(data.getSubItemNm());
+            row.add(data.getRawMaterialCd());
+            row.add(data.getRawMaterialNm());
+            row.add(data.getApplyDate());
+            row.add(data.getMaterialCd());
+            row.add(data.getMaterialNm());
+            row.add(data.getUs());
+            row.add(data.getSteelGrade());
+            row.add(data.getMSpec());
+            row.add(data.getMType());
+            row.add(data.getThickThick());
+            row.add(data.getWidthOuter());
+            row.add(data.getHeightInLen());
+            row.add(data.getBlWidth());
+            row.add(data.getBlLength());
+            row.add(data.getBlCavity());
+            row.add(data.getNetWeight());
+            row.add(data.getSpecificGravity());
+            row.add(data.getSlittLossRate());
+            row.add(data.getLossRate());
+            row.add(data.getInputWeight());
+            row.add(data.getBfConsignedPrice());
+            row.add(data.getAfConsignedPrice());
+            row.add(data.getDiffConsignedPrice());
+            row.add(data.getBfCnsgnMatPrice());
+            row.add(data.getAfCnsgnMatPrice());
+            row.add(data.getDiffCnsgnMatPrice());
+            row.add(data.getBfScrapUnitPrice());
+            row.add(data.getAfScrapUnitPrice());
+            row.add(data.getDiffScrapUnitPrice());
+            row.add(data.getScrapWeight());
+            row.add(data.getScrapRecoveryRate());
+            row.add(data.getBfScrapPrice());
+            row.add(data.getAfScrapPrice());
+            row.add(data.getDiffScrapPrice());
+            row.add(data.getBfPartMatCost());
+            row.add(data.getAfPartMatCost());
+            row.add(data.getDiffPartMatCost());
+            row.add(data.getMatAdminRate());
+            row.add(data.getOsMatAdminRate());
+            row.add(data.getChangedAmount());
+            row.add(data.getChangedStatus());
+            row.add(data.getSubItemCount());
+            row.add(data.getCompletedCnt());
+            row.add(data.getIncompletedCnt());
+            row.add(data.getErrorCnt());
+
+
+
+            rowData.add(row);
+        }
+
+        sheet.put("rowData", rowData);
+
+        Map<String, Object> sheetMap = new HashMap<String, Object>();
+        sheetMap.put("sheet1", sheet);
+
+        try {
+            byte[] contents = excelService.exportToExcel2(fileName, sheetMap);
+            if (contents == null) {
+                return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<byte[]>(contents, httpHeader, HttpStatus.OK);
+            }
+        } catch (IOException e) {
+            log.error("IOException:::Export to Excel");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return new ResponseEntity<byte[]>(null, httpHeader, HttpStatus.NO_CONTENT);
+    }
+
+
     /**
      * Export to Excel
      * @param fileName

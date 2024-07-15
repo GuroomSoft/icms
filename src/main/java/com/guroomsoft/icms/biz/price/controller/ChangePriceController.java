@@ -55,6 +55,75 @@ public class ChangePriceController {
         }
     }
 
+    @Operation(summary = "가격변경 상세 목록 조회 엑셀 출력", description = "가격변경 상세 목록 조회 엑셀 출력")
+    @RequestMapping(value = "/detailToExcel", method = {RequestMethod.POST})
+    public ResponseEntity<byte[]> findChangePriceListToExcel(
+            //@Parameter(description = "조회조건", required = true) @RequestParam DetailReq cond
+            @Parameter(description = "공시단가문서번호") @RequestParam(required = false) String docNo,
+            @Parameter(description = "플랜트코드") @RequestParam(required = false) String plantCd,
+            @Parameter(description = "협력사코드목록") @RequestParam(required = false) List<String> bpList,
+            @Parameter(description = "차종") @RequestParam(required = false) String carModel,
+            @Parameter(description = "부품구분코드") @RequestParam(required = false) String partType,
+            @Parameter(description = "원소재코드") @RequestParam(required = false) String rawMaterialCd,
+            @Parameter(description = "매입품번") @RequestParam(required = false) String pcsItemNo,
+            @Parameter(description = "SUB품번") @RequestParam(required = false) String subItemNo,
+            @Parameter(description = "재질코드") @RequestParam(required = false) String materialCd
+    )
+    {
+        try {
+            List<ChangePrice> resultSet = null;
+            DetailReq cond = new DetailReq();
+            cond.setDocNo(docNo);
+            cond.setPlantCd(plantCd);
+            cond.setBpList(bpList);
+            cond.setCarModel(carModel);
+            cond.setPartType(partType);
+            cond.setRawMaterialCd(rawMaterialCd);
+            cond.setPcsItemNo(pcsItemNo);
+            cond.setSubItemNo(subItemNo);
+            cond.setMaterialCd(materialCd);
+
+            resultSet = changePriceService.findChangedPrice(cond);
+
+            String reportTitle = "가격변경 상세 목록 조회";
+            String excelFileName = String.format("%s_%s.xlsx", reportTitle, DateTimeUtil.currentDatetime2());
+
+            // 조회조건 영역
+            Map<String, Object> condMap = new HashMap<String, Object>();
+            if (StringUtils.isNotBlank(docNo)) {
+                condMap.put("cond0", "[문서] : 전체");
+            } else {
+                condMap.put("cond0", String.format("[문서] : %s - %s", docNo, docNo));
+            }
+            if (StringUtils.isNotBlank(plantCd)) {
+                condMap.put("cond1", "[플랜트] : 전체");
+            } else {
+                condMap.put("cond1", String.format("[플랜트] : %s - %s", plantCd, plantService.getName(plantCd)));
+            }
+
+            String[] colHeaders = {"NO", "기준일", "플랜트코드", "플랜트명", "협력사코드", "협력사명", "차종"
+                    , "매입품번", "매입품명", "현재가입자", "현재가", "변경금액합계", "새 적용금액", "부품구분코드", "부품구분명", "사급품목 협력사 코드", "사급품목 협력사 명", "SUB 품번", "SUB 품명"
+                    , "원소재코드", "원소재명", "기준일", "재질코드", "재질명", "US", "강종", "M-SPEC", "M-TYPE", "두께/두께", "가로/외경", "세로/투입길이", "BL-가로"
+                    , "BL-세로", "BL-CAVITY", "NET중량(Kg)", "비중", "SLITTLOSS 율(%)", "LOSS 율(%)", "투입중량(Kg)", "사급단가(이전)", "사급단가(이후)", "사급단가 차액", "사급재료비(이전/매)"
+                    , "사급재료비(이후/매)", "사급재료비 차액", "SCRAP 단가(이전/Kg)", "SCRAP 단가(이후/Kg)", "SCRAP 단가 차액", "SCRAP 단가 중량(Kg/EA)", "SCRAP 단가 회수율(%)", "SCRAP 가격(이전/매)"
+                    , "SCRAP 가격(이후/매)", "SCRAP 가격 차액", "부품재료비(이전)", "부품재료비(이후)", "부품재료비 차액", "재관비율(%)", "외주재관비율(%)", "변동금액", "변경상태", "SUB품목수", "가격변경완료수"
+                    , "미완료수", "에러수"
+            };
+
+            return changePriceService.exportToExcelForDetail(
+                    excelFileName,
+                    reportTitle,
+                    condMap,
+                    colHeaders,
+                    resultSet);
+            //return responseService.getListResult(resultSet);
+        } catch (CNotFoundException e) {
+            throw new CNotFoundException();
+        } catch (Exception e) {
+            throw new CUnknownException();
+        }
+    }
+
     @Operation(summary = "협력사 목록 조회", description = "협력사 목록 조회")
     @RequestMapping(value = "/targetBp", method = {RequestMethod.POST})
     public ListResult<Map<String, Object>> findTargetBp(

@@ -83,8 +83,14 @@
             format(round(a.total_changed_amt, 2), '#,##0.00') as totalChangedAmt,
             format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt,
             -->
-            format(round(a.total_changed_amt, 1, 1), '#,##0.0') as totalChangedAmt,
-            format(round(a.new_purchase_amt, 1, 1), '#,##0.0') as newPurchaseAmt,
+            CASE
+            WHEN a.bp_cd = '200091' THEN format(round(a.total_changed_amt, 1), '#,##0.0')
+            ELSE format(round(a.total_changed_amt, 0), '#,###')
+            END AS totalChangedAmt,
+            CASE
+            WHEN a.bp_cd = '200091' THEN format(round(a.new_purchase_amt , 1), '#,##0.0')
+            ELSE format(round(a.new_purchase_amt , 0), '#,###')
+            END AS newPurchaseAmt,
             p.plant_nm, m.bp_nm AS bp_nm, b.item_nm AS pcs_item_nm,
             dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,
             sm.bp_nm AS sub_item_bp_nm, sb.item_nm,
@@ -115,28 +121,79 @@
 
     <!-- 매입품번 가격변경 조회 -->
     <select id="selectChangePricePurchaseItem" parameterType="com.guroomsoft.icms.biz.price.dto.PurchaseItemReq"  resultType="java.util.Map">
-        SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
+SELECT
+        plantCd
+        ,carModel
+        ,bpCd
+        ,bpNm
+        ,itemNo
+        ,itemNm
+        ,CASE
+        WHEN bpCd = '200091' THEN format(round(curPrice , 1), '#,##0.0')
+        ELSE format(round(curPrice, 0), '#,###')
+        END AS curPrice,
+        CASE
+        WHEN bpCd = '200091' THEN format(round(ISNULL(afPrice, 0), 1), '#,##0.0')
+        ELSE format(round(ISNULL(afPrice, 0), 0), '#,##0')
+        END AS afPrice,
+        CASE
+        WHEN bpCd = '200091' THEN format(round(ISNULL(diffAmount, 0), 1), '#,##0.0')
+        ELSE format(round(ISNULL(diffAmount, 0), 0), '#,##0')
+        END AS diffAmount
+        ,applyDate
+        ,subItemCnt
+        ,completedCnt
+        ,incompletedCnt
+        ,errorCnt
+FROM (
+SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
             w.plant_cd as plantCd, w.car_model as carModel, w.bp_cd as bpCd, w.bp_nm as bpNm
-           , w.item_no as itemNo, w.item_nm AS itemNm, w.cur_price AS curPrice
-           , w.af_price AS afPrice, w.diff_amount AS diffAmount, w.apply_date as applyDate
-           , w.sub_item_cnt as subItemCnt, w.completed_cnt as completedCnt, w.incompleted_cnt as incompletedCnt
-           , w.error_cnt as errorCnt
+             , w.item_no as itemNo, w.item_nm AS itemNm, w.cur_price AS curPrice
+            -- , w.af_price AS afPrice
+            ,
+            CASE
+            WHEN (SELECT DISTINCT TOP 1 bgn_date FROM BT_ANNOUNCE_PRICE_DTL WITH (NOLOCK) ORDER BY bgn_date) = w.apply_date AND w.af_price = 0 THEN w.cur_price
+            WHEN w.af_price = 0 THEN
+            COALESCE(
+            (SELECT TOP 1 new_purchase_amt
+            FROM HT_CHANGED_PRICE t2
+            WHERE t2.pcs_item_no = w.item_no AND t2.new_purchase_amt IS NOT NULL AND t2.new_purchase_amt != 0 AND t2.apply_date &lt; w.apply_date ORDER BY t2.apply_date DESC), w.cur_price)
+            ELSE w.af_price
+            END AS afPrice
+             , w.diff_amount AS diffAmount, w.apply_date as applyDate
+             , w.sub_item_cnt as subItemCnt, w.completed_cnt as completedCnt, w.incompleted_cnt as incompletedCnt
+             , w.error_cnt as errorCnt
         FROM (
             SELECT
                 a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
-                format(round(b.cur_price, 0), '#,###') as cur_price,
                 <!--
+                format(round(b.cur_price, 0), '#,###') as cur_price,
                 format(round(b.af_price, 0), '#,###') as af_price,
                 format(round(b.diff_amount, 0), '#,###') as diff_amount,
                 -->
-                format(round(b.af_price, 1, 1), '#,##0.0') as af_price,
-                format(round(b.diff_amount, 1, 1), '#,##0.0') as diff_amount,
+
+                <!--
+                CASE
+                WHEN a.bp_cd = '200091' THEN format(round(b.cur_price , 1), '#,##0.0')
+                ELSE format(round(b.cur_price, 0), '#,###')
+                END AS cur_price,
+                CASE
+                WHEN a.bp_cd = '200091' THEN format(round(ISNULL(c.new_purchase_amt, 0), 1), '#,##0.0')
+                ELSE format(round(ISNULL(c.new_purchase_amt, 0), 0), '#,##0')
+                END AS af_price,
+                CASE
+                WHEN a.bp_cd = '200091' THEN format(round(ISNULL(c.total_changed_amt, 0), 1), '#,##0.0')
+                ELSE format(round(ISNULL(c.total_changed_amt, 0), 0), '#,##0')
+                END AS diff_amount,
+                -->
+                b.cur_price AS cur_price, ISNULL(c.new_purchase_amt, 0) AS af_price, ISNULL(c.total_changed_amt, 0) AS diff_amount,
                 b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
                 sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
             FROM BT_PRICE_CHANGE a WITH (NOLOCK)
                 JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
                 LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
                 LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
+                LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = i.item_no and c.plant_cd = b.plant_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
             WHERE a.announced_date = #{announcedDate}
                 AND a.plant_cd = #{plantCd}
             <if test='applyDate != null and !applyDate.equals("")'>AND b.apply_date = #{applyDate}</if>
@@ -150,7 +207,9 @@
             <if test='itemNo != null and !itemNo.equals("")'>AND b.item_no = #{itemNo}</if>
             ) w
          WHERE w.sum_diff != 0
-         ORDER BY w.bp_cd, w.apply_date
+        )ww
+         <!--ORDER BY w.bp_cd, w.apply_date-->
+        ORDER BY ww.bpCd, ww.applyDate
     </select>
 
     <!-- 합의서 요약정보 -->
@@ -186,12 +245,8 @@
                  SELECT
                      a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
                      format(round(b.cur_price, 0), '#,###') as cur_price,
-                     <!--
                      format(round(b.af_price, 0), '#,###') as af_price,
                      format(round(b.diff_amount, 0), '#,###') as diff_amount,
-                     -->
-                     format(round(b.af_price, 1, 1), '#,##0.0') as af_price,
-                     format(round(b.diff_amount, 1, 1), '#,##0.0') as diff_amount,
                      b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
                      sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
                  FROM BT_PRICE_CHANGE a WITH (NOLOCK)
@@ -297,6 +352,17 @@
 
         }
     </update>
+
+    <select id="getPriceChangeDocList" parameterType="java.util.Map" resultType="priceChange">
+        SELECT /* ChangePriceMapper.selectChangePriceDocList */
+        a.doc_no as docNo
+        FROM BT_PRICE_CHANGE a WITH (NOLOCK)
+        WHERE
+        AND a.bp_cd in
+        <foreach collection="bpList" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
 
     <!-- 매입단가 업로드 조회 -->
     <select id="findPurchaseForSap" parameterType="changePrice"  resultType="changePrice">
