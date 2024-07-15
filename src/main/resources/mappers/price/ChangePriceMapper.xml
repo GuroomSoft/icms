@@ -171,7 +171,6 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 format(round(b.af_price, 0), '#,###') as af_price,
                 format(round(b.diff_amount, 0), '#,###') as diff_amount,
                 -->
-
                 <!--
                 CASE
                 WHEN a.bp_cd = '200091' THEN format(round(b.cur_price , 1), '#,##0.0')
@@ -193,7 +192,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
                 LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
                 LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
-                LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = i.item_no and c.plant_cd = b.plant_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
+                LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = b.item_no and c.plant_cd = b.plant_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
             WHERE a.announced_date = #{announcedDate}
                 AND a.plant_cd = #{plantCd}
             <if test='applyDate != null and !applyDate.equals("")'>AND b.apply_date = #{applyDate}</if>
