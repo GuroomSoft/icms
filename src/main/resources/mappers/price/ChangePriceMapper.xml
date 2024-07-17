@@ -178,7 +178,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
              , w.error_cnt as errorCnt
         FROM (
             SELECT
-                a.plant_cd, b.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
+                a.plant_cd, i.car_model, a.bp_cd, p.bp_nm, b.item_no, isnull(i.item_nm, '') as item_nm,
                 <!--
                 format(round(b.cur_price, 0), '#,###') as cur_price,
                 format(round(b.af_price, 0), '#,###') as af_price,
