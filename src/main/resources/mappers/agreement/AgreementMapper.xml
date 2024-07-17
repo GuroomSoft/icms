@@ -107,6 +107,43 @@
         </foreach>
     </select>
 
+    <!-- 조회 -->
+    <select id="selectAgreementDataDocNo" parameterType="java.util.Map" resultType="agreementDoc">
+        select /* AgreementMapper.selectAgreementDataDocNo */
+        sender_team as team_s,
+        sender as name_s,
+        bp_cd,
+        bp_nm as company_r,
+        ceo_nm as name_r,
+        agr_desc,
+        eform_doc_id as eformDocId
+        from HT_AGREEMENT WITH (NOLOCK)
+        where
+        src_doc_no in
+        <foreach collection="srcDocNos" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <delete id="deleteAgreement" parameterType="java.util.Map">
+        delete HT_AGREEMENT
+        <where>
+            src_doc_no in
+            <foreach collection="srcDocNos" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+
+    <delete id="deleteAgreementLog" parameterType="java.util.Map">
+        delete HT_AGREEMENT_STATUS_LOG
+        <where>
+            doc_id in
+            <foreach collection="eFormDocIds" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
 
     <update id="updateAgreementDetailImage" parameterType="java.util.Map">
         update HT_AGREEMENT

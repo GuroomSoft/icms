@@ -3,6 +3,7 @@ package com.guroomsoft.icms.biz.agreement.service;
 import com.guroomsoft.icms.auth.dao.UserDAO;
 import com.guroomsoft.icms.auth.dto.User;
 import com.guroomsoft.icms.biz.agreement.dao.AgreementDAO;
+import com.guroomsoft.icms.biz.agreement.dto.AgreementDoc;
 import com.guroomsoft.icms.biz.agreement.dto.WebhookResponse;
 import com.guroomsoft.icms.biz.price.dao.ChangePriceDAO;
 import com.guroomsoft.icms.common.event.IcmsEventPublisher;
@@ -170,6 +171,57 @@ public class AgreementService {
         Map<String, Object> cond = new LinkedHashMap<>();
         cond.put("EdormDocids", EdormDocids);
         return agreementDAO.selectAgreementDataEformDocId(cond);
+    }
+
+    public List<AgreementDoc> findAgreementForDocNo(List<String> DocNos) throws Exception
+    {
+        if (DocNos == null || DocNos.isEmpty())
+        {
+            throw new CInvalidArgumentException();
+        }
+        Map<String, Object> cond = new LinkedHashMap<>();
+        cond.put("srcDocNos", DocNos);
+        return agreementDAO.selectAgreementDataDocNo(cond);
+    }
+
+    /**
+     * Agreement 삭제
+     * @param DocNos
+     * @return
+     */
+    @Transactional
+    public int deleteAgreement(List<String> DocNos) throws Exception
+    {
+        if ( DocNos == null || DocNos.isEmpty() ) {
+            throw new CInvalidArgumentException();
+        }
+        try {
+            Map<String, Object> params = new LinkedHashMap<>();
+            params.put("srcDocNos", DocNos);
+            return agreementDAO.deleteAgreement(params);
+        } catch (Exception e) {
+            throw new CModifictionFailException();
+        }
+    }
+    /**
+     * 로그 삭제
+     * @param eFormDocIds
+     * @return
+     */
+    @Transactional
+    public int deleteAgreementLog(List<String> eFormDocIds) throws Exception
+    {
+        if ( eFormDocIds == null || eFormDocIds.isEmpty() ) {
+            throw new CInvalidArgumentException();
+        }
+
+        try {
+            Map<String, Object> params = new LinkedHashMap<>();
+            params.put("eFormDocIds", eFormDocIds);
+            return agreementDAO.deleteAgreementLog(params);
+        } catch (Exception e) {
+            throw new CModifictionFailException();
+        }
     }
 
     /**

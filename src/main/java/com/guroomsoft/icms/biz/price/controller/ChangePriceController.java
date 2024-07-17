@@ -1,5 +1,7 @@
 package com.guroomsoft.icms.biz.price.controller;
 
+import com.guroomsoft.icms.biz.agreement.dto.AgreementDoc;
+import com.guroomsoft.icms.biz.agreement.service.AgreementService;
 import com.guroomsoft.icms.biz.code.service.PlantService;
 import com.guroomsoft.icms.biz.econtract.service.EformService;
 import com.guroomsoft.icms.biz.price.dto.ChangePrice;
@@ -23,10 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Tag(name = "가격변경관리 Controller")
@@ -38,6 +37,7 @@ public class ChangePriceController {
     private final ChangePriceService changePriceService;
     private final PlantService plantService;
     private final EformService eformService;
+    private final AgreementService agreementService;
 
     @Operation(summary = "가격변경 상세 목록 조회", description = "가격변경 상세 목록 조회")
     @RequestMapping(value = "/detail", method = {RequestMethod.POST})
@@ -247,28 +247,37 @@ public class ChangePriceController {
     {
         try {
             //1. BT_PRICE_CHANGE 테이블에서 검색
+            //1. BT_PRICE_CHANGE 테이블 doc_status = 'N' 으로 수정 및 데이터 가져오기 해당
             List<PriceChange> docList = changePriceService.findBtPriceChangeList(docs);
             //2. BT_PRICE_CHANGE 테이블  doc_status = 'N' 으로 수정
 
-
+            List<String> srcDocList = docList.stream().map(PriceChange::getDocNo).toList();
+            List<AgreementDoc> agreementList = agreementService.findAgreementForDocNo(srcDocList);
             //3. HT_AGREEMENT 테이블 데이터 검색 SELECT * FROM HT_AGREEMENT WHERE src_doc_no IN docList.doc_no
 
+            if(agreementList != null && !agreementList.isEmpty())
+            {
+                List<String> eFormDocIds = agreementList.stream()
+                        .map(AgreementDoc::getEformDocId)
+                        .filter(Objects::nonNull) // null 방지
+                        .toList();
+                if(!eFormDocIds.isEmpty())
+                {
+                    // eformsign 문서삭제
+                    eformService.delDocuments(null, eFormDocIds);
 
-            //4. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT_STATUS_LOG.doc_id  = HT_AGREEMENT.eform_doc_id 삭제
+                    agreementService.deleteAgreementLog(eFormDocIds);
+                    //4. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT_STATUS_LOG.doc_id  = HT_AGREEMENT.eform_doc_id 삭제
+                }
+            }
+            agreementService.deleteAgreement(srcDocList);
+            //5. HT_AGREEMENT 테이블 데이터 삭제
+
+            changePriceService.disabledPriceChange(docs);
+            //2. BT_PRICE_CHANGE 테이블  doc_status = 'N' 으로 수정
 
 
-            //1. BT_PRICE_CHANGE 테이블 doc_status = 'N' 으로 수정 및 데이터 가져오기 해당
-            // 검색 조건으로 doc_no 로 검색
-            // 여기서 체크
-            //2. HT_AGREEMENT 테이블 데이터 검색
-            //3. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT 테이블에서 검색 후(2번에서 나온 데이터) 그 데이터로 삭제
-            //4. HT_AGREEMENT 테이블 데이터 삭제
-            // 참고 프로시저 SP_CREATE_ECONTRACT_AGREEMENT
-
-            // eformsign 문서삭제
-            // Map<String, Object> resultMap = eformService.delDocuments(null, documents);
-            // EformAPI.getMapFromJsonObject(resultJson);
-
+            // 참고 프로시저 SP_CREATE_ECONTRACT_AGREEMENT, SP_CANCEL_PRICE_CHANGE
             //{
             //    call SP_CANCEL_PRICE_CHANGE(
             //    #{pDocNo,           mode=IN, jdbcType=NVARCHAR, javaType=String}
@@ -280,8 +289,6 @@ public class ChangePriceController {
             //if (((Integer)param.get("pErrCode")).intValue() < 0 ) {
             //    throw new CBizProcessFailException();
             //}
-
-
             return responseService.getSuccessResult();
         } catch (CInvalidArgumentException e) {
             return responseService.getFailResult(CInvalidArgumentException.getCode(), CInvalidArgumentException.getCustomMessage());

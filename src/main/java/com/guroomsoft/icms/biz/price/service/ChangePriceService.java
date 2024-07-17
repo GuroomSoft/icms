@@ -323,6 +323,20 @@ public class ChangePriceService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public int disabledPriceChange(List<String> docs) throws Exception
+    {
+        try {
+            Map<String, Object> cond = new HashMap<>();
+            cond.put("doclist", docs);
+            return changePriceDAO.disabledPriceChange(cond);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CDatabaseException();
+        }
+    }
+
+
 
     /**
      * 매입단가 변경관리 상세내역 출력

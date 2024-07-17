@@ -370,11 +370,21 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
         a.doc_no as docNo
         FROM BT_PRICE_CHANGE a WITH (NOLOCK)
         WHERE
-        AND a.bp_cd in
-        <foreach collection="bpList" item="item" separator="," open="(" close=")">
+        a.doc_no in
+        <foreach collection="doclist" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
     </select>
+
+    <update id="disabledPriceChange" parameterType="java.util.Map">
+        update BT_PRICE_CHANGE
+            set doc_status = 'N'
+        where
+            doc_no in
+        <foreach collection="doclist" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
 
     <!-- 매입단가 업로드 조회 -->
     <select id="findPurchaseForSap" parameterType="changePrice"  resultType="changePrice">
