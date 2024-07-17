@@ -61,9 +61,23 @@
             format(round(a.bf_consigned_price, 2), '#,##0.##') as bfConsignedPrice,
             format(round(a.af_consigned_price, 2), '#,##0.##') as afConsignedPrice,
             format(round(a.diff_consigned_price, 2), '#,##0.##') as diffConsignedPrice,
+            <!--
             format(round(a.bf_cnsgn_mat_price, 2), '#,##0.##') as bfCnsgnMatPrice,
             format(round(a.af_cnsgn_mat_price, 2), '#,##0.##') as afCnsgnMatPrice,
             format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice,
+            -->
+            CASE
+            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.bf_cnsgn_mat_price, 1), '#,##0.0')
+            ELSE format(round(a.bf_cnsgn_mat_price, 0), '#,###')
+            END AS bfCnsgnMatPrice,
+            CASE
+            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1), '#,##0.0')
+            ELSE format(round(a.af_cnsgn_mat_price, 0), '#,###')
+            END AS afCnsgnMatPrice,
+            CASE
+            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1) - round(a.bf_cnsgn_mat_price, 1), '#,##0.0')
+            ELSE format(round(a.af_cnsgn_mat_price, 0) - round(a.bf_cnsgn_mat_price, 0), '#,###')
+            END AS diffCnsgnMatPrice,
             format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice,
             format(round(a.af_scrap_unit_price, 2), '#,##0.##') as afScrapUnitPrice,
             format(round(a.diff_scrap_unit_price, 2), '#,##0.##') as diffScrapUnitPrice,
@@ -115,7 +129,6 @@
         <if test='pcsItemNo != null and !pcsItemNo.equals("")' >AND a.pcs_item_no like concat('%', #{pcsItemNo}, '%')</if>
         <if test='subItemNo != null and !subItemNo.equals("")'>AND a.sub_item_no like concat('%', #{subItemNo}, '%')</if>
         <if test='materialCd != null and !materialCd.equals("")'>AND a.material_cd like concat('%', #{materialCd}, '%')</if>
-
         order by a.doc_no, a.apply_date, a.plant_cd, a.car_model, a.bp_cd, a.pcs_item_no, a.part_type
     </select>
 
