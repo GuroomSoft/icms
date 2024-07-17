@@ -57,7 +57,16 @@
             w.agr_desc,
             w.agr_detail,
             w.agr_file,
-            (SELECT COUNT(DISTINCT item_no) from BT_PRICE_CHANGE_ITEM WHERE bp_cd = w.bp_cd and plant_cd = '1100') AS item_count
+            w.plant_cd,
+            (SELECT COUNT(*)
+            FROM
+            (
+            SELECT item_no
+            FROM BT_PRICE_CHANGE_DTL
+            WHERE plant_cd = w.plant_cd
+            AND bp_cd = w.bp_cd
+            GROUP BY item_no
+            ) a) AS item_count
         FROM(
         SELECT /* AgreementMapper.selectAgreementDataOnly */
         sender_team as team_s,
@@ -67,7 +76,8 @@
         ceo_nm as name_r,
         agr_desc,
         agr_detail,
-        agr_file
+        agr_file,
+        plant_cd
         from HT_AGREEMENT WITH (NOLOCK)
         where plant_cd = #{plantCd}
         and announced_date = #{announcedDate}
