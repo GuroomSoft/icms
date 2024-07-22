@@ -268,8 +268,8 @@ public class ChangePriceController {
                 if(!eFormDocIds.isEmpty())
                 {
                     // eformsign 문서삭제 => 문서 취소
-                     eformService.delDocuments(null, eFormDocIds);
-                    // eformService.cancelDocuments(null, eFormDocIds);
+                    // eformService.delDocuments(null, eFormDocIds);
+                     eformService.cancelDocuments(null, eFormDocIds);
 
                     agreementService.deleteAgreementLog(eFormDocIds);
                     //4. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT_STATUS_LOG.doc_id  = HT_AGREEMENT.eform_doc_id 삭제
