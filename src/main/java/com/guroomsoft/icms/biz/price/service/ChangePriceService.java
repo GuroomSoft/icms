@@ -42,7 +42,7 @@ public class ChangePriceService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> findTargetBpList(String announcedDate, String plantCd) throws Exception
+    public List<Map<String, Object>> findTargetBpList(String announcedDate, String plantCd, String docNo) throws Exception
     {
         if (StringUtils.isBlank(announcedDate) || StringUtils.isBlank(plantCd)) {
             throw new CInvalidArgumentException();
@@ -50,6 +50,7 @@ public class ChangePriceService {
 
         try {
             Map<String, String> cond = new HashMap<>();
+            cond.put("docNo", docNo);
             cond.put("plantCd", plantCd);
             cond.put("announcedDate", announcedDate);
             return changePriceDAO.selectTargetBp(cond);
@@ -82,7 +83,9 @@ public class ChangePriceService {
     {
         if (cond == null
                 || StringUtils.isBlank(cond.getAnnouncedDate())
-                || StringUtils.isBlank(cond.getPlantCd()) )
+                || StringUtils.isBlank(cond.getPlantCd())
+                || StringUtils.isBlank(cond.getDocNo())
+        )
         {
             throw new CInvalidArgumentException();
         }
@@ -200,7 +203,7 @@ public class ChangePriceService {
     }
 
     @Transactional
-    public int calculateChangePrice(String plantCd, String announcedDate, Long reqUserUid) throws Exception
+    public int calculateChangePrice(String plantCd, String announcedDate, Long reqUserUid, String docNo) throws Exception
     {
         if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate)) {
             throw new CInvalidArgumentException();
@@ -212,6 +215,8 @@ public class ChangePriceService {
             param.put("plantCd", plantCd);
             param.put("announcedDate", announcedDate);
             param.put("reqUserUid", reqUserUid);
+            param.put("docNo", docNo);
+
             changePriceDAO.calculateChangePrice(param);
             errorCode = ((Integer) param.get("errCode")).intValue();
             if (errorCode < 0) {

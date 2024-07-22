@@ -31,7 +31,7 @@ public class AgreementController {
     {
         List<Map<String, Object>> resultSet  = null;
         try {
-            resultSet = agreementService.findAgreementForSend(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpList());
+            resultSet = agreementService.findAgreementForSend(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpList(), cond.getDocNo());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

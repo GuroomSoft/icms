@@ -26,6 +26,7 @@
             ) c ON a.bp_cd = c.bp_cd
         WHERE a.plant_cd = #{plantCd}
           AND a.announced_date = #{announcedDate}
+          AND a.ref_doc_no = #{docNo}
           AND a.doc_status != 'C'
         ORDER BY a.bp_cd
     </select>
@@ -44,7 +45,7 @@
     <!-- 가격변경이력 -->
     <select id="selectChangedPrice" resultType="changePrice" parameterType="com.guroomsoft.icms.biz.price.dto.DetailReq">
         select /* ChangePriceMapper.selectChangedPrice */
-            a.doc_no, a.announced_date, a.plant_cd, a.bp_cd, a.doc_order, a.car_model, a.pcs_item_no, a.base_date,
+            a.doc_no, a.announced_date, a.plant_cd, a.bp_cd, a.doc_order, b.car_model, a.pcs_item_no, a.base_date,
             format(a.cur_item_price, '0.00##') as curItemPrice, a.part_type, a.sub_item_bp_cd, a.sub_item_no,
             a.raw_material_cd, a.apply_date, a.material_cd, a.material_nm, a.us, a.steel_grade, a.m_spec, a.m_type,
             format(a.thick_thick, '0.0##') as thickThick ,
@@ -67,7 +68,7 @@
             format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice,
             -->
             CASE
-            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.bf_cnsgn_mat_price, 1), '#,##0.0')
+            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')
             ELSE format(round(a.bf_cnsgn_mat_price, 0), '#,###')
             END AS bfCnsgnMatPrice,
             CASE
@@ -75,7 +76,7 @@
             ELSE format(round(a.af_cnsgn_mat_price, 0), '#,###')
             END AS afCnsgnMatPrice,
             CASE
-            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1) - round(a.bf_cnsgn_mat_price, 1), '#,##0.0')
+            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1, 1) - round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')
             ELSE format(round(a.af_cnsgn_mat_price, 0) - round(a.bf_cnsgn_mat_price, 0), '#,###')
             END AS diffCnsgnMatPrice,
             format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice,
@@ -98,11 +99,11 @@
             format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt,
             -->
             CASE
-            WHEN a.bp_cd = '200091' THEN format(round(a.total_changed_amt, 1), '#,##0.0')
+            WHEN a.bp_cd = '200091' THEN format(round(a.total_changed_amt, 1, 1), '#,##0.0')
             ELSE format(round(a.total_changed_amt, 0), '#,###')
             END AS totalChangedAmt,
             CASE
-            WHEN a.bp_cd = '200091' THEN format(round(a.new_purchase_amt , 1), '#,##0.0')
+            WHEN a.bp_cd = '200091' THEN format(round(a.new_purchase_amt , 1, 1), '#,##0.0')
             ELSE format(round(a.new_purchase_amt , 0), '#,###')
             END AS newPurchaseAmt,
             p.plant_nm, m.bp_nm AS bp_nm, b.item_nm AS pcs_item_nm,
@@ -129,7 +130,7 @@
         <if test='pcsItemNo != null and !pcsItemNo.equals("")' >AND a.pcs_item_no like concat('%', #{pcsItemNo}, '%')</if>
         <if test='subItemNo != null and !subItemNo.equals("")'>AND a.sub_item_no like concat('%', #{subItemNo}, '%')</if>
         <if test='materialCd != null and !materialCd.equals("")'>AND a.material_cd like concat('%', #{materialCd}, '%')</if>
-        order by a.doc_no, a.apply_date, a.plant_cd, a.car_model, a.bp_cd, a.pcs_item_no, a.part_type
+        order by a.doc_no, a.apply_date, a.plant_cd, b.car_model, a.bp_cd, a.pcs_item_no, a.part_type
     </select>
 
     <!-- 매입품번 가격변경 조회 -->
@@ -142,15 +143,15 @@ SELECT
         ,itemNo
         ,itemNm
         ,CASE
-        WHEN bpCd = '200091' THEN format(round(curPrice , 1), '#,##0.0')
+        WHEN bpCd = '200091' THEN format(round(curPrice , 1, 1), '#,##0.0')
         ELSE format(round(curPrice, 0), '#,###')
         END AS curPrice,
         CASE
-        WHEN bpCd = '200091' THEN format(round(ISNULL(afPrice, 0), 1), '#,##0.0')
+        WHEN bpCd = '200091' THEN format(round(ISNULL(afPrice, 0), 1, 1), '#,##0.0')
         ELSE format(round(ISNULL(afPrice, 0), 0), '#,##0')
         END AS afPrice,
         CASE
-        WHEN bpCd = '200091' THEN format(round(ISNULL(diffAmount, 0), 1), '#,##0.0')
+        WHEN bpCd = '200091' THEN format(round(ISNULL(diffAmount, 0), 1, 1), '#,##0.0')
         ELSE format(round(ISNULL(diffAmount, 0), 0), '#,##0')
         END AS diffAmount
         ,applyDate
@@ -170,7 +171,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
             COALESCE(
             (SELECT TOP 1 new_purchase_amt
             FROM HT_CHANGED_PRICE t2
-            WHERE t2.pcs_item_no = w.item_no AND t2.new_purchase_amt IS NOT NULL AND t2.new_purchase_amt != 0 AND t2.apply_date &lt; w.apply_date ORDER BY t2.apply_date DESC), w.cur_price)
+            WHERE t2.plant_cd = w.plant_cd AND t2.bp_cd = w.bp_cd AND t2.pcs_item_no = w.item_no AND t2.new_purchase_amt IS NOT NULL AND t2.new_purchase_amt != 0 AND t2.apply_date &lt; w.apply_date ORDER BY t2.apply_date DESC), w.cur_price)
             ELSE w.af_price
             END AS afPrice
              , w.diff_amount AS diffAmount, w.apply_date as applyDate
@@ -205,9 +206,10 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
                 LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
                 LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
-                LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = b.item_no and c.plant_cd = b.plant_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
+                LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = b.item_no and c.plant_cd = b.plant_cd and c.bp_cd = b.bp_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
             WHERE a.announced_date = #{announcedDate}
                 AND a.plant_cd = #{plantCd}
+                AND a.ref_doc_no = #{docNo}
             <if test='applyDate != null and !applyDate.equals("")'>AND b.apply_date = #{applyDate}</if>
             <if test='bpCd != null and !bpCd.equals("")'>AND a.bp_cd = #{bpCd}</if>
             <if test="bpList != null">
@@ -325,6 +327,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 #{plantCd,        mode=IN,  jdbcType=VARCHAR, javaType=String},
                 #{announcedDate,  mode=IN,  jdbcType=VARCHAR, javaType=String},
                 #{reqUserUid,     mode=IN,  jdbcType=NUMERIC, javaType=Long},
+                #{docNo,          mode=IN,  jdbcType=VARCHAR, javaType=String},
                 #{errCode,        mode=OUT, jdbcType=NUMERIC, javaType=Integer},
                 #{errMsg,         mode=OUT, jdbcType=VARCHAR, javaType=String})
             }
@@ -446,7 +449,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
         , a.plant_cd
         , a.bp_cd
         , a.doc_order
-        , a.car_model
+        , b.car_model
         , a.pcs_item_no
         , a.base_date
         , format(a.cur_item_price, '0.00##') as curItemPrice
@@ -516,7 +519,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
         left outer join MT_ITEM b WITH (NOLOCK) ON a.pcs_item_no = b.item_no
         left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no
         LEFT OUTER JOIN HT_PURCHASE_PRICE c WITH(NOLOCK) ON a.pcs_item_no = c.mat_cd AND a.plant_cd = c.plant_cd
-        order by a.doc_no, a.apply_date, a.plant_cd, a.car_model, a.bp_cd, a.pcs_item_no, a.part_type
+        order by a.doc_no, a.apply_date, a.plant_cd, b.car_model, a.bp_cd, a.pcs_item_no, a.part_type
     </select>
 
 </mapper>

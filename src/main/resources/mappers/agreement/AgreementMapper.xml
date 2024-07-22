@@ -49,39 +49,43 @@
     <!-- 조회 -->
     <select id="selectAgreementDataOnly" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT
-            w.team_s,
-            w.name_s,
-            w.bp_cd,
-            w.company_r,
-            w.name_r,
-            w.agr_desc,
-            w.agr_detail,
-            w.agr_file,
-            w.plant_cd,
-            (SELECT COUNT(*)
-            FROM
-            (
-            SELECT item_no
-            FROM BT_PRICE_CHANGE_DTL
-            WHERE plant_cd = w.plant_cd
-            AND bp_cd = w.bp_cd
-            GROUP BY item_no
-            ) a) AS item_count
+        w.team_s,
+        w.name_s,
+        w.bp_cd,
+        w.company_r,
+        w.name_r,
+        w.agr_desc,
+        w.agr_detail,
+        w.agr_file,
+        w.plant_cd,
+        (SELECT COUNT(*)
+        FROM
+        (
+        SELECT item_no
+        FROM BT_PRICE_CHANGE_DTL
+        WHERE plant_cd = w.plant_cd
+        AND bp_cd = w.bp_cd
+        GROUP BY item_no
+        ) a) AS item_count
+        , ref_doc_no
         FROM(
         SELECT /* AgreementMapper.selectAgreementDataOnly */
-        sender_team as team_s,
-        sender as name_s,
-        bp_cd,
-        bp_nm as company_r,
-        ceo_nm as name_r,
-        agr_desc,
-        agr_detail,
-        agr_file,
-        plant_cd
-        from HT_AGREEMENT WITH (NOLOCK)
-        where plant_cd = #{plantCd}
-        and announced_date = #{announcedDate}
-        and bp_cd in
+        A.sender_team as team_s,
+        A.sender as name_s,
+        A.bp_cd,
+        A.bp_nm as company_r,
+        A.ceo_nm as name_r,
+        A.agr_desc,
+        A.agr_detail,
+        A.agr_file,
+        A.plant_cd,
+        B.ref_doc_no
+        from HT_AGREEMENT A WITH (NOLOCK)
+        LEFT OUTER JOIN BT_PRICE_CHANGE B WITH (NOLOCK) ON a.src_doc_no = B.doc_no
+        where a.plant_cd = #{plantCd}
+        and a.announced_date = #{announcedDate}
+        and b.ref_doc_no = #{docNo}
+        and a.bp_cd in
         <foreach collection="bpList" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>

@@ -130,12 +130,13 @@ public class ChangePriceController {
     @Operation(summary = "협력사 목록 조회", description = "협력사 목록 조회")
     @RequestMapping(value = "/targetBp", method = {RequestMethod.POST})
     public ListResult<Map<String, Object>> findTargetBp(
+            @Parameter(description = "공시단가문서", required = true) @RequestParam String docNo,
             @Parameter(description = "고시일(YYYYMMDD)", required = true) @RequestParam String announcedDate,
             @Parameter(description = "플랜트 코드", required = true) @RequestParam String plantCd)
     {
         List<Map<String, Object>> resultSet = null;
         try {
-            resultSet = changePriceService.findTargetBpList(announcedDate, plantCd);
+            resultSet = changePriceService.findTargetBpList(announcedDate, plantCd, docNo);
             return responseService.getListResult(resultSet);
         } catch (CDatabaseException e) {
             throw new CDatabaseException();
@@ -192,11 +193,12 @@ public class ChangePriceController {
     public CommonResult calculateChangePrice(
             @Parameter(description = "플랜트 코드", required = true) @RequestParam String plantCd,
             @Parameter(description = "등록월", required = true) @RequestParam String announcedDate,
+            @Parameter(description = "공시단가문서", required = true) @RequestParam String docNo,
             @Parameter(hidden = true) @RequestParam long reqUserUid)
     {
         try {
             //changePriceService.calculateChangePrice(plantCd, announcedDate.replaceAll("[^0-9]", ""), Long.valueOf(reqUserUid));
-            changePriceService.calculateChangePrice(plantCd, announcedDate, Long.valueOf(reqUserUid));
+            changePriceService.calculateChangePrice(plantCd, announcedDate, Long.valueOf(reqUserUid), docNo);
             return responseService.getSuccessResult();
         } catch (CInvalidArgumentException e) {
             return responseService.getFailResult(CInvalidArgumentException.getCode(), CInvalidArgumentException.getCustomMessage());
@@ -263,8 +265,9 @@ public class ChangePriceController {
                         .toList();
                 if(!eFormDocIds.isEmpty())
                 {
-                    // eformsign 문서삭제
-                    eformService.delDocuments(null, eFormDocIds);
+                    // eformsign 문서삭제 => 문서 취소
+                     eformService.delDocuments(null, eFormDocIds);
+                    // eformService.cancelDocuments(null, eFormDocIds);
 
                     agreementService.deleteAgreementLog(eFormDocIds);
                     //4. HT_AGREEMENT_STATUS_LOG 테이블 HT_AGREEMENT_STATUS_LOG.doc_id  = HT_AGREEMENT.eform_doc_id 삭제

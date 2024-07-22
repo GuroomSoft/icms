@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @Alias("purchaseItemReq")
 public class PurchaseItemReq {
+    @Schema(description = "공시단가문서번호") @JsonProperty("docNo") private String docNo;
     @Schema(description = "등록월(YYYYMMDD)") @JsonProperty("announcedDate") private String announcedDate;
     @Schema(description = "플랜트코드") @JsonProperty("plantCd") private String plantCd;
     @Schema(description = "원소재적용월(YYYYMMDD)") @JsonProperty("applyDate") private String applyDate;

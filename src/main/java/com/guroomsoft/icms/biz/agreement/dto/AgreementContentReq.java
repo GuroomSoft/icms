@@ -11,6 +11,7 @@ import java.util.List;
  */
 @Data
 public class AgreementContentReq {
+    @Schema(description = "공시단가문서번호") @JsonProperty("docNo") private String docNo;
     @Schema(description = "등록일") @JsonProperty("announceDate") private String announcedDate;
     @Schema(description = "플랜트코드") @JsonProperty("plantCd") private String plantCd;
     @Schema(description = "협력사코드목록") @JsonProperty("bpList") private List<String> bpList;

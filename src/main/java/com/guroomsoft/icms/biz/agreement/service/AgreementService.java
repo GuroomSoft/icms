@@ -145,15 +145,16 @@ public class AgreementService {
      * @return
      * @throws Exception
      */
-    public List<Map<String, Object>> findAgreementForSend(String plantCd, String announcedDate, List<String> bpList) throws Exception
+    public List<Map<String, Object>> findAgreementForSend(String plantCd, String announcedDate, List<String> bpList, String docNo) throws Exception
     {
 
-        if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate) || bpList == null || bpList.isEmpty())
+        if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate) || bpList == null || bpList.isEmpty()|| StringUtils.isBlank(docNo))
         {
             throw new CInvalidArgumentException();
         }
 
         Map<String, Object> cond = new LinkedHashMap<>();
+        cond.put("docNo", docNo);
         cond.put("plantCd", plantCd);
         cond.put("announcedDate", announcedDate);
         cond.put("bpList", bpList);
