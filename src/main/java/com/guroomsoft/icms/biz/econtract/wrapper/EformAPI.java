@@ -667,6 +667,57 @@ public class EformAPI {
     }
 
     /**
+     * 문서 취소
+     * @param configMap
+     * @param params
+     * @return
+     */
+    public static JSONObject cancelDocuments(Map<String, Object> configMap, Map<String, Object> params)
+    {
+        JSONObject jsonObject = null;
+
+        String fullUrl = (String)configMap.get("apiUrl") + "/v2.0/api/documents/cancel";
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+
+        String jsonBody = convertMapToJson(params).toJSONString();
+        MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
+        // RequestBody 생성
+        RequestBody requestBody = RequestBody.create(jsonBody, mediaType);
+
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .addHeader("Accept", "*/*")
+                .addHeader("Content-Type", "application/json;charset=utf-8")
+                .addHeader("eformsign_signature", String.format("Bearer %s", secretKey))
+                .addHeader("Authorization", "Bearer " + (String)configMap.get("accessToken"))
+                .post(requestBody)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            ResponseBody responseBody = response.body();
+            JSONParser jsonParser = new JSONParser();
+            jsonObject = (JSONObject) jsonParser.parse(responseBody.string());
+
+            if (response.code() == 200) {
+                log.debug("👉 {}", jsonObject.toJSONString());
+            } else {
+                log.debug("👉 {}", jsonObject.toJSONString());
+            }
+            return jsonObject;
+        } catch (IOException e) {
+            log.error("👉 IOException :::: " + e.getMessage());
+        } catch (ParseException e) {
+            log.error("👉 ParseException :::: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("👉 Exception :::: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
      * Utility
      * convert to Map from Json Object
      * @param jsonObj

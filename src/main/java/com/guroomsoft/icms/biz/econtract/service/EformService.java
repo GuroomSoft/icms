@@ -593,4 +593,23 @@ public class EformService {
         return EformAPI.getMapFromJsonObject(resultJson);
     }
 
+    /**
+     * 이폼 문서 취소
+     * @param memberId
+     * @return
+     */
+    public Map<String, Object> cancelDocuments(String memberId, List<String> documentsIds)
+    {
+        Map<String, Object> authInfo = getAccessToken(memberId);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("document_ids", documentsIds);
+
+        Map<String, Object> input = new LinkedHashMap<>();
+        input.put("input", params);
+        input.put("comment", "문서 취소");
+
+        JSONObject resultJson = EformAPI.cancelDocuments(authInfo, input);
+        return EformAPI.getMapFromJsonObject(resultJson);
+    }
+
 }
