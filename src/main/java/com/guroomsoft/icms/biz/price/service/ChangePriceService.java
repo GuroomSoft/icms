@@ -97,7 +97,7 @@ public class ChangePriceService {
         }
     }
 
-    public PriceChange getPriceChangeDoc(String plantCd, String announcedDate, String bpCd) throws Exception
+    public PriceChange getPriceChangeDoc(String plantCd, String announcedDate, String bpCd, String docNo) throws Exception
     {
         if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate) || StringUtils.isBlank(bpCd)) {
             throw new CInvalidArgumentException();
@@ -107,6 +107,7 @@ public class ChangePriceService {
         cond.put("plantCd", plantCd);
         cond.put("announcedDate", announcedDate);
         cond.put("bpCd", bpCd);
+        cond.put("docNo", docNo);
 
         return changePriceDAO.getPriceChangeDoc(cond);
     }
@@ -124,7 +125,8 @@ public class ChangePriceService {
         if (cond == null
                 || StringUtils.isBlank(cond.getAnnouncedDate())
                 || StringUtils.isBlank(cond.getPlantCd())
-                || StringUtils.isBlank(cond.getBpCd()) )
+                || StringUtils.isBlank(cond.getBpCd())
+                || StringUtils.isBlank(cond.getDocNo()))
         {
             throw new CInvalidArgumentException();
         }
@@ -133,7 +135,7 @@ public class ChangePriceService {
         try {
             User user = userDAO.selectUserByKey(reqUserUid);
             Partner bp = partnerDAO.selectByKey(cond.getBpCd());
-            PriceChange doc = getPriceChangeDoc(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpCd());
+            PriceChange doc = getPriceChangeDoc(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpCd(), cond.getDocNo());
 
             Map<String, Object> resultMap = new LinkedHashMap<>();
             List<Map<String, Object>> dataList = changePriceDAO.selectChangePricePurchaseItem(cond);

@@ -167,12 +167,14 @@ public class ChangePriceController {
     @Operation(summary = "가격결정합의 내용 조회", description = "가격결정합의 내용 조회")
     @RequestMapping(value = "/agreement/content", method = {RequestMethod.POST})
     public DataResult<Map<String, Object>> getArgeementContent(
+            @Parameter(description = "공시단가문서번호", required = true) @RequestParam String docNo,
             @Parameter(description = "등록월", required = true) @RequestParam String announcedDate,
             @Parameter(description = "플랜트 코드", required = true) @RequestParam String plantCd,
             @Parameter(description = "협력사 코드", required = true) @RequestParam String bpCd,
             @Parameter(hidden = true) @RequestParam long reqUserUid)
     {
         PurchaseItemReq cond = new PurchaseItemReq();
+        cond.setDocNo(docNo);
         cond.setAnnouncedDate(announcedDate);
         cond.setPlantCd(plantCd);
         if (StringUtils.isNotBlank(bpCd)) cond.setBpCd(bpCd);

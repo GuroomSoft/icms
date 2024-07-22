@@ -40,6 +40,7 @@
          WHERE plant_cd = #{plantCd}
            AND announced_date = #{announcedDate}
            AND bp_cd = #{bpCd}
+           AND ref_doc_no = #{docNo}
     </select>
 
     <!-- 가격변경이력 -->
@@ -236,6 +237,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
               and m.announced_date = #{announcedDate}
               and a.bp_cd = #{bpCd}
               and isnull(a.raw_material_cd, '') > ''
+              and m.ref_doc_no = #{docNo}
         )
         SELECT s.apply_date AS applyDate
              , STUFF((SELECT ',' + raw_material_nm
