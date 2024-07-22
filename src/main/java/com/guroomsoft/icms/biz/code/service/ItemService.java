@@ -159,7 +159,7 @@ public class ItemService {
                 plants.add(item.getPlantCd());
 
                 LinkedHashMap<String, Object> params = new LinkedHashMap<>();
-                params.put("plants", plants);
+                params.put("plantCd", plants);
 
                 downloadItemFromSap(params, null);
             }
