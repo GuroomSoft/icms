@@ -1,7 +1,9 @@
 package com.guroomsoft.icms.biz.code.service;
 
+import com.guroomsoft.icms.biz.code.dao.CorporationDAO;
 import com.guroomsoft.icms.biz.code.dao.PartnerDAO;
 import com.guroomsoft.icms.biz.code.dao.SupplierDAO;
+import com.guroomsoft.icms.biz.code.dto.Corporation;
 import com.guroomsoft.icms.biz.code.dto.Partner;
 import com.guroomsoft.icms.common.exception.*;
 import com.guroomsoft.icms.common.service.ExcelService;
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,8 @@ public class SupplierService {
     private final PartnerDAO partnerDAO;
     private final ExcelService excelService;
     private final JcoClient jcoClient;
+
+    private final CorporationDAO corporationDAO;
 
     /**
      * 협력업체목록
@@ -479,6 +484,31 @@ public class SupplierService {
 
         return 0;
     }
+
+
+    /**
+     * SAP로부터 공급사 정보 수신
+     * 05시 55분 실행
+     */
+
+    @Transactional
+    @Scheduled(cron = "0 55 5 * * *")
+    public void scheduleDownloadSupplierFromSap()
+    {
+        try{
+            Corporation cond = new Corporation();
+            cond.setUseAt("Y");
+            List<Corporation> CorporationList = corporationDAO.selectCorporation(cond);
+            for(Corporation item : CorporationList)
+            {
+                downloadSupplierFromSap(item.getCorpCd(), null);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+
 
     /**
      * 다운로드 정보를 공급업체로 변환

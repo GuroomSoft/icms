@@ -149,14 +149,13 @@ public class ItemService {
      * 06시 실행
      */
     @Transactional
-    @Scheduled(cron = "0 0 4 * * *")
+    @Scheduled(cron = "0 10 4 * * *")
     public void scheduleDownloadPurchaseFromSAP()
     {
         try{
             List<Plant> plantList = getPlantList("KR");
             for (Plant item : plantList) {
-                List<String> plants = new ArrayList<>();
-                plants.add(item.getPlantCd());
+                String plants = item.getPlantCd();
 
                 LinkedHashMap<String, Object> params = new LinkedHashMap<>();
                 params.put("plantCd", plants);

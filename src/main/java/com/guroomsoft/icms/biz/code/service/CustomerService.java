@@ -1,7 +1,9 @@
 package com.guroomsoft.icms.biz.code.service;
 
+import com.guroomsoft.icms.biz.code.dao.CorporationDAO;
 import com.guroomsoft.icms.biz.code.dao.CustomerDAO;
 import com.guroomsoft.icms.biz.code.dao.PartnerDAO;
+import com.guroomsoft.icms.biz.code.dto.Corporation;
 import com.guroomsoft.icms.biz.code.dto.Partner;
 import com.guroomsoft.icms.common.exception.*;
 import com.guroomsoft.icms.common.service.ExcelService;
@@ -15,6 +17,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +41,7 @@ public class CustomerService {
 
     private final ExcelService excelService;
     private final JcoClient jcoClient;
+    private final CorporationDAO corporationDAO;
 
     /**
      * 고객사목록
@@ -455,6 +459,28 @@ public class CustomerService {
             log.error(e.getMessage());
         }
         return 0;
+    }
+
+    /**
+     * SAP로부터 고객사 정보 수신
+     * 06시 5분 실행
+     */
+
+    @Transactional
+    @Scheduled(cron = "0 5 6 * * *")
+    public void scheduleDownloadSupplierFromSap()
+    {
+        try{
+            Corporation cond = new Corporation();
+            cond.setUseAt("Y");
+            List<Corporation> CorporationList = corporationDAO.selectCorporation(cond);
+            for(Corporation item : CorporationList)
+            {
+                downloadCustomerFromSap(item.getCorpCd(), null);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     /**
