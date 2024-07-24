@@ -112,3 +112,27 @@ Error:     >Tue Jul 02 17:15:19,421<    [JCoAPI] Exception while adding Connecti
 	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
 
 
+
+**** Log file opened at 2024-07-24 12:15:05 KST (GMT+09:00 Korean Standard Time) Rel. 3.1.8 (2023-07-11) [753.1216]
+Error:     >Wed Jul 24 12:15:05,114<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.65 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.65:3330' not reached
+TIME        Wed Jul 24 12:15:05 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.65:3330
+SYSTEM CALL connect
+ERRNO       10061
+ERRNO TEXT  WSAECONNREFUSED: Connection refused
+COUNTER     2
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
