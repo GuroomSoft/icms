@@ -15,7 +15,13 @@
                  when isnull(b.bp_tel_no, '') != '' then b.bp_tel_no
                  else '' end as mobile,
             a.doc_status as docStatus,
-            a.eform_doc_id as eformDocId,
+            -- a.eform_doc_id as eformDocId,
+            HA.eform_doc_id as eformDocId,
+            -- HA.eform_status as eformStatus,
+            -- HA.complete_dt as eformCompleteDt,
+            case when isnull(HA.eform_doc_id, '') != '' AND isnull(HA.complete_dt, '') != '' AND (HA.eform_status = 'doc_accept_participant' OR HA.eform_status = 'doc_complete') then 'true'
+                 else 'false'
+                end as eformComplete,
             dbo.FN_GET_CODE_NAME('C09', a.doc_status) as docStatusNm
         FROM BT_PRICE_CHANGE a
              JOIN MT_BIZ_PARTNER b on a.bp_cd = b.bp_cd
@@ -24,6 +30,7 @@
                   from ST_USERS
                  where account_type = 'E'
             ) c ON a.bp_cd = c.bp_cd
+             LEFT OUTER JOIN HT_AGREEMENT HA ON HA.eform_doc_id = a.eform_doc_id
         WHERE a.plant_cd = #{plantCd}
           AND a.announced_date = #{announcedDate}
           AND a.ref_doc_no = #{docNo}
