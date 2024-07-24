@@ -89,11 +89,11 @@
             <if test='lastLoginDt != null and !lastLoginDt.equals("")'>
                 last_login_dt = CONVERT(DATETIME, #{lastLoginDt}, 120),
             </if>
+            <if test='corporateSeal != null and !corporateSeal.equals("")'>
+                corporate_seal = #{corporateSeal},
+            </if>
                 mod_uid = #{modUid},
                 mod_dt = GETDATE()
-            <if test='corporateSeal != null and !corporateSeal.equals("")'>
-                corporate_seal = CONVERT(DATETIME, #{corporateSeal}, 120),
-            </if>
         </set>
         <where>
             <if test="userUid != null and userUid gt 0">
