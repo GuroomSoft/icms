@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
@@ -343,7 +344,16 @@ public class ChangePriceService {
         }
     }
 
-
+    public BigDecimal dataReplaceBigDecimal(String data)
+    {
+        if(data == null || data.isEmpty())
+        {
+            return BigDecimal.ZERO;
+        }else{
+            String cleanedStr = data.replace(",", "");
+            return new BigDecimal(cleanedStr);
+        }
+    }
 
     /**
      * 매입단가 변경관리 상세내역 출력
@@ -400,9 +410,9 @@ public class ChangePriceService {
             row.add(data.getPcsItemNo());
             row.add(data.getPcsItemNm());
             row.add(data.getBaseDate());
-            row.add(data.getCurItemPrice());
-            row.add(data.getTotalChangedAmt());
-            row.add(data.getNewPurchaseAmt());
+            row.add(dataReplaceBigDecimal(data.getCurItemPrice()));
+            row.add(dataReplaceBigDecimal(data.getTotalChangedAmt()));
+            row.add(dataReplaceBigDecimal(data.getNewPurchaseAmt()));
             row.add(data.getPartType());
             row.add(data.getPartTypeNm());
             row.add(data.getSubItemBpCd());
@@ -418,37 +428,37 @@ public class ChangePriceService {
             row.add(data.getSteelGrade());
             row.add(data.getMSpec());
             row.add(data.getMType());
-            row.add(data.getThickThick());
-            row.add(data.getWidthOuter());
-            row.add(data.getHeightInLen());
+            row.add(dataReplaceBigDecimal(data.getThickThick()));
+            row.add(dataReplaceBigDecimal(data.getWidthOuter()));
+            row.add(dataReplaceBigDecimal(data.getHeightInLen()));
             row.add(data.getBlWidth());
             row.add(data.getBlLength());
             row.add(data.getBlCavity());
-            row.add(data.getNetWeight());
-            row.add(data.getSpecificGravity());
-            row.add(data.getSlittLossRate());
-            row.add(data.getLossRate());
-            row.add(data.getInputWeight());
-            row.add(data.getBfConsignedPrice());
-            row.add(data.getAfConsignedPrice());
-            row.add(data.getDiffConsignedPrice());
-            row.add(data.getBfCnsgnMatPrice());
-            row.add(data.getAfCnsgnMatPrice());
-            row.add(data.getDiffCnsgnMatPrice());
-            row.add(data.getBfScrapUnitPrice());
-            row.add(data.getAfScrapUnitPrice());
-            row.add(data.getDiffScrapUnitPrice());
-            row.add(data.getScrapWeight());
-            row.add(data.getScrapRecoveryRate());
-            row.add(data.getBfScrapPrice());
-            row.add(data.getAfScrapPrice());
-            row.add(data.getDiffScrapPrice());
-            row.add(data.getBfPartMatCost());
-            row.add(data.getAfPartMatCost());
-            row.add(data.getDiffPartMatCost());
-            row.add(data.getMatAdminRate());
-            row.add(data.getOsMatAdminRate());
-            row.add(data.getChangedAmount());
+            row.add(dataReplaceBigDecimal(data.getNetWeight()));
+            row.add(dataReplaceBigDecimal(data.getSpecificGravity()));
+            row.add(dataReplaceBigDecimal(data.getSlittLossRate()));
+            row.add(dataReplaceBigDecimal(data.getLossRate()));
+            row.add(dataReplaceBigDecimal(data.getInputWeight()));
+            row.add(dataReplaceBigDecimal(data.getBfConsignedPrice()));
+            row.add(dataReplaceBigDecimal(data.getAfConsignedPrice()));
+            row.add(dataReplaceBigDecimal(data.getDiffConsignedPrice()));
+            row.add(dataReplaceBigDecimal(data.getBfCnsgnMatPrice()));
+            row.add(dataReplaceBigDecimal(data.getAfCnsgnMatPrice()));
+            row.add(dataReplaceBigDecimal(data.getDiffCnsgnMatPrice()));
+            row.add(dataReplaceBigDecimal(data.getBfScrapUnitPrice()));
+            row.add(dataReplaceBigDecimal(data.getAfScrapUnitPrice()));
+            row.add(dataReplaceBigDecimal(data.getDiffScrapUnitPrice()));
+            row.add(dataReplaceBigDecimal(data.getScrapWeight()));
+            row.add(dataReplaceBigDecimal(data.getScrapRecoveryRate()));
+            row.add(dataReplaceBigDecimal(data.getBfScrapPrice()));
+            row.add(dataReplaceBigDecimal(data.getAfScrapPrice()));
+            row.add(dataReplaceBigDecimal(data.getDiffScrapPrice()));
+            row.add(dataReplaceBigDecimal(data.getBfPartMatCost()));
+            row.add(dataReplaceBigDecimal(data.getAfPartMatCost()));
+            row.add(dataReplaceBigDecimal(data.getDiffPartMatCost()));
+            row.add(dataReplaceBigDecimal(data.getMatAdminRate()));
+            row.add(dataReplaceBigDecimal(data.getOsMatAdminRate()));
+            row.add(dataReplaceBigDecimal(data.getChangedAmount()));
             row.add(data.getChangedStatus());
             row.add(data.getSubItemCount());
             row.add(data.getCompletedCnt());
