@@ -27,11 +27,12 @@ public class AgreementController {
     @Operation(summary = "합의서 전송데이터 조회", description = "합의서 전송데이터 조회")
     @RequestMapping(value = "/getTargetData", method = {RequestMethod.POST})
     public ListResult<Map<String, Object>> getTargetData(
-            @Parameter(description = "조회조건", required = true) @RequestBody AgreementContentReq cond)
+            @Parameter(description = "조회조건", required = true) @RequestBody AgreementContentReq cond,
+            @Parameter(hidden = true) @RequestParam long reqUserUid)
     {
         List<Map<String, Object>> resultSet  = null;
         try {
-            resultSet = agreementService.findAgreementForSend(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpList(), cond.getDocNo());
+            resultSet = agreementService.findAgreementForSend(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpList(), cond.getDocNo(), Long.valueOf(reqUserUid));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

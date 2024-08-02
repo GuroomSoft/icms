@@ -145,7 +145,7 @@ public class AgreementService {
      * @return
      * @throws Exception
      */
-    public List<Map<String, Object>> findAgreementForSend(String plantCd, String announcedDate, List<String> bpList, String docNo) throws Exception
+    public List<Map<String, Object>> findAgreementForSend(String plantCd, String announcedDate, List<String> bpList, String docNo, Long reqUserUid) throws Exception
     {
 
         if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate) || bpList == null || bpList.isEmpty()|| StringUtils.isBlank(docNo))
@@ -158,6 +158,7 @@ public class AgreementService {
         cond.put("plantCd", plantCd);
         cond.put("announcedDate", announcedDate);
         cond.put("bpList", bpList);
+        cond.put("reqUserUid", reqUserUid);
         return agreementDAO.selectAgreementDataOnly(cond);
     }
 

@@ -65,9 +65,15 @@
         FROM BT_PRICE_CHANGE_DTL
         WHERE plant_cd = w.plant_cd
         AND bp_cd = w.bp_cd
+        AND doc_no = w.src_doc_no
         GROUP BY item_no
         ) a) AS item_count
-        , ref_doc_no
+        , ref_doc_no,
+        w.src_doc_no,
+        w.userSign_s,
+        w.corporateSeal_s,
+        w.userSign_r,
+        w.corporateSeal_r
         FROM(
         SELECT /* AgreementMapper.selectAgreementDataOnly */
         A.sender_team as team_s,
@@ -79,9 +85,19 @@
         A.agr_detail,
         A.agr_file,
         A.plant_cd,
-        B.ref_doc_no
+        B.ref_doc_no,
+        A.src_doc_no,
+        (SELECT user_sign
+        FROM ST_USERS
+        WHERE user_uid = #{reqUserUid}) as userSign_s,
+        (SELECT corporate_seal
+        FROM ST_USERS
+        WHERE user_uid = #{reqUserUid}) as corporateSeal_s,
+        C.user_sign as userSign_r,
+        C.corporate_seal as corporateSeal_r
         from HT_AGREEMENT A WITH (NOLOCK)
         LEFT OUTER JOIN BT_PRICE_CHANGE B WITH (NOLOCK) ON a.src_doc_no = B.doc_no
+        LEFT OUTER JOIN ST_USERS C WITH (NOLOCK) ON a.bp_cd = C.account_id
         where a.plant_cd = #{plantCd}
         and a.announced_date = #{announcedDate}
         and b.ref_doc_no = #{docNo}
@@ -120,7 +136,9 @@
         bp_nm as company_r,
         ceo_nm as name_r,
         agr_desc,
-        eform_doc_id as eformDocId
+        eform_doc_id as eformDocId,
+        eform_status as eformStatus,
+        complete_dt as completeDt
         from HT_AGREEMENT WITH (NOLOCK)
         where
         src_doc_no in
