@@ -261,10 +261,22 @@ public class ChangePriceController {
 
             if(agreementList != null && !agreementList.isEmpty())
             {
-                List<String> eFormDocIds = agreementList.stream()
+                List<String> eFormDocIds = new ArrayList<>(agreementList.stream()
                         .map(AgreementDoc::getEformDocId)
                         .filter(Objects::nonNull) // null 방지
-                        .toList();
+                        .toList());
+
+                List<String> eFormCompleteList = new ArrayList<>(agreementList.stream()
+                        .filter(f -> f.getCompleteDt() != null && f.getEformDocId() != null && (Objects.equals(f.getEformStatus(), "doc_accept_participant") || Objects.equals(f.getEformStatus(), "doc_complete")))
+                        .map(AgreementDoc::getEformDocId)
+                        .toList());
+
+                if (eFormCompleteList == null || eFormCompleteList.isEmpty()) {
+                    eFormCompleteList = new ArrayList<>();
+                }
+
+                eFormDocIds.removeAll(eFormCompleteList);
+
                 if(!eFormDocIds.isEmpty())
                 {
                     // eformsign 문서삭제 => 문서 취소
