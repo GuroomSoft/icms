@@ -170,7 +170,7 @@ public class ExcelService {
         dataRightStyle = wb.createCellStyle();
 
         dataRightStyle.setAlignment(HorizontalAlignment.RIGHT);
-        dataRightStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("#,##0"));
+        dataRightStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("#,##0.###"));
 
         dataRightStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
@@ -481,7 +481,8 @@ public class ExcelService {
                         cell.setCellValue((Float)col);
                         cell.setCellStyle(dataRightStyle);
                     } else if (StringUtils.equals(col.getClass().getSimpleName(), "BigDecimal")) {
-                        cell.setCellValue(((BigDecimal)col).longValue());
+                        //cell.setCellValue(((BigDecimal)col).longValue());
+                        cell.setCellValue(((BigDecimal) col).doubleValue());
                         cell.setCellStyle(dataRightStyle);
                     } else if (StringUtils.equals(col.getClass().getSimpleName(), "Double")) {
                         cell.setCellValue((Double)col);
