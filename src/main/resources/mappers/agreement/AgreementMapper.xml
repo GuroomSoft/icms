@@ -48,7 +48,7 @@
 
     <!-- 조회 -->
     <select id="selectAgreementDataOnly" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
+        SELECT /* AgreementMapper.selectAgreementDataOnly */
         w.team_s,
         w.name_s,
         w.bp_cd,
@@ -75,7 +75,7 @@
         w.userSign_r,
         w.corporateSeal_r
         FROM(
-        SELECT /* AgreementMapper.selectAgreementDataOnly */
+        SELECT
         A.sender_team as team_s,
         A.sender as name_s,
         A.bp_cd,
