@@ -23,4 +23,5 @@ public class DetailReq {
     @Schema(description = "매입품번") @JsonProperty("pcsItemNo") private String pcsItemNo;
     @Schema(description = "SUB품번") @JsonProperty("subItemNo") private String subItemNo;
     @Schema(description = "재질코드") @JsonProperty("materialCd") private String materialCd;
+    @Schema(description = "개별가격변동내역상세상태") @JsonProperty("changedStatus") private String changedStatus;
 }

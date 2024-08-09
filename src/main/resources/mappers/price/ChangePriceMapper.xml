@@ -126,6 +126,9 @@
                left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no
         where a.doc_no = #{docNo}
             AND a.plant_cd = #{plantCd}
+        <if test="changedStatus != null">
+            AND a.changed_status = #{changedStatus}
+        </if>
         <if test="bpList != null">
             AND a.bp_cd in
             <foreach collection="bpList" item="item" separator="," open="(" close=")">
@@ -452,7 +455,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
 
     <!-- 사급 단가 업로드 조회 -->
     <select id="findConsignedForSap" parameterType="changePrice"  resultType="changePrice">
-        select /* ChangePriceMapper.selectChangedPrice */
+        select /* ChangePriceMapper.findConsignedForSap */
         a.doc_no
         , a.announced_date
         , a.plant_cd

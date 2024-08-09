@@ -85,6 +85,7 @@ public class ChangePriceController {
             cond.setPcsItemNo(pcsItemNo);
             cond.setSubItemNo(subItemNo);
             cond.setMaterialCd(materialCd);
+            cond.setChangedStatus("E");
 
             resultSet = changePriceService.findChangedPrice(cond);
 
