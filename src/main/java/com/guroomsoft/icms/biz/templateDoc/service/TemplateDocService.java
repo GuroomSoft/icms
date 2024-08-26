@@ -7,6 +7,8 @@ import com.guroomsoft.icms.biz.code.dao.PartnerDAO;
 import com.guroomsoft.icms.biz.code.dto.Code;
 import com.guroomsoft.icms.biz.code.dto.Item;
 import com.guroomsoft.icms.biz.code.dto.Partner;
+import com.guroomsoft.icms.biz.material.dto.Material;
+import com.guroomsoft.icms.biz.material.service.MaterialService;
 import com.guroomsoft.icms.biz.templateDoc.dao.TemplateDocDAO;
 import com.guroomsoft.icms.biz.templateDoc.dto.TemplateDoc;
 import com.guroomsoft.icms.biz.templateDoc.dto.TemplateDtl;
@@ -42,6 +44,7 @@ public class TemplateDocService {
     private final ItemDAO itemDAO;
     private final UserDAO userDAO;
     private final CodeDAO codeDAO;
+    private final MaterialService materialService;
 
     /**
      * 템플릿 문서 조회
@@ -360,8 +363,18 @@ public class TemplateDocService {
             return resultMap;
         }
 
+        Material cond = new Material();
+        List<Material> resultSet = null;
+        try {
+            resultSet = materialService.findMaterial(cond);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         for (TemplateDtl item : items)
         {
+
+
             // 전체 적용
             if (StringUtils.isBlank(item.getPlantCd()))
             {
@@ -494,6 +507,13 @@ public class TemplateDocService {
                     continue;
                 }
 
+                if(resultSet.stream().filter(f -> Objects.equals(f.getMaterialCd(), item.getMaterialCd())).findFirst().orElse(null) == null)
+                {
+                    item.setInvalidMessage("직개발 부품 - 미등록 재질코드");
+                    invalidItems.add(item);
+                    continue;
+                }
+
                 // Net 중량
                 if (item.getNetWeight() == null || item.getNetWeight().doubleValue() == 0 ) {
                     item.setInvalidMessage("직개발 부품 - Net 중량 누락");
@@ -554,6 +574,13 @@ public class TemplateDocService {
                 if ( StringUtils.isBlank(item.getMaterialCd()) )
                 {
                     item.setInvalidMessage("직개발 부품 - 재질코드 누락");
+                    invalidItems.add(item);
+                    continue;
+                }
+
+                if(resultSet.stream().filter(f -> Objects.equals(f.getMaterialCd(), item.getMaterialCd())).findFirst().orElse(null) == null)
+                {
+                    item.setInvalidMessage("직개발 부품 - 미등록 재질코드");
                     invalidItems.add(item);
                     continue;
                 }
