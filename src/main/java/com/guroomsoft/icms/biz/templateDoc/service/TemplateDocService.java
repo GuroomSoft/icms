@@ -211,7 +211,29 @@ public class TemplateDocService {
                 Map<String, Object> cond = new HashMap<>();
                 cond.put("docNo", doc.getDocNo());
                 templateDocDAO.deleteTemplateDtl(cond); // 세부항목 삭제 후 등록처리
-                for (TemplateDtl item : details) {
+
+                List<TemplateDtl> mergedList = new ArrayList<>();
+                for (TemplateDtl newItem : details) {
+                    boolean found = false;
+                    // 기존 리스트에서 동일한 itemno, subitemno가 있는지 확인
+                    for (TemplateDtl existingItem : mergedList) {
+                        if (Objects.equals(existingItem.getPcsItemNo(), newItem.getPcsItemNo()) &&
+                                Objects.equals(existingItem.getSubItemNo(), newItem.getSubItemNo()) &&
+                                Objects.equals(existingItem.getPlantCd(), newItem.getPlantCd()) &&
+                                Objects.equals(existingItem.getBpCd(), newItem.getBpCd()) ) {
+                            // 동일한 항목이면 us 값을 더함
+                            existingItem.setUs(existingItem.getUs() + newItem.getUs());
+                            found = true;
+                            break;
+                        }
+                    }
+                    // 동일한 항목이 없으면 새로 추가
+                    if (!found) {
+                        mergedList.add(newItem);
+                    }
+                }
+
+                for (TemplateDtl item : mergedList) {
                     item.setDocNo(doc.getDocNo());
                     item.setRegUid(requestUserUid);
                     Map<String, Object> dataMap = convertToItemMap(item);
@@ -735,7 +757,28 @@ public class TemplateDocService {
             throw new CInvalidArgumentException();
         }
 
-        for (TemplateDtl item : items)
+        List<TemplateDtl> mergedList = new ArrayList<>();
+        for (TemplateDtl newItem : items) {
+            boolean found = false;
+            // 기존 리스트에서 동일한 itemno, subitemno가 있는지 확인
+            for (TemplateDtl existingItem : mergedList) {
+                if (Objects.equals(existingItem.getPcsItemNo(), newItem.getPcsItemNo()) &&
+                        Objects.equals(existingItem.getSubItemNo(), newItem.getSubItemNo()) &&
+                        Objects.equals(existingItem.getPlantCd(), newItem.getPlantCd()) &&
+                        Objects.equals(existingItem.getBpCd(), newItem.getBpCd()) ) {
+                    // 동일한 항목이면 us 값을 더함
+                    existingItem.setUs(existingItem.getUs() + newItem.getUs());
+                    found = true;
+                    break;
+                }
+            }
+            // 동일한 항목이 없으면 새로 추가
+            if (!found) {
+                mergedList.add(newItem);
+            }
+        }
+
+        for (TemplateDtl item : mergedList)
         {
             if (!isValidNewDtl(item)) {
                 log.debug(">>> Skip invalid detail item {} {} {}", item.getBpCd(), item.getPcsItemNo(), item.getSubItemNo() );
