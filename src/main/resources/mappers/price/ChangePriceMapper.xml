@@ -52,80 +52,297 @@
 
     <!-- 가격변경이력 -->
     <select id="selectChangedPrice" resultType="changePrice" parameterType="com.guroomsoft.icms.biz.price.dto.DetailReq">
+<!--        SELECT w.doc_no-->
+<!--        ,w.announced_date-->
+<!--        ,w.plant_cd-->
+<!--        ,w.bp_cd-->
+<!--        ,w.doc_order-->
+<!--        ,w.car_model-->
+<!--        ,w.pcs_item_no-->
+<!--        ,w.base_date-->
+<!--        ,w.curItemPrice-->
+<!--        ,w.part_type-->
+<!--        ,w.sub_item_bp_cd-->
+<!--        ,w.sub_item_no-->
+<!--        ,w.raw_material_cd-->
+<!--        ,w.apply_date-->
+<!--        ,w.material_cd-->
+<!--        ,w.material_nm-->
+<!--        ,w.us-->
+<!--        ,w.steel_grade-->
+<!--        ,w.m_spec-->
+<!--        ,w.m_type-->
+<!--        ,w.thickThick-->
+<!--        ,w.widthOuter-->
+<!--        ,w.heightInLen-->
+<!--        ,w.blWidth-->
+<!--        ,w.blLength-->
+<!--        ,w.blCavity-->
+<!--        ,w.net_weight-->
+<!--        ,w.specificGravity-->
+<!--        ,w.slittLossRate-->
+<!--        ,w.lossRate-->
+<!--        ,w.inputWeight-->
+<!--        ,w.bfConsignedPrice-->
+<!--        ,w.afConsignedPrice-->
+<!--        ,w.diffConsignedPrice-->
+<!--        ,w.bfCnsgnMatPrice-->
+<!--        ,w.afCnsgnMatPrice-->
+<!--        ,w.diffCnsgnMatPrice-->
+<!--        ,w.bfScrapUnitPrice-->
+<!--        ,w.afScrapUnitPrice-->
+<!--        ,w.diffScrapUnitPrice-->
+<!--        ,w.scrapWeight-->
+<!--        ,w.scrapRecoveryRate-->
+<!--        ,w.bfScrapPrice-->
+<!--        ,w.afScrapPrice-->
+<!--        ,w.diffScrapPrice-->
+<!--        ,w.bfPartMatCost-->
+<!--        ,w.afPartMatCost-->
+<!--        ,w.diffPartMatCost-->
+<!--        ,w.matAdminRate-->
+<!--        ,w.osMatAdminRate-->
+<!--        ,w.changedAmount-->
+<!--        ,w.changed_status-->
+<!--        ,w.sub_item_count-->
+<!--        ,w.completed_cnt-->
+<!--        ,w.incompleted_cnt-->
+<!--        ,w.error_cnt-->
+<!--        ,w.totalChangedAmt-->
+<!--        ,-->
+<!--        CASE WHEN w.totalChangedAmt = 0 THEN-->
+<!--        COALESCE(-->
+<!--        CASE-->
+<!--        WHEN w.bp_cd = '200091' THEN-->
+<!--        (SELECT TOP 1-->
+<!--        format(sum(round(ISNULL(changed_amount, 0), 1, 1)) over (PARTITION BY plant_cd, bp_cd, pcs_item_no, car_model) + cur_item_price, '#,###')-->
+<!--        FROM [ICMS].[dbo].HT_CHANGED_PRICE WITH (NOLOCK)-->
+<!--        WHERE plant_cd = w.plant_cd-->
+<!--        AND bp_cd = w.bp_cd-->
+<!--        AND pcs_item_no = w.pcs_item_no-->
+<!--        AND apply_date &lt;= w.apply_date-->
+<!--        ORDER BY pcs_item_no, apply_date)-->
+<!--        ELSE-->
+<!--        (SELECT TOP 1-->
+<!--        format(sum(round(ISNULL(changed_amount, 0), 0)) over (PARTITION BY plant_cd, bp_cd, pcs_item_no, car_model) + cur_item_price, '#,###')-->
+<!--        FROM [ICMS].[dbo].HT_CHANGED_PRICE WITH (NOLOCK)-->
+<!--        WHERE plant_cd = w.plant_cd-->
+<!--        AND bp_cd = w.bp_cd-->
+<!--        AND pcs_item_no = w.pcs_item_no-->
+<!--        AND apply_date &lt;= w.apply_date-->
+<!--        ORDER BY pcs_item_no, apply_date)-->
+<!--        END-->
+<!--        , w.newPurchaseAmt)-->
+<!--        ELSE w.newPurchaseAmt-->
+<!--        END AS newPurchaseAmt-->
+<!--        ,w.plant_nm-->
+<!--        ,w.bp_nm-->
+<!--        ,w.pcs_item_nm-->
+<!--        ,w.part_type_nm-->
+<!--        ,w.sub_item_bp_nm-->
+<!--        ,w.item_nm-->
+<!--        ,w.raw_material_nm-->
+<!--        FROM (-->
+<!--        select /* ChangePriceMapper.selectChangedPrice */-->
+<!--            a.doc_no, a.announced_date, a.plant_cd, a.bp_cd, a.doc_order, b.car_model, a.pcs_item_no, a.base_date,-->
+<!--            format(a.cur_item_price, '0.00##') as curItemPrice, a.part_type, a.sub_item_bp_cd, a.sub_item_no,-->
+<!--            a.raw_material_cd, a.apply_date, a.material_cd, a.material_nm, a.us, a.steel_grade, a.m_spec, a.m_type,-->
+<!--            format(a.thick_thick, '0.0##') as thickThick ,-->
+<!--            format(a.width_outer, '0.###') as widthOuter,-->
+<!--            format(a.height_in_len, '0.###') as heightInLen,-->
+<!--            format(a.bl_width, '0.###') as blWidth,-->
+<!--            format(a.bl_length, '0.###') as blLength,-->
+<!--            format(a.bl_cavity, '0.###') as blCavity ,-->
+<!--            format(round(a.net_weight, 3), '0.000') as net_weight,-->
+<!--            format(a.specific_gravity, '0.##') as specificGravity,-->
+<!--            format(a.slitt_loss_rate, '0.##') as slittLossRate,-->
+<!--            format(a.loss_rate, '0.##') as lossRate,-->
+<!--            format(round(a.input_weight,3), '0.###') as inputWeight,-->
+<!--            format(round(a.bf_consigned_price, 2), '#,##0.##') as bfConsignedPrice,-->
+<!--            format(round(a.af_consigned_price, 2), '#,##0.##') as afConsignedPrice,-->
+<!--            format(round(a.diff_consigned_price, 2), '#,##0.##') as diffConsignedPrice,-->
+<!--            &lt;!&ndash;-->
+<!--            format(round(a.bf_cnsgn_mat_price, 2), '#,##0.##') as bfCnsgnMatPrice,-->
+<!--            format(round(a.af_cnsgn_mat_price, 2), '#,##0.##') as afCnsgnMatPrice,-->
+<!--            format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice,-->
+<!--            &ndash;&gt;-->
+<!--            CASE-->
+<!--            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')-->
+<!--            ELSE format(round(a.bf_cnsgn_mat_price, 0), '#,###')-->
+<!--            END AS bfCnsgnMatPrice,-->
+<!--            CASE-->
+<!--            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1, 1), '#,##0.0')-->
+<!--            ELSE format(round(a.af_cnsgn_mat_price, 0), '#,###')-->
+<!--            END AS afCnsgnMatPrice,-->
+<!--            CASE-->
+<!--            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1, 1) - round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')-->
+<!--            ELSE format(round(a.af_cnsgn_mat_price, 0) - round(a.bf_cnsgn_mat_price, 0), '#,###')-->
+<!--            END AS diffCnsgnMatPrice,-->
+<!--            format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice,-->
+<!--            format(round(a.af_scrap_unit_price, 2), '#,##0.##') as afScrapUnitPrice,-->
+<!--            format(round(a.diff_scrap_unit_price, 2), '#,##0.##') as diffScrapUnitPrice,-->
+<!--            format(round(a.scrap_weight, 3), '0.000') as scrapWeight,-->
+<!--            format(a.scrap_recovery_rate, '##') as scrapRecoveryRate,-->
+<!--            format(round(a.bf_scrap_price, 2), '#,##0.00') as bfScrapPrice,-->
+<!--            format(round(a.af_scrap_price, 2), '#,##0.00') as afScrapPrice,-->
+<!--            format(round(a.diff_scrap_price, 2), '#,##0.00') as diffScrapPrice,-->
+<!--            format(round(a.bf_part_mat_cost, 2), '#,##0.00') as bfPartMatCost,-->
+<!--            format(round(a.af_part_mat_cost, 2), '#,##0.00') as afPartMatCost,-->
+<!--            format(round(a.diff_part_mat_cost, 2), '#,##0.00') as diffPartMatCost,-->
+<!--            format(a.mat_admin_rate, '0.0') as matAdminRate,-->
+<!--            format(a.os_mat_admin_rate, '0.0') as osMatAdminRate ,-->
+<!--            format(round(a.changed_amount, 2), '#,##0.00') as changedAmount,-->
+<!--            &lt;!&ndash;a.changed_status, &ndash;&gt;-->
+<!--            CASE-->
+<!--            WHEN a.cur_item_price IS NULL AND a.part_type = 'RP' THEN 'E'-->
+<!--            WHEN a.cur_item_price = 0 AND a.part_type = 'RP' THEN 'E'-->
+<!--            ELSE a.changed_status-->
+<!--            END AS changed_status,-->
+<!--            a.sub_item_count, a.completed_cnt, a.incompleted_cnt, a.error_cnt,-->
+<!--            &lt;!&ndash;-->
+<!--            format(round(a.total_changed_amt, 2), '#,##0.00') as totalChangedAmt,-->
+<!--            format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt,-->
+<!--            CASE-->
+<!--            WHEN a.bp_cd = '200091' THEN format(round(a.total_changed_amt, 1, 1), '#,##0.0')-->
+<!--            ELSE format(round(a.total_changed_amt, 0), '#,###')-->
+<!--            END AS totalChangedAmt,-->
+<!--            &ndash;&gt;-->
+<!--            CASE-->
+<!--            WHEN a.bp_cd = '200091' THEN format(sum(round(ISNULL(a.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, a.apply_date), '#,##0.0')-->
+<!--            ELSE format(sum(round(ISNULL(a.changed_amount, 0), 0)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, a.apply_date), '#,###')-->
+<!--            END AS totalChangedAmt,-->
+<!--            CASE-->
+<!--            WHEN a.bp_cd = '200091' THEN format(round(a.new_purchase_amt , 1, 1), '#,##0.0')-->
+<!--            ELSE format(round(a.new_purchase_amt , 0), '#,###')-->
+<!--            END AS newPurchaseAmt,-->
+<!--            p.plant_nm, m.bp_nm AS bp_nm, b.item_nm AS pcs_item_nm,-->
+<!--            dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,-->
+<!--            sm.bp_nm AS sub_item_bp_nm, sb.item_nm,-->
+<!--            dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) AS raw_material_nm-->
+<!--          from HT_CHANGED_PRICE a WITH (NOLOCK)-->
+<!--               join MT_PLANT p WITH (NOLOCK) ON a.plant_cd = p.plant_cd-->
+<!--               left outer join MT_BIZ_PARTNER m WITH (NOLOCK) ON a.bp_cd = m.bp_cd-->
+<!--               left outer join MT_BIZ_PARTNER sm WITH (NOLOCK) ON a.sub_item_bp_cd = sm.bp_cd-->
+<!--               left outer join MT_ITEM b WITH (NOLOCK) ON a.pcs_item_no = b.item_no-->
+<!--               left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no-->
+<!--        where a.doc_no = #{docNo}-->
+<!--            AND a.plant_cd = #{plantCd}-->
+<!--        <if test="changedStatus != null">-->
+<!--            AND a.changed_status = #{changedStatus}-->
+<!--        </if>-->
+<!--        <if test="bpList != null">-->
+<!--            AND a.bp_cd in-->
+<!--            <foreach collection="bpList" item="item" separator="," open="(" close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        <if test='partType != null and !partType.equals("")'>AND a.part_type = #{partType}</if>-->
+<!--        <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>AND a.raw_material_cd = #{rawMaterialCd}</if>-->
+<!--        <if test='carModel != null and !carModel.equals("")'>AND a.car_model = #{carModel}</if>-->
+<!--        <if test='pcsItemNo != null and !pcsItemNo.equals("")' >AND a.pcs_item_no like concat('%', #{pcsItemNo}, '%')</if>-->
+<!--        <if test='subItemNo != null and !subItemNo.equals("")'>AND a.sub_item_no like concat('%', #{subItemNo}, '%')</if>-->
+<!--        <if test='materialCd != null and !materialCd.equals("")'>AND a.material_cd like concat('%', #{materialCd}, '%')</if>-->
+<!--        ) w-->
+<!--        order by w.doc_no, w.apply_date, w.plant_cd, w.car_model, w.bp_cd, w.pcs_item_no, w.part_type-->
         select /* ChangePriceMapper.selectChangedPrice */
-            a.doc_no, a.announced_date, a.plant_cd, a.bp_cd, a.doc_order, b.car_model, a.pcs_item_no, a.base_date,
-            format(a.cur_item_price, '0.00##') as curItemPrice, a.part_type, a.sub_item_bp_cd, a.sub_item_no,
-            a.raw_material_cd, a.apply_date, a.material_cd, a.material_nm, a.us, a.steel_grade, a.m_spec, a.m_type,
-            format(a.thick_thick, '0.0##') as thickThick ,
-            format(a.width_outer, '0.###') as widthOuter,
-            format(a.height_in_len, '0.###') as heightInLen,
-            format(a.bl_width, '0.###') as blWidth,
-            format(a.bl_length, '0.###') as blLength,
-            format(a.bl_cavity, '0.###') as blCavity ,
-            format(round(a.net_weight, 3), '0.000') as net_weight,
-            format(a.specific_gravity, '0.##') as specificGravity,
-            format(a.slitt_loss_rate, '0.##') as slittLossRate,
-            format(a.loss_rate, '0.##') as lossRate,
-            format(round(a.input_weight,3), '0.###') as inputWeight,
-            format(round(a.bf_consigned_price, 2), '#,##0.##') as bfConsignedPrice,
-            format(round(a.af_consigned_price, 2), '#,##0.##') as afConsignedPrice,
-            format(round(a.diff_consigned_price, 2), '#,##0.##') as diffConsignedPrice,
-            <!--
-            format(round(a.bf_cnsgn_mat_price, 2), '#,##0.##') as bfCnsgnMatPrice,
-            format(round(a.af_cnsgn_mat_price, 2), '#,##0.##') as afCnsgnMatPrice,
-            format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice,
-            -->
-            CASE
-            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')
-            ELSE format(round(a.bf_cnsgn_mat_price, 0), '#,###')
-            END AS bfCnsgnMatPrice,
-            CASE
-            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1), '#,##0.0')
-            ELSE format(round(a.af_cnsgn_mat_price, 0), '#,###')
-            END AS afCnsgnMatPrice,
-            CASE
-            WHEN a.sub_item_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1, 1) - round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')
-            ELSE format(round(a.af_cnsgn_mat_price, 0) - round(a.bf_cnsgn_mat_price, 0), '#,###')
-            END AS diffCnsgnMatPrice,
-            format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice,
-            format(round(a.af_scrap_unit_price, 2), '#,##0.##') as afScrapUnitPrice,
-            format(round(a.diff_scrap_unit_price, 2), '#,##0.##') as diffScrapUnitPrice,
-            format(round(a.scrap_weight, 3), '0.000') as scrapWeight,
-            format(a.scrap_recovery_rate, '##') as scrapRecoveryRate,
-            format(round(a.bf_scrap_price, 2), '#,##0.00') as bfScrapPrice,
-            format(round(a.af_scrap_price, 2), '#,##0.00') as afScrapPrice,
-            format(round(a.diff_scrap_price, 2), '#,##0.00') as diffScrapPrice,
-            format(round(a.bf_part_mat_cost, 2), '#,##0.00') as bfPartMatCost,
-            format(round(a.af_part_mat_cost, 2), '#,##0.00') as afPartMatCost,
-            format(round(a.diff_part_mat_cost, 2), '#,##0.00') as diffPartMatCost,
-            format(a.mat_admin_rate, '0.0') as matAdminRate,
-            format(a.os_mat_admin_rate, '0.0') as osMatAdminRate ,
-            format(round(a.changed_amount, 2), '#,##0.00') as changedAmount,
-            a.changed_status, a.sub_item_count, a.completed_cnt, a.incompleted_cnt, a.error_cnt,
-            <!--
-            format(round(a.total_changed_amt, 2), '#,##0.00') as totalChangedAmt,
-            format(round(a.new_purchase_amt, 2), '#,##0.00') as newPurchaseAmt,
-            -->
-            CASE
-            WHEN a.bp_cd = '200091' THEN format(round(a.total_changed_amt, 1, 1), '#,##0.0')
-            ELSE format(round(a.total_changed_amt, 0), '#,###')
-            END AS totalChangedAmt,
-            CASE
-            WHEN a.bp_cd = '200091' THEN format(round(a.new_purchase_amt , 1, 1), '#,##0.0')
-            ELSE format(round(a.new_purchase_amt , 0), '#,###')
-            END AS newPurchaseAmt,
-            p.plant_nm, m.bp_nm AS bp_nm, b.item_nm AS pcs_item_nm,
-            dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm,
-            sm.bp_nm AS sub_item_bp_nm, sb.item_nm,
-            dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) AS raw_material_nm
-          from HT_CHANGED_PRICE a WITH (NOLOCK)
-               join MT_PLANT p WITH (NOLOCK) ON a.plant_cd = p.plant_cd
-               left outer join MT_BIZ_PARTNER m WITH (NOLOCK) ON a.bp_cd = m.bp_cd
-               left outer join MT_BIZ_PARTNER sm WITH (NOLOCK) ON a.sub_item_bp_cd = sm.bp_cd
-               left outer join MT_ITEM b WITH (NOLOCK) ON a.pcs_item_no = b.item_no
-               left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no
-        where a.doc_no = #{docNo}
-            AND a.plant_cd = #{plantCd}
+        bt.ref_doc_no as doc_no
+        , bt.announced_date
+        , a.plant_cd
+        , a.bp_cd
+        , a.pc_ord as doc_order
+        , b.car_model
+        , a.item_no as pcs_item_no
+        , a.cur_price_date as base_date
+        , format(a.cur_item_price, '0.00##') as curItemPrice
+        , a.part_type
+        , a.sub_bp_cd as sub_item_bp_cd
+        , a.sub_item_no
+        , a.raw_material_cd
+        , a.apply_date
+        , a.material_cd
+        , a.material_nm
+        , a.us
+        , a.steel_grade
+        , a.m_spec
+        , a.m_type
+        , format(a.thick_thick, '0.0##') as thickThick
+        , format(a.width_outer, '0.###') as widthOuter
+        , format(a.height_in_len, '0.###') as heightInLen
+        , format(a.bl_width, '0.###') as blWidth
+        , format(a.bl_length, '0.###') as blLength
+        , format(a.bl_cavity, '0.###') as blCavity
+        , format(round(a.net_weight, 3), '0.000') as net_weight
+        , format(a.specific_gravity, '0.##') as specificGravity
+        , format(a.slitt_loss_rate, '0.##') as slittLossRate
+        , format(a.loss_rate, '0.##') as lossRate
+        , format(round(a.input_weight,3), '0.###') as inputWeight
+        , format(round(a.bf_consigned_price, 2), '#,##0.##') as bfConsignedPrice
+        , format(round(a.af_consigned_price, 2), '#,##0.##') as afConsignedPrice
+        , format(round(a.diff_consigned_price, 2), '#,##0.##') as diffConsignedPrice
+        -- , format(round(a.bf_cnsgn_mat_price, 2), '#,##0.##') as bfCnsgnMatPrice
+        -- , format(round(a.af_cnsgn_mat_price, 2), '#,##0.##') as afCnsgnMatPrice
+        -- , format(round(a.diff_cnsgn_mat_price, 2), '#,##0.##') as diffCnsgnMatPrice
+        , CASE
+        WHEN a.sub_bp_cd = '200091' THEN format(round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')
+        ELSE format(round(a.bf_cnsgn_mat_price, 0), '#,###')
+        END AS bfCnsgnMatPrice
+        , CASE
+        WHEN a.sub_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1, 1), '#,##0.0')
+        ELSE format(round(a.af_cnsgn_mat_price, 0), '#,###')
+        END AS afCnsgnMatPrice
+        , CASE
+        WHEN a.sub_bp_cd = '200091' THEN format(round(a.af_cnsgn_mat_price, 1, 1) - round(a.bf_cnsgn_mat_price, 1, 1), '#,##0.0')
+        ELSE format(round(a.af_cnsgn_mat_price, 0) - round(a.bf_cnsgn_mat_price, 0), '#,###')
+        END AS diffCnsgnMatPrice
+        , format(round(a.bf_scrap_unit_price, 2), '#,##0.##') as bfScrapUnitPrice
+        , format(round(a.af_scrap_unit_price, 2), '#,##0.##') as afScrapUnitPrice
+        , format(round(a.diff_scrap_unit_price, 2), '#,##0.##') as diffScrapUnitPrice
+        , format(round(a.scrap_weight, 3), '0.000') as scrapWeight
+        , format(a.scrap_recovery_rate, '##') as scrapRecoveryRate
+        , format(round(a.bf_scrap_price, 2), '#,##0.00') as bfScrapPrice
+        , format(round(a.af_scrap_price, 2), '#,##0.00') as afScrapPrice
+        , format(round(a.diff_scrap_price, 2), '#,##0.00') as diffScrapPrice
+        , format(round(a.bf_part_mat_cost, 2), '#,##0.00') as bfPartMatCost
+        , format(round(a.af_part_mat_cost, 2), '#,##0.00') as afPartMatCost
+        , format(round(a.diff_part_mat_cost, 2), '#,##0.00') as diffPartMatCost
+        , format(a.mat_admin_rate, '0.0') as matAdminRate
+        , format(a.os_mat_admin_rate, '0.0') as osMatAdminRate
+        , format(round(a.changed_amount, 2), '#,##0.00') as changedAmount
+        -- , a.changed_status
+        , CASE
+        WHEN a.cur_item_price IS NULL AND a.part_type = 'RP' THEN 'E'
+        WHEN a.cur_item_price = 0 AND a.part_type = 'RP' THEN 'E'
+        ELSE a.changed_status
+        END AS changed_status
+        , btitem.sub_item_cnt
+        , btitem.completed_cnt
+        , btitem.incompleted_cnt
+        , btitem.error_cnt
+        , CASE
+        WHEN a.bp_cd = '200091' THEN format(sum(round(ISNULL(a.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, a.apply_date), '#,##0.0')
+        ELSE format(sum(round(ISNULL(a.changed_amount, 0), 0)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, a.apply_date), '#,###')
+        END AS totalChangedAmt
+        , CASE
+        WHEN a.bp_cd = '200091' THEN format(ISNULL(btitem.af_price, 0), '#,##0.0')
+        ELSE format(round(btitem.af_price , 0), '#,###')
+        END AS newPurchaseAmt
+        , p.plant_nm
+        , m.bp_nm AS bp_nm
+        , b.item_nm AS pcs_item_nm
+        , dbo.FN_GET_CODE_NAME('B02', a.part_type) AS part_type_nm
+        , sm.bp_nm AS sub_item_bp_nm
+        , sb.item_nm
+        , dbo.FN_GET_CODE_NAME('B01', a.raw_material_cd) AS raw_material_nm
+        from BT_PRICE_CHANGE_DTL a WITH (NOLOCK)
+        left outer join BT_PRICE_CHANGE bt WITH (NOLOCK) ON bt.doc_no = a.doc_no
+        left outer join BT_PRICE_CHANGE_ITEM btitem WITH (NOLOCK) ON a.doc_no = btitem.doc_no AND a.plant_cd = btitem.plant_cd AND a.bp_cd = btitem.bp_cd AND a.item_no = btitem.item_no AND a.apply_date = btitem.apply_date
+        join MT_PLANT p WITH (NOLOCK) ON a.plant_cd = p.plant_cd
+        left outer join MT_BIZ_PARTNER m WITH (NOLOCK) ON a.bp_cd = m.bp_cd
+        left outer join MT_BIZ_PARTNER sm WITH (NOLOCK) ON a.sub_bp_cd = sm.bp_cd
+        left outer join MT_ITEM b WITH (NOLOCK) ON a.item_no = b.item_no
+        left outer join MT_ITEM sb WITH (NOLOCK) ON a.sub_item_no = sb.item_no
+        where bt.ref_doc_no = #{docNo}
+        AND a.plant_cd = #{plantCd}
         <if test="changedStatus != null">
             AND a.changed_status = #{changedStatus}
         </if>
@@ -138,10 +355,10 @@
         <if test='partType != null and !partType.equals("")'>AND a.part_type = #{partType}</if>
         <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>AND a.raw_material_cd = #{rawMaterialCd}</if>
         <if test='carModel != null and !carModel.equals("")'>AND a.car_model = #{carModel}</if>
-        <if test='pcsItemNo != null and !pcsItemNo.equals("")' >AND a.pcs_item_no like concat('%', #{pcsItemNo}, '%')</if>
+        <if test='pcsItemNo != null and !pcsItemNo.equals("")' >AND a.item_no like concat('%', #{pcsItemNo}, '%')</if>
         <if test='subItemNo != null and !subItemNo.equals("")'>AND a.sub_item_no like concat('%', #{subItemNo}, '%')</if>
         <if test='materialCd != null and !materialCd.equals("")'>AND a.material_cd like concat('%', #{materialCd}, '%')</if>
-        order by a.doc_no, a.apply_date, a.plant_cd, b.car_model, a.bp_cd, a.pcs_item_no, a.part_type
+        order by bt.ref_doc_no, a.apply_date, a.plant_cd, b.car_model, a.bp_cd, a.item_no, a.part_type
     </select>
 
     <!-- 매입품번 가격변경 조회 -->
@@ -178,11 +395,32 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
             ,
             CASE
             WHEN (SELECT DISTINCT TOP 1 bgn_date FROM BT_ANNOUNCE_PRICE_DTL WITH (NOLOCK) ORDER BY bgn_date) = w.apply_date AND w.af_price = 0 THEN w.cur_price
-            WHEN w.af_price = 0 THEN
+            WHEN w.af_price = 0 OR w.diff_amount = 0 THEN
             COALESCE(
-            (SELECT TOP 1 new_purchase_amt
-            FROM HT_CHANGED_PRICE t2
-            WHERE t2.plant_cd = w.plant_cd AND t2.bp_cd = w.bp_cd AND t2.pcs_item_no = w.item_no AND t2.new_purchase_amt IS NOT NULL AND t2.new_purchase_amt != 0 AND t2.apply_date &lt; w.apply_date ORDER BY t2.apply_date DESC), w.cur_price)
+            --(SELECT TOP 1 new_purchase_amt
+            --FROM HT_CHANGED_PRICE t2
+            --WHERE t2.plant_cd = w.plant_cd AND t2.bp_cd = w.bp_cd AND t2.pcs_item_no = w.item_no AND t2.new_purchase_amt IS NOT NULL AND t2.new_purchase_amt != 0 AND t2.apply_date &lt; w.apply_date ORDER BY t2.apply_date DESC)
+        CASE
+        WHEN w.bp_cd = '200091' THEN
+        (SELECT TOP 1
+        sum(round(ISNULL(changed_amount, 0), 1, 1)) over (PARTITION BY plant_cd, bp_cd, pcs_item_no, car_model) + cur_item_price
+        FROM [ICMS].[dbo].HT_CHANGED_PRICE
+        WHERE plant_cd = w.plant_cd
+        AND bp_cd = w.bp_cd
+        AND pcs_item_no = w.item_no
+        AND apply_date &lt;= w.apply_date
+        ORDER BY pcs_item_no, apply_date)
+        ELSE
+        (SELECT TOP 1
+        sum(round(ISNULL(changed_amount, 0), 0)) over (PARTITION BY plant_cd, bp_cd, pcs_item_no, car_model) + cur_item_price
+        FROM [ICMS].[dbo].HT_CHANGED_PRICE
+        WHERE plant_cd = w.plant_cd
+        AND bp_cd = w.bp_cd
+        AND pcs_item_no = w.item_no
+        AND apply_date &lt;= w.apply_date
+        ORDER BY pcs_item_no, apply_date)
+        END
+        , w.cur_price)
             ELSE w.af_price
             END AS afPrice
              , w.diff_amount AS diffAmount, w.apply_date as applyDate
@@ -210,14 +448,40 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 ELSE format(round(ISNULL(c.total_changed_amt, 0), 0), '#,##0')
                 END AS diff_amount,
                 -->
-                b.cur_price AS cur_price, ISNULL(c.new_purchase_amt, 0) AS af_price, ISNULL(c.total_changed_amt, 0) AS diff_amount,
+                -- b.cur_price AS cur_price, ISNULL(c.new_purchase_amt, 0) AS af_price,
+                -- CASE
+                -- WHEN c.cur_item_price = 0 OR c.cur_item_price IS NULL THEN
+                -- (SELECT TOP 1
+                -- cur_item_price
+                -- FROM [ICMS].[dbo].HT_CHANGED_PRICE
+                -- WHERE plant_cd = a.plant_cd
+                -- AND bp_cd = a.bp_cd
+                -- AND pcs_item_no = b.item_no
+                -- AND apply_date >= b.apply_date
+                -- ORDER BY pcs_item_no, apply_date)
+                -- ELSE c.cur_item_price
+                -- END AS cur_price
+                --, ISNULL(c.new_purchase_amt, 0) AS af_price,
+                --ISNULL(c.total_changed_amt, 0) AS diff_amount,
+                ISNULL(b.cur_price, 0) AS cur_price,
+                ISNULL(b.af_price, 0) AS af_price,
+                -- b.diff_amount,
+                CASE
+                WHEN a.bp_cd = '200091' THEN format(sum(round(ISNULL(c.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, b.apply_date), '#,##0.0')
+                ELSE format(sum(round(ISNULL(c.changed_amount, 0), 0)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, b.apply_date), '#,###')
+                END AS diff_amount,
+                --CASE
+                --WHEN a.bp_cd = '200091' THEN sum(round(ISNULL(c.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, i.car_model, b.apply_date)
+                --ELSE sum(round(ISNULL(c.changed_amount, 0), 0)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, i.car_model, b.apply_date)
+                --END AS diff_amount,
                 b.apply_date, b.sub_item_cnt, b.completed_cnt, b.incompleted_cnt, b.error_cnt,
                 sum(b.diff_amount) OVER(PARTITION BY a.plant_cd, b.car_model, a.bp_cd, b.item_no) AS sum_diff
             FROM BT_PRICE_CHANGE a WITH (NOLOCK)
                 JOIN BT_PRICE_CHANGE_ITEM b WITH (NOLOCK) ON a.doc_no = b.doc_no
                 LEFT OUTER JOIN MT_ITEM i WITH (NOLOCK) ON b.item_no = i.item_no
                 LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
-                LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = b.item_no and c.plant_cd = b.plant_cd and c.bp_cd = b.bp_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
+                LEFT OUTER JOIN BT_PRICE_CHANGE_DTL c WITH (NOLOCK) ON a.doc_no = c.doc_no AND b.plant_cd = c.plant_cd AND b.bp_cd = c.bp_cd AND b.item_no = c.item_no AND b.apply_date = c.apply_date
+                -- LEFT OUTER JOIN HT_CHANGED_PRICE c WITH (NOLOCK) ON c.pcs_item_no = b.item_no and c.plant_cd = b.plant_cd and c.bp_cd = b.bp_cd and a.ref_doc_no = c.doc_no and c.apply_date = b.apply_date
             WHERE a.announced_date = #{announcedDate}
                 AND a.plant_cd = #{plantCd}
                 AND a.ref_doc_no = #{docNo}
@@ -231,10 +495,10 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
             </if>
             <if test='itemNo != null and !itemNo.equals("")'>AND b.item_no = #{itemNo}</if>
             ) w
-         WHERE w.sum_diff != 0
+         -- WHERE w.sum_diff != 0
         )ww
          <!--ORDER BY w.bp_cd, w.apply_date-->
-        ORDER BY ww.bpCd, ww.applyDate
+        ORDER BY ww.bpCd, ww.applyDate, ww.carModel
     </select>
 
     <!-- 합의서 요약정보 -->
@@ -281,7 +545,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                      LEFT OUTER JOIN MT_BIZ_PARTNER p WITH (NOLOCK) on a.bp_cd = p.bp_cd
                  WHERE a.doc_no = #{docNo}
              ) w
-        WHERE w.sum_diff != 0
+        -- WHERE w.sum_diff != 0
         ORDER BY w.bp_cd, w.apply_date
     </select>
 
@@ -449,7 +713,7 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                  WHERE 1 = 1
 <!--                <if test='plant_cd != null and !plant_cd.equals("")'>AND a.plant_cd = #{plant_cd}</if>-->
              ) w
-        WHERE w.sum_diff != 0
+        -- WHERE w.sum_diff != 0
         ORDER BY w.bp_cd, w.apply_date
     </select>
 
