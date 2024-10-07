@@ -467,8 +467,8 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 ISNULL(b.af_price, 0) AS af_price,
                 -- b.diff_amount,
                 CASE
-                WHEN a.bp_cd = '200091' THEN format(sum(round(ISNULL(c.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, b.apply_date), '#,##0.0')
-                ELSE format(sum(round(ISNULL(c.changed_amount, 0), 0)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, b.apply_date), '#,###')
+                WHEN a.bp_cd = '200091' THEN sum(round(ISNULL(c.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, b.apply_date)
+                ELSE sum(round(ISNULL(c.changed_amount, 0), 0)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, b.car_model, b.apply_date)
                 END AS diff_amount,
                 --CASE
                 --WHEN a.bp_cd = '200091' THEN sum(round(ISNULL(c.changed_amount, 0), 1, 1)) over (PARTITION BY a.plant_cd, a.bp_cd, b.item_no, i.car_model, b.apply_date)
