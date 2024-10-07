@@ -66,4 +66,137 @@
         </where>
 
     </delete>
+
+    <select id="selectPlantGroups" parameterType="group" resultType="group">
+        SELECT /* PlantMapper.selectGroups */
+        grp_uid, grp_name, grp_remark, use_at
+        FROM MT_PLANT_GROUPS WITH(NOLOCK)
+        <where>
+            <if test="grpUid != null and grpUid gt 0">AND grp_uid = #{grpUid}</if>
+            <if test='grpName != null and !grpName.equals("")'>AND grp_name LIKE CONCAT('%', #{grpName}, '%')</if>
+            <if test='grpRemark != null and !grpRemark.equals("")'>AND grp_remark LIKE CONCAT('%', #{grpRemark}, '%')</if>
+            <if test='useAt != null and !useAt.equals("")'>AND use_at = #{useAt}</if>
+        </where>
+    </select>
+
+    <!-- 플랜트 그룹 조회 -->
+    <select id="selectPlantGroupsByKey" parameterType="group" resultType="java.lang.Long">
+        SELECT /* UsersMapper.selectGroupsByKey */
+            GRP_UID AS grpUid, GRP_NAME AS grpName, GRP_REMARK AS grpRemark, USE_AT AS useAt
+        FROM MT_PLANT_GROUPS WITH(NOLOCK)
+        WHERE GRP_UID = #{grpUid}
+    </select>
+
+    <!-- 플랜트 그룹 등록 -->
+    <insert id="insertPlantGroups" parameterType="group">
+        <selectKey keyProperty="grpUid" resultType="long" order="BEFORE">
+            SELECT NEXT VALUE FOR GROUP_SEQ
+        </selectKey>
+        INSERT /* PlantMapper.insertGroups */
+        INTO MT_PLANT_GROUPS (
+        grp_uid, grp_name, grp_remark, reg_dt, reg_uid
+        ) VALUES (
+        #{grpUid}, #{grpName}, #{grpRemark}, CURRENT_TIMESTAMP, #{regUid}
+        )
+    </insert>
+
+    <!-- 플랜트 그룹 수정 -->
+    <update id="updatePlantGroups" parameterType="group">
+        UPDATE /* PlantMapper.updateGroups */
+        MT_PLANT_GROUPS
+        <set>
+            <if test='grpName != null and !grpName.equals("")'>GRP_NAME = #{grpName},</if>
+            <if test='grpRemark != null'>GRP_REMARK = #{grpRemark},</if>
+            <if test='useAt != null and !useAt.equals("")'>USE_AT = #{useAt},</if>
+            MOD_DT = CURRENT_TIMESTAMP,
+            MOD_UID = #{modUid}
+        </set>
+        WHERE GRP_UID = #{grpUid}
+    </update>
+
+    <!-- 플랜트 그룹 삭제 -->
+    <delete id="deletePlantGroups" parameterType="java.lang.Long">
+        DELETE /* PlantMapper.deleteGroups */
+        FROM MT_PLANT_GROUPS
+        WHERE grp_uid = #{grpUid}
+    </delete>
+
+    <select id="selectPlantGroupItem" resultType="groupItem" parameterType="java.lang.Long">
+        SELECT /*PlantMapper.selectPlantGroupItem*/
+        grp_uid
+        , plant_cd
+        , plant_nm
+        , corp_cd
+        , plant_country
+        , ord
+        , use_at
+        , reg_dt
+        , reg_uid
+        , mod_dt
+        , mod_uid
+        FROM MT_PLANT_GROUP_ITEM WITH(NOLOCK)
+        <where>
+            <if test="grpUid != null and grpUid gt 0">AND grp_uid = #{grpUid}</if>
+        </where>
+        ORDER BY ord
+    </select>
+
+    <select id="selectPlantGroupOtherItems" resultType="plant">
+        select /* PlantMapper.selectPlant */
+        a.*, b.corp_nm
+        , dbo.FN_GET_CODE_NAME('C08', a.plant_country) AS plantCountryNm
+        , dbo.FN_GET_CODE_NAME('C03', a.use_at) AS useAtNm
+        from MT_PLANT a WITH (NOLOCK)
+        left outer join MT_CORPORATION b ON a.corp_cd = b.corp_cd
+        WHERE plant_cd NOT IN (
+        SELECT plant_cd
+        FROM MT_PLANT_GROUP_ITEM
+        WHERE use_at = 'Y'
+        )
+    </select>
+
+    <!-- 플랜트 그룹 등록 -->
+    <insert id="insertPlantGroupItem" parameterType="groupItem">
+        <!-- ord 값을 미리 계산하는 selectKey -->
+        <selectKey keyProperty="ord" resultType="int" order="BEFORE">
+            SELECT COALESCE(MAX(ord), 0) + 1
+            FROM MT_PLANT_GROUP_ITEM
+            WHERE grp_uid = #{grpUid}
+        </selectKey>
+
+        INSERT /* PlantMapper.insertPlantGroupItem */
+        INTO MT_PLANT_GROUP_ITEM (
+        grp_uid, plant_cd, plant_nm, corp_cd, plant_country, reg_dt, reg_uid, USE_AT, ord
+        ) VALUES (
+        #{grpUid}, #{plantCd}, #{plantNm}, #{corpCd}, #{plantCountry}, CURRENT_TIMESTAMP, #{regUid}, 'Y', #{ord}
+        )
+    </insert>
+
+    <!-- 플랜트 그룹 수정 -->
+    <update id="updatePlantGroupItem" parameterType="groupItem">
+        UPDATE /* PlantMapper.updatePlantGroupItem */
+        MT_PLANT_GROUP_ITEM
+        <set>
+            <if test='ord != null'>ord = #{ord},</if>
+            MOD_DT = CURRENT_TIMESTAMP,
+            MOD_UID = #{modUid}
+        </set>
+        WHERE grp_uid = #{grpUid}
+        AND plant_cd = #{plantCd}
+    </update>
+
+    <!-- 플랜트 그룹 삭제 -->
+    <delete id="deletePlantGroupItem" parameterType="groupItem">
+        DELETE /* PlantMapper.deletePlantGroupItem */
+        FROM MT_PLANT_GROUP_ITEM
+        WHERE grp_uid = #{grpUid}
+        AND plant_cd = #{plantCd}
+    </delete>
+
+    <!-- 그룹 멤버 전체 삭제 -->
+    <delete id="deleteAllPlantGroupItem" parameterType="java.lang.Long">
+        DELETE /* UsersMapper.deleteAllPlantGroupItem */
+        FROM MT_PLANT_GROUP_ITEM
+        WHERE grp_uid = #{grpUid}
+    </delete>
 </mapper>

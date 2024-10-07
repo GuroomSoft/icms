@@ -43,4 +43,8 @@ public class Plant extends BaseDTO {
     @JsonProperty("useAtNm")
     private String useAtNm;
 
+    @Schema(description = "순서")
+    @JsonProperty("ord")
+    private Integer ord;
+
 }
