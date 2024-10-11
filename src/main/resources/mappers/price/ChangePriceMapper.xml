@@ -486,6 +486,12 @@ SELECT /* ChangePriceMapper.selectChangePricePurchaseItem */
                 AND a.plant_cd = #{plantCd}
                 AND a.ref_doc_no = #{docNo}
             <if test='applyDate != null and !applyDate.equals("")'>AND b.apply_date = #{applyDate}</if>
+            <if test='applyDateList != null'>
+                AND b.apply_date in
+                <foreach collection="applyDateList" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test='bpCd != null and !bpCd.equals("")'>AND a.bp_cd = #{bpCd}</if>
             <if test="bpList != null">
                 AND a.bp_cd in

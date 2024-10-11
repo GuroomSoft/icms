@@ -1,5 +1,6 @@
 package com.guroomsoft.icms.biz.price.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guroomsoft.icms.biz.agreement.dto.AgreementDoc;
 import com.guroomsoft.icms.biz.agreement.service.AgreementService;
 import com.guroomsoft.icms.biz.code.service.PlantService;
@@ -152,6 +153,7 @@ public class ChangePriceController {
             @Parameter(description = "조회조건", required = true) @RequestBody PurchaseItemReq search)
     {
         if (search.getBpList() != null && search.getBpList().isEmpty()) search.setBpList(null);
+        if (search.getApplyDateList() != null && search.getApplyDateList().isEmpty()) search.setApplyDateList(null);
 
         try {
             List<Map<String, Object>> resultSet = changePriceService.findChangePricePurchaseItem(search);
@@ -169,14 +171,19 @@ public class ChangePriceController {
     public DataResult<Map<String, Object>> getArgeementContent(
             @Parameter(description = "공시단가문서번호", required = true) @RequestParam String docNo,
             @Parameter(description = "등록월", required = true) @RequestParam String announcedDate,
+            @Parameter(description = "원소재적용월(YYYYMMDD)") @RequestParam(required = false) List<String> applyDateList,
             @Parameter(description = "플랜트 코드", required = true) @RequestParam String plantCd,
             @Parameter(description = "협력사 코드", required = true) @RequestParam String bpCd,
             @Parameter(hidden = true) @RequestParam long reqUserUid)
     {
+        if (applyDateList == null || applyDateList.isEmpty()) applyDateList = null;
+
         PurchaseItemReq cond = new PurchaseItemReq();
         cond.setDocNo(docNo);
         cond.setAnnouncedDate(announcedDate);
         cond.setPlantCd(plantCd);
+        cond.setApplyDateList(applyDateList);
+
         if (StringUtils.isNotBlank(bpCd)) cond.setBpCd(bpCd);
 
         try {
