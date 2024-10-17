@@ -202,3 +202,753 @@ Error:     >Wed Sep 25 12:05:09,787<    [JCoAPI] Exception while adding Connecti
 	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
 
 
+
+**** Log file opened at 2024-10-12 04:10:21 KST (GMT+09:00 Korean Standard Time) Rel. 3.1.8 (2023-07-11) [753.1216]
+Error:     >Sat Oct 12 04:10:21,186<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:10:21 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     2
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:10:42,255<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:10:42 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     4
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:11:03,311<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:11:03 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     6
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:11:24,352<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:11:24 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     8
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:11:45,411<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:11:45 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     10
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:12:06,473<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:12:06 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     12
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:12:27,513<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:12:27 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     14
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 04:12:48,567<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 04:12:48 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     16
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 05:55:21,067<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 05:55:21 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     18
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 05:55:42,112<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 05:55:42 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     20
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 05:56:03,172<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 05:56:03 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     22
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 05:56:24,220<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 05:56:24 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     24
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 05:56:45,277<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 05:56:45 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     26
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:00:21,106<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:00:21 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     28
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:00:42,155<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:00:42 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     30
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:01:03,205<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:01:03 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     32
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:01:24,240<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:01:24 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     34
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:01:45,300<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:01:45 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     36
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:02:06,355<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:02:06 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     38
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:02:27,392<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:02:27 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     40
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:02:48,424<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:02:48 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     42
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:05:21,062<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:05:21 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     44
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:05:42,135<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:05:42 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     46
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:06:03,191<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:06:03 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     48
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:06:24,244<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:06:24 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     50
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:06:45,310<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:06:45 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     52
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:30:21,138<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:30:21 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     54
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:30:42,187<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:30:42 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     56
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:31:03,235<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:31:03 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     58
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:31:24,289<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:31:24 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     60
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:31:45,329<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:31:45 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     62
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:32:06,393<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:32:06 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     64
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:32:27,443<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:32:27 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     66
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+
+Error:     >Sat Oct 12 06:32:48,495<    RfcException raised by system [<unknown>]:
+	message: Connect to SAP gateway failed
+	connection parameters: TYPE=A DESTINATION=ABAP_AS ASHOST=172.50.2.75 SYSNR=30 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '172.50.2.75:3330' not reached
+TIME        Sat Oct 12 06:32:48 2024
+RELEASE     753
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      D:/depot/bas/753_REL/src/base/ni/nixxi.cpp
+LINE        3458
+DETAIL      NiPConnect2: 172.50.2.75:3330
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     68
+
+	return code: RFC_FAILURE (RFC_FAILURE)
+	error group: RFC_ERROR_COMMUNICATION
+

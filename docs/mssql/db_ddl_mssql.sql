@@ -1766,3 +1766,48 @@ EXEC ICMS.sys.sp_addextendedproperty 'MS_Description', '공시단가등록일', 
 EXEC ICMS.sys.sp_addextendedproperty 'MS_Description', '대량발송요청ID', 'schema', 'dbo', 'table', 'HT_AGREEMENT_STATUS_LOG', 'column', 'mass_job_request_id';
 EXEC ICMS.sys.sp_addextendedproperty 'MS_Description', '메모사항', 'schema', 'dbo', 'table', 'HT_AGREEMENT_STATUS_LOG', 'column', 'comment';
 EXEC ICMS.sys.sp_addextendedproperty 'MS_Description', '등록일시', 'schema', 'dbo', 'table', 'HT_AGREEMENT_STATUS_LOG', 'column', 'reg_dt';
+
+
+
+CREATE TABLE HT_AGREEMENT_ITEM(
+    [doc_no] [nvarchar](30) NULL,
+    [apply_date] [nvarchar](50) NULL,
+    [agr_desc] [nvarchar](1000) NULL,
+    [src_doc_no] [nvarchar](30) NULL
+)
+
+CREATE TABLE MT_PLANT_GROUP_ITEM(
+    [grp_uid] [numeric](20, 0) NOT NULL,
+    [plant_cd] [nvarchar](20) NOT NULL,
+    [plant_nm] [nvarchar](100) NULL,
+    [corp_cd] [nvarchar](20) NOT NULL,
+    [plant_country] [nvarchar](10) NOT NULL,
+    [ord] [numeric](20, 0) NULL,
+    [use_at] [char](1) NOT NULL,
+    [reg_dt] [datetime] NOT NULL,
+    [reg_uid] [numeric](20, 0) NOT NULL,
+    [mod_dt] [datetime] NULL,
+    [mod_uid] [numeric](20, 0) NULL,
+    CONSTRAINT [PK_MT_PLANT_GROUP_ITEM] PRIMARY KEY CLUSTERED
+        (
+         [grp_uid] ASC,
+         [plant_cd] ASC
+            )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+CREATE TABLE MT_PLANT_GROUPS(
+    [grp_uid] [numeric](20, 0) NOT NULL,
+    [grp_name] [nvarchar](100) NULL,
+    [grp_remark] [nvarchar](200) NULL,
+    [use_at] [char](1) NOT NULL,
+    [reg_dt] [datetime] NOT NULL,
+    [reg_uid] [numeric](20, 0) NOT NULL,
+    [mod_dt] [datetime] NULL,
+    [mod_uid] [numeric](20, 0) NULL,
+    CONSTRAINT [PK_MT_PLANT_GROUPS] PRIMARY KEY CLUSTERED
+        (
+         [grp_uid] ASC
+            )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
