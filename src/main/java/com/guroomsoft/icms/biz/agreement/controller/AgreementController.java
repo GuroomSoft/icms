@@ -32,7 +32,7 @@ public class AgreementController {
     {
         List<Map<String, Object>> resultSet  = null;
         try {
-            resultSet = agreementService.findAgreementForSend(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpList(), cond.getDocNo(), Long.valueOf(reqUserUid));
+            resultSet = agreementService.findAgreementForSend(cond.getPlantCd(), cond.getAnnouncedDate(), cond.getBpList(), cond.getDocNo(), Long.valueOf(reqUserUid), cond.getApplyDateList());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

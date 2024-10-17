@@ -48,6 +48,7 @@ public class ChangePriceController {
         List<ChangePrice> resultSet = null;
         try {
             if (cond.getBpList() != null && cond.getBpList().isEmpty()) cond.setBpList(null);
+            if (cond.getApplyDateList() != null && cond.getApplyDateList().isEmpty()) cond.setApplyDateList(null);
             resultSet = changePriceService.findChangedPrice(cond);
 
             return responseService.getListResult(resultSet);

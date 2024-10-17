@@ -145,11 +145,9 @@ public class AgreementService {
      * @return
      * @throws Exception
      */
-    public List<Map<String, Object>> findAgreementForSend(String plantCd, String announcedDate, List<String> bpList, String docNo, Long reqUserUid) throws Exception
-    {
+    public List<Map<String, Object>> findAgreementForSend(String plantCd, String announcedDate, List<String> bpList, String docNo, Long reqUserUid, List<String> applyDateList) throws Exception {
 
-        if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate) || bpList == null || bpList.isEmpty()|| StringUtils.isBlank(docNo))
-        {
+        if (StringUtils.isBlank(plantCd) || StringUtils.isBlank(announcedDate) || bpList == null || bpList.isEmpty() || StringUtils.isBlank(docNo)) {
             throw new CInvalidArgumentException();
         }
 
@@ -159,6 +157,11 @@ public class AgreementService {
         cond.put("announcedDate", announcedDate);
         cond.put("bpList", bpList);
         cond.put("reqUserUid", reqUserUid);
+        if (applyDateList != null && !applyDateList.isEmpty()) {
+            cond.put("applyDateList", applyDateList);
+        } else {
+            cond.put("applyDateList", null);
+        }
         return agreementDAO.selectAgreementDataOnly(cond);
     }
 

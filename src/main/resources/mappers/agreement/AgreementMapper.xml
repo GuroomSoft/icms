@@ -58,53 +58,75 @@
         w.agr_detail,
         w.agr_file,
         w.plant_cd,
-        (SELECT COUNT(*)
-        FROM
-        (
-        SELECT item_no
-        FROM BT_PRICE_CHANGE_DTL
-        WHERE plant_cd = w.plant_cd
-        AND bp_cd = w.bp_cd
-        AND doc_no = w.src_doc_no
-        GROUP BY item_no
-        ) a) AS item_count
-        , ref_doc_no,
+        w.item_count,
+        w.ref_doc_no,
         w.src_doc_no,
         w.userSign_s,
         w.corporateSeal_s,
         w.userSign_r,
         w.corporateSeal_r
-        FROM(
+        FROM (
         SELECT
-        A.sender_team as team_s,
-        A.sender as name_s,
+        A.sender_team AS team_s,
+        A.sender AS name_s,
         A.bp_cd,
-        A.bp_nm as company_r,
-        A.ceo_nm as name_r,
+        A.bp_nm AS company_r,
+        A.ceo_nm AS name_r,
+        -- STRING_AGG 함수로 agr_desc 결합
+        COALESCE(STRING_AGG(I.agr_desc, ''), A.agr_desc) AS agr_desc,
+        A.agr_detail,
+        A.agr_file,
+        A.plant_cd,
+        B.ref_doc_no,
+        A.src_doc_no,
+        U1.user_sign AS userSign_s,
+        U1.corporate_seal AS corporateSeal_s,
+        U2.user_sign AS userSign_r,
+        U2.corporate_seal AS corporateSeal_r,
+        (SELECT COUNT(*)
+        FROM (
+        SELECT item_no
+        FROM BT_PRICE_CHANGE_DTL
+        WHERE plant_cd = A.plant_cd
+        AND bp_cd = A.bp_cd
+        AND doc_no = A.src_doc_no
+        GROUP BY item_no
+        ) a) AS item_count
+        FROM HT_AGREEMENT A WITH (NOLOCK)
+        LEFT JOIN BT_PRICE_CHANGE B WITH (NOLOCK) ON A.src_doc_no = B.doc_no
+        LEFT JOIN ST_USERS U1 WITH (NOLOCK) ON U1.user_uid = #{reqUserUid}
+        LEFT JOIN ST_USERS U2 WITH (NOLOCK) ON A.bp_cd = U2.account_id
+        LEFT JOIN HT_AGREEMENT_ITEM I WITH (NOLOCK) ON I.src_doc_no = A.src_doc_no
+        AND I.doc_no = A.doc_no
+        WHERE A.plant_cd = #{plantCd}
+        AND A.announced_date = #{announcedDate}
+        AND B.ref_doc_no = #{docNo}
+        AND A.bp_cd IN
+        <foreach collection="bpList" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+        <if test='applyDateList != null'>
+            AND I.apply_date IN
+            <foreach collection="applyDateList" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY
+        A.sender_team,
+        A.sender,
+        A.bp_cd,
+        A.bp_nm,
+        A.ceo_nm,
         A.agr_desc,
         A.agr_detail,
         A.agr_file,
         A.plant_cd,
         B.ref_doc_no,
         A.src_doc_no,
-        (SELECT user_sign
-        FROM ST_USERS
-        WHERE user_uid = #{reqUserUid}) as userSign_s,
-        (SELECT corporate_seal
-        FROM ST_USERS
-        WHERE user_uid = #{reqUserUid}) as corporateSeal_s,
-        C.user_sign as userSign_r,
-        C.corporate_seal as corporateSeal_r
-        from HT_AGREEMENT A WITH (NOLOCK)
-        LEFT OUTER JOIN BT_PRICE_CHANGE B WITH (NOLOCK) ON a.src_doc_no = B.doc_no
-        LEFT OUTER JOIN ST_USERS C WITH (NOLOCK) ON a.bp_cd = C.account_id
-        where a.plant_cd = #{plantCd}
-        and a.announced_date = #{announcedDate}
-        and b.ref_doc_no = #{docNo}
-        and a.bp_cd in
-        <foreach collection="bpList" item="item" separator="," open="(" close=")">
-            #{item}
-        </foreach>
+        U1.user_sign,
+        U1.corporate_seal,
+        U2.user_sign,
+        U2.corporate_seal
         ) w
     </select>
 

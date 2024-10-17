@@ -352,6 +352,12 @@
                 #{item}
             </foreach>
         </if>
+        <if test='applyDateList != null'>
+            AND a.apply_date in
+            <foreach collection="applyDateList" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
         <if test='partType != null and !partType.equals("")'>AND a.part_type = #{partType}</if>
         <if test='rawMaterialCd != null and !rawMaterialCd.equals("")'>AND a.raw_material_cd = #{rawMaterialCd}</if>
         <if test='carModel != null and !carModel.equals("")'>AND a.car_model = #{carModel}</if>
@@ -363,7 +369,7 @@
 
     <!-- 매입품번 가격변경 조회 -->
     <select id="selectChangePricePurchaseItem" parameterType="com.guroomsoft.icms.biz.price.dto.PurchaseItemReq"  resultType="java.util.Map">
-SELECT
+SELECT DISTINCT
         plantCd
         ,carModel
         ,bpCd
